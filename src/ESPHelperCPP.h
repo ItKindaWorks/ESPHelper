@@ -116,6 +116,12 @@ public:
 	void disableHeartbeat();
 	void heartbeat();
 
+	void OTA_enable();
+	void OTA_disable();
+	void OTA_begin();
+	void OTA_setPassword(char* pass);
+	void OTA_setHostname(char* hostname);
+
 private:
 	WiFiClient wifiClient;
 
@@ -125,6 +131,9 @@ private:
 	bool _ssidSet = false;
 	bool _passSet = false;
 	bool _mqttSet = false;
+
+	bool _useOTA = false;
+	bool _OTArunning = false;
 
 	netInfo **_netList;
 

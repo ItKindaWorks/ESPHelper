@@ -28,10 +28,14 @@ ESPHelper::ESPHelper(){	}
 //initializer with single netInfo network
 ESPHelper::ESPHelper(netInfo *startingNet){		
 	_currentNet = *startingNet;
+
 	_ssidSet = true;
 	_passSet = true;
 	_mqttSet = true;
+
 	_hoppingAllowed = false;
+
+	_useOTA = false;
 }
 
 
@@ -40,7 +44,10 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	_netList = netList;
 	_netCount = netCount;
 	_currentIndex = startIndex;
+
 	_hoppingAllowed = true;
+
+	_useOTA = false;
 
 	_currentNet = *netList[constrain(_currentIndex, 0, _netCount)];
 
@@ -54,7 +61,10 @@ ESPHelper::ESPHelper(char *ssid, char *pass, char *mqttIP){
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
 	_currentNet.mqtt = mqttIP;
+
 	_hoppingAllowed = false;
+
+	_useOTA = false;
 
 	_ssidSet = true;
 	_passSet = true;
@@ -72,37 +82,26 @@ bool ESPHelper::begin(){
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(_currentNet.ssid, _currentNet.pass);
 
-		ArduinoOTA.onStart([]() {
-			
-			debugPrintln("Start");
-		});
-		ArduinoOTA.onEnd([]() {
-			debugPrintln("\nEnd");
-		});
-		ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-			// Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-		});
-		ArduinoOTA.onError([](ota_error_t error) {
-			// Serial.printf("Error[%u]: ", error);
-			// if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-			// else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-			// else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-			// else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-			// else if (error == OTA_END_ERROR) Serial.println("End Failed");
-		});
+		ArduinoOTA.onStart([]() {/* ota start code */});
+		ArduinoOTA.onEnd([]() {/* ota end code */});
+		ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {/* ota progress code */});
+		ArduinoOTA.onError([](ota_error_t error) {/* ota error code */});
 
 
 		while (!client.connected() || WiFi.status() != WL_CONNECTED ) {
 			reconnect();
 			delay(10);
 		}
-		ArduinoOTA.begin();
+
+		OTA_begin();
+		
 		return true;
 	}
 	return false;
 }
 
 void ESPHelper::end(){
+	OTA_disable();
 	WiFi.disconnect();
 }
 
@@ -119,7 +118,16 @@ bool ESPHelper::loop(){
 		else{
 			client.loop();
 			heartbeat();
-			ArduinoOTA.handle();
+
+			//check for whether we want to use OTA and whether the system is running
+			if(_useOTA && _OTArunning) {ArduinoOTA.handle();}
+
+			//if we want to use OTA but its not running yet, start it up.
+			else if(_useOTA && !_OTArunning){
+				OTA_begin();
+				ArduinoOTA.handle();
+			}
+
 			_connected = true;
 			return true;
 		}
@@ -419,6 +427,32 @@ void ESPHelper::heartbeat(){
 		}
 		counter++;
 	}
+}
+
+//enable use of OTA updates
+void ESPHelper::OTA_enable(){
+	_useOTA = true;
+}
+
+//begin the OTA subsystem but with a check for connectivity and enabled use of OTA
+void ESPHelper::OTA_begin(){
+	if(_connected && _useOTA){ArduinoOTA.begin();}
+	_OTArunning = true;
+}
+
+//disable use of OTA updates
+void ESPHelper::OTA_disable(){
+	_useOTA = false;
+	_OTArunning = false;
+}
+
+//set a password for OTA updates
+void ESPHelper::OTA_setPassword(char* pass){
+	ArduinoOTA.setPassword(pass);
+}
+
+void ESPHelper::OTA_setHostname(char* hostname){
+	ArduinoOTA.setHostname(hostname);
 }
 
 

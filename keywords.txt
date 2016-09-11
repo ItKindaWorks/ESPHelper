@@ -1,0 +1,41 @@
+#######################################
+# Syntax Coloring Map For ESPHelper
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ESPHelper	KEYWORD1
+netInfo	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin 	KEYWORD2
+reconnect 	KEYWORD2
+end 	KEYWORD2
+loop 	KEYWORD2
+publish 	KEYWORD2
+subscribe 	KEYWORD2
+addSubscription 	KEYWORD2
+unsubscribe 	KEYWORD2
+removeSubscription 	KEYWORD2
+setCallback	KEYWORD2
+getSSID	KEYWORD2
+serSSID	KEYWORD2
+getPASS	KEYWORD2
+setPass	KEYWORD2
+getMQTTIP	KEYWORD2
+setMQTTIP	KEYWORD2
+getNetInfo	KEYWORD2
+setNetInfo	KEYWORD2
+setHopping	KEYWORD2
+heartbeat 	KEYWORD2
+enableHeartbeat	KEYWORD2
+disableHeartbeat	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

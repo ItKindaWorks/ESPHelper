@@ -12,6 +12,10 @@ methods for enabling/disabling OTA and changing the OTA hostname and password.
 
 Please take a look at the examples included with this library to get an idea of how it works. 
 
+Note:
+-----
+This library does requre the use of the Metro library which can be found [here](https://www.pjrc.com/teensy/td_libs_Metro.html)
+
 Useful Methods:
 
 bool begin(); //must be called (once) to start the system

@@ -1,5 +1,5 @@
 /*    
-basicUse.ino
+MultiNetwork.ino
 Copyright (c) 2016 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
@@ -21,9 +21,18 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ESPHelper.h"
 
-netInfo homeNet = {.name = "NETWORK NICKNAME", .mqtt = "YOUR MQTT-IP", .ssid = "YOUR SSID", .pass = "YOUR NETWORK PASS"};
 
-ESPHelper myESP(&homeNet);
+netInfo homeNet1 = {.name = "NETWORK NICKNAME1", .mqtt = "YOUR MQTT-IP1", .ssid = "YOUR SSID1", .pass = "YOUR NETWORK PASS1"};
+netInfo homeNet2 = {.name = "NETWORK NICKNAME2", .mqtt = "YOUR MQTT-IP2", .ssid = "YOUR SSID2", .pass = "YOUR NETWORK PASS2"};
+netInfo homeNet3 = {.name = "NETWORK NICKNAME3", .mqtt = "YOUR MQTT-IP3", .ssid = "YOUR SSID3", .pass = "YOUR NETWORK PASS3"};
+
+netInfo *knownNetworks[3] = {
+	&homeNet1,
+	&homeNet2,
+	&homeNet3
+};
+
+ESPHelper myESP(knownNetworks, 3);   
 
 void setup() {
 	
@@ -31,6 +40,8 @@ void setup() {
 	delay(500);
 
 	Serial.println("Starting Up, Please Wait...");
+
+	// myESP.setHopping(false);	//uncomment to prevent hopping between networks in network array
 
 	myESP.addSubscription("/test");
 
@@ -41,7 +52,7 @@ void setup() {
 }
 
 void loop(){
-	myESP.loop();  //run the loop() method as often as possible - this keeps the network services running
+	myESP.loop();	//run the loop() method as often as possible - this keeps the network services running
 
 	//Put application code here
 

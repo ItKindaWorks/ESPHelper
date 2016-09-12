@@ -1,5 +1,5 @@
 /*    
-basicUse.ino
+OTA.ino
 Copyright (c) 2016 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
@@ -31,6 +31,10 @@ void setup() {
 	delay(500);
 
 	Serial.println("Starting Up, Please Wait...");
+
+	myESP.OTA_enable();
+	myESP.OTA_setPassword("SET OTA PASSWORD");
+	myESP.OTA_setHostname("SET OTA HOSTNAME");
 
 	myESP.addSubscription("/test");
 

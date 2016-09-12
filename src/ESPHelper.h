@@ -76,7 +76,7 @@ public:
 
 	ESPHelper();
 	ESPHelper(netInfo *startingNet);
-	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex);
+	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
 	ESPHelper(char *ssid, char *pass, char *mqttIP);
 
 	bool begin();

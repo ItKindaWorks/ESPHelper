@@ -281,6 +281,16 @@ void ESPHelper::changeNetwork(){
 	debugPrintln("\tDone - Ready for next reconnect attempt");
 }
 
+void ESPHelper::updateNetwork(){
+	debugPrintln("\tDisconnecting from WiFi");
+	WiFi.disconnect();
+	debugPrintln("\tAttempting to begin on new network");
+	WiFi.begin(_currentNet.ssid, _currentNet.pass);
+	debugPrintln("\tSetting new MQTT server");
+	client.setServer(_currentNet.mqtt, 1883);
+	debugPrintln("\tDone - Ready for next reconnect attempt");
+}
+
 //generate unique MQTT name from MAC addr
 String ESPHelper::macToStr(const uint8_t* mac){ 
 

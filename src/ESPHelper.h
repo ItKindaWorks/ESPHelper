@@ -93,6 +93,8 @@ public:
 
 	void reconnect();
 
+	void updateNetwork();	//manually disconnect and reconnecting to network/mqtt using current values (generally called after setting new network values)
+
 	char* getSSID();
 	void setSSID(char *ssid);
 

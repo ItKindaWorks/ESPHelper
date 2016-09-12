@@ -29,12 +29,18 @@ getPASS	KEYWORD2
 setPass	KEYWORD2
 getMQTTIP	KEYWORD2
 setMQTTIP	KEYWORD2
+getIP	KEYWORD2
 getNetInfo	KEYWORD2
 setNetInfo	KEYWORD2
 setHopping	KEYWORD2
 heartbeat 	KEYWORD2
 enableHeartbeat	KEYWORD2
 disableHeartbeat	KEYWORD2
+OTA_enable	KEYWORD2
+OTA_disable	KEYWORD2
+OTA_begin	KEYWORD2
+OTA_setPassword	KEYWORD2
+OTA_setHostname	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

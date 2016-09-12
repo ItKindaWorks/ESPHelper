@@ -30,6 +30,8 @@ void publish(char* topic, char* payload); //publish a given MQTT message to a gi
 bool setCallback(MQTT_CALLBACK_SIGNATURE);  //set the callback for MQTT (must be called after begin() method)
 
 
+void updateNetwork(); //manually disconnect and reconnecting to network/mqtt using current values (generally called after setting new network values)
+
 String getIP(); //get the current IP of the ESP module
 
 

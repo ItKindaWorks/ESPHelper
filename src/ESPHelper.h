@@ -1,6 +1,6 @@
 /*    
     ESPHelper.h 
-    Copyright (c) 2016 ItKindaWorks All right reserved.
+    Copyright (c) 2016 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
 
     This file is part of ESPHelper

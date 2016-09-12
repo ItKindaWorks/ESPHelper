@@ -15,7 +15,9 @@ Please take a look at the examples included with this library to get an idea of 
 Note:
 -----
 This library does requre the use of these libraries (so make sure they're installed as well!):
+ * 
  [Metro](https://www.pjrc.com/teensy/td_libs_Metro.html)
+ * 
  [pubsubclient](https://github.com/knolleary/pubsubclient)
 
 Useful Methods:

@@ -79,6 +79,7 @@ bool ESPHelper::begin(){
 	if(checkParams()){
 
 		client = PubSubClient(_currentNet.mqtt, 1883, wifiClient);
+
 		WiFi.mode(WIFI_STA);
 		WiFi.begin(_currentNet.ssid, _currentNet.pass);
 
@@ -95,6 +96,7 @@ bool ESPHelper::begin(){
 
 		OTA_begin();
 		
+		_hasBegun = true;
 		return true;
 	}
 	return false;
@@ -197,8 +199,16 @@ void ESPHelper::publish(char* topic, char* payload){
 }
 
 //set the callback function for MQTT
-void ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){	
-	client.setCallback(callback);
+	//true on: mqtt has been initialized
+	//false on: mqtt not been inistialized
+bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){	
+	if(_hasBegun) {
+		client.setCallback(callback);
+		return true;
+	}
+	else{
+		return false;
+	}
 }
 
 //attempts to connect to wifi & mqtt server if not connected
@@ -432,6 +442,7 @@ void ESPHelper::heartbeat(){
 //enable use of OTA updates
 void ESPHelper::OTA_enable(){
 	_useOTA = true;
+	OTA_begin();
 }
 
 //begin the OTA subsystem but with a check for connectivity and enabled use of OTA

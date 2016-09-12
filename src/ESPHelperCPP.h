@@ -89,7 +89,7 @@ public:
 	bool removeSubscription(char* topic);
 	void publish(char* topic, char* payload);
 
-	void setCallback(MQTT_CALLBACK_SIGNATURE);
+	bool setCallback(MQTT_CALLBACK_SIGNATURE);
 
 	void reconnect();
 
@@ -134,6 +134,8 @@ private:
 
 	bool _useOTA = false;
 	bool _OTArunning = false;
+
+	bool _hasBegun = false;
 
 	netInfo **_netList;
 

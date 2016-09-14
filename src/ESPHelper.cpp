@@ -72,7 +72,7 @@ ESPHelper::ESPHelper(char *ssid, char *pass, char *mqttIP){
 }
 
 //start the wifi & mqtt systems and attempt connection (currently blocking)
-	//true on: parameter check validated & network/mqtt connection
+	//true on: parameter check validated
 	//false on: parameter check failed
 bool ESPHelper::begin(){	
 
@@ -88,10 +88,11 @@ bool ESPHelper::begin(){
 		ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {/* ota progress code */});
 		ArduinoOTA.onError([](ota_error_t error) {/* ota error code */});
 
-
-		while (!client.connected() || WiFi.status() != WL_CONNECTED ) {
+		int timeout = 0;	//counter for begin connection attempts
+		while ((!client.connected() || WiFi.status() != WL_CONNECTED) && timeout < 200 ) {	//max 2 sec before timeout
 			reconnect();
 			delay(10);
+			timeout++;
 		}
 
 		OTA_begin();
@@ -134,6 +135,7 @@ bool ESPHelper::loop(){
 			return true;
 		}
 	}
+	return false;
 }
 
 //subscribe to a speicifc topic (does not add to topic list)
@@ -457,8 +459,10 @@ void ESPHelper::OTA_enable(){
 
 //begin the OTA subsystem but with a check for connectivity and enabled use of OTA
 void ESPHelper::OTA_begin(){
-	if(_connected && _useOTA){ArduinoOTA.begin();}
-	_OTArunning = true;
+	if(_connected && _useOTA){
+		ArduinoOTA.begin();
+		_OTArunning = true;
+	}
 }
 
 //disable use of OTA updates

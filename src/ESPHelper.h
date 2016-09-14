@@ -128,6 +128,8 @@ public:
 private:
 	WiFiClient wifiClient;
 
+	String _clientName;
+
 	uint8_t _netCount = 0;
 	uint8_t _currentIndex = 0;
 

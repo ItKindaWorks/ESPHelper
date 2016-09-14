@@ -77,6 +77,11 @@ ESPHelper::ESPHelper(char *ssid, char *pass, char *mqttIP){
 bool ESPHelper::begin(){	
 
 	if(checkParams()){
+		// Generate client name based on MAC address and last 8 bits of microsecond counter
+		_clientName += "esp8266-";
+		uint8_t mac[6];
+		WiFi.macAddress(mac);
+		_clientName += macToStr(mac);
 
 		client = PubSubClient(_currentNet.mqtt, 1883, wifiClient);
 
@@ -229,28 +234,33 @@ void ESPHelper::reconnect() {
 		}
 
 		// make sure we are connected to WIFI before attemping to reconnect to MQTT
+		//----note---- maybe want to reset tryCount whenever we succeed at getting wifi connection?
 		if(WiFi.status() == WL_CONNECTED){
 			debugPrintln("\n---WIFI Connected!---");
-		
-			while (!client.connected()) {
+
+			int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
+			while (!client.connected() && timeout < 10) {
 				debugPrint("Attemping MQTT connection");
 
-				// Generate client name based on MAC address and last 8 bits of microsecond counter
-				String clientName;
-				clientName += "esp8266-";
-				uint8_t mac[6];
-				WiFi.macAddress(mac);
-				clientName += macToStr(mac);
-
 				//if connected, subscribe to the topic(s) we want to be notified about
-				if (client.connect((char*) clientName.c_str())) {
+				if (client.connect((char*) _clientName.c_str())) {
 					debugPrintln(" -- Connected");
 					_connected = true;
 					resubscribe();
 				}
 				else{
-					_connected = false;
 					debugPrintln(" -- Failed");
+					_connected = false;
+				}
+				timeout++;
+			}
+
+			if(timeout >= 10 && !client.connected()){	//if we still cant connect to mqtt after 10 attempts increment the try count
+				tryCount++;
+				if(tryCount == 20){
+					changeNetwork();
+					tryCount = 0;
+					return;
 				}
 			}
 		}

@@ -116,28 +116,29 @@ void ESPHelper::end(){
 //main loop - should be called as often as possible - handles wifi/mqtt connection and mqtt handler
 	//true on: network/server connected
 	//false on: network or server disconnected
-bool ESPHelper::loop(){	
+int ESPHelper::loop(){	
 	if(checkParams()){
 		if (!client.connected() || WiFi.status() != WL_CONNECTED) {
 			reconnect();
-			_connected = false;
-			return false;
+			// return _connectionStatus;
 		}
-		else{
-			client.loop();
+
+		if(_connectionStatus >= WIFI_ONLY){
+			
+			if(_connectionStatus == FULL_CONNECTION){client.loop();}
+			
 			heartbeat();
 
 			//check for whether we want to use OTA and whether the system is running
 			if(_useOTA && _OTArunning) {ArduinoOTA.handle();}
-
 			//if we want to use OTA but its not running yet, start it up.
 			else if(_useOTA && !_OTArunning){
 				OTA_begin();
 				ArduinoOTA.handle();
 			}
 
-			_connected = true;
-			return true;
+
+			return _connectionStatus;
 		}
 	}
 	return false;
@@ -147,7 +148,7 @@ bool ESPHelper::loop(){
 	//true on: subscription success
 	//false on: subscription failed (either from PubSub lib or network is disconnected)
 bool ESPHelper::subscribe(char* topic){		
-	if(_connected){return client.subscribe(topic);}
+	if(_connectionStatus == FULL_CONNECTION){return client.subscribe(topic);}
 	else{return false;}
 }
 
@@ -225,7 +226,8 @@ void ESPHelper::reconnect() {
 	if(reconnectMetro.check()){
 		//attempt to connect to the wifi if connection is lost
 		if(WiFi.status() != WL_CONNECTED){
-			_connected = false;
+			_connectionStatus = NO_CONNECTION;
+			// _connected = false;
 			debugPrint(".");
 			tryCount++;
 			if(tryCount == 20){
@@ -239,6 +241,7 @@ void ESPHelper::reconnect() {
 		//----note---- maybe want to reset tryCount whenever we succeed at getting wifi connection?
 		if(WiFi.status() == WL_CONNECTED){
 			debugPrintln("\n---WIFI Connected!---");
+			_connectionStatus = WIFI_ONLY;
 
 			int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
 			while (!client.connected() && timeout < 10) {
@@ -247,12 +250,13 @@ void ESPHelper::reconnect() {
 				//if connected, subscribe to the topic(s) we want to be notified about
 				if (client.connect((char*) _clientName.c_str())) {
 					debugPrintln(" -- Connected");
-					_connected = true;
+					// _connected = true;
+					_connectionStatus = FULL_CONNECTION;
 					resubscribe();
 				}
 				else{
 					debugPrintln(" -- Failed");
-					_connected = false;
+					// _connected = false;
 				}
 				timeout++;
 			}
@@ -279,18 +283,22 @@ void ESPHelper::changeNetwork(){
 		if(_currentIndex >= _netCount){_currentIndex = 0;}
 
 		_currentNet = *_netList[_currentIndex];
+
+		debugPrint("Trying next network: ");
+		debugPrintln(_currentNet.ssid);
+
+		updateNetwork();
 	}
 
-	debugPrint("Trying next network: ");
-	debugPrintln(_currentNet.ssid);
-
-	debugPrintln("\tDisconnecting from WiFi");
-	WiFi.disconnect();
-	debugPrintln("\tAttempting to begin on new network");
-	WiFi.begin(_currentNet.ssid, _currentNet.pass);
-	debugPrintln("\tSetting new MQTT server");
-	client.setServer(_currentNet.mqtt, 1883);
-	debugPrintln("\tDone - Ready for next reconnect attempt");
+	
+	// debugPrintln("\tDisconnecting from WiFi");
+	// WiFi.disconnect();
+	// debugPrintln("\tAttempting to begin on new network");
+	// WiFi.begin(_currentNet.ssid, _currentNet.pass);
+	// debugPrintln("\tSetting new MQTT server");
+	// client.setServer(_currentNet.mqtt, 1883);
+	// debugPrintln("\tDone - Ready for next reconnect attempt");
+	//ALL THIS COMMENTED CODE IS HANDLED BY updateNetwork()
 }
 
 void ESPHelper::updateNetwork(){
@@ -378,6 +386,10 @@ String ESPHelper::getIP(){
 	return WiFi.localIP().toString();
 }
 
+
+int ESPHelper::getStatus(){
+	return _connectionStatus;
+}
 
 
 
@@ -469,7 +481,7 @@ void ESPHelper::OTA_enable(){
 
 //begin the OTA subsystem but with a check for connectivity and enabled use of OTA
 void ESPHelper::OTA_begin(){
-	if(_connected && _useOTA){
+	if(_connectionStatus >= WIFI_ONLY && _useOTA){
 		ArduinoOTA.begin();
 		_OTArunning = true;
 	}

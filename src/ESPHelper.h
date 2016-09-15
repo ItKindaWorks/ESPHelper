@@ -36,7 +36,7 @@
 
 // #define DEBUG
 
-
+enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
 
 
 #ifdef DEBUG
@@ -66,7 +66,7 @@ class ESPHelper{
 
 public:
 	int16_t _hoppingAllowed = false;
-	bool _connected = false;
+	bool _fullyConnected = false;
 
 	netInfo _currentNet;
 	netInfo *_currentNetwork;
@@ -83,7 +83,7 @@ public:
 	bool begin();
 	void end();
 
-	bool loop();
+	int loop();
 
 	bool subscribe(char* topic);
 	bool addSubscription(char* topic);
@@ -107,6 +107,8 @@ public:
 
 	String getIP();
 
+	int getStatus();
+
 	void setNetInfo(netInfo newNetwork);
 	void setNetInfo(netInfo *newNetwork);
 	netInfo* getNetInfo();
@@ -129,6 +131,8 @@ private:
 	WiFiClient wifiClient;
 
 	String _clientName;
+
+	int _connectionStatus = NO_CONNECTION;
 
 	uint8_t _netCount = 0;
 	uint8_t _currentIndex = 0;

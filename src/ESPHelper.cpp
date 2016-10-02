@@ -89,7 +89,14 @@ bool ESPHelper::begin(){
 		WiFi.begin(_currentNet.ssid, _currentNet.pass);
 
 		ArduinoOTA.onStart([]() {/* ota start code */});
-		ArduinoOTA.onEnd([]() {/* ota end code */});
+		ArduinoOTA.onEnd([]() {
+			WiFi.disconnect();
+			int timeout = 0;
+			while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
+				delay(10);
+				timeout++;
+			}
+		});
 		ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {/* ota progress code */});
 		ArduinoOTA.onError([](ota_error_t error) {/* ota error code */});
 
@@ -148,7 +155,11 @@ int ESPHelper::loop(){
 	//true on: subscription success
 	//false on: subscription failed (either from PubSub lib or network is disconnected)
 bool ESPHelper::subscribe(char* topic){		
-	if(_connectionStatus == FULL_CONNECTION){return client.subscribe(topic);}
+	if(_connectionStatus == FULL_CONNECTION){
+		bool returnVal = client.subscribe(topic);
+		client.loop();
+		return returnVal;
+	}
 	else{return false;}
 }
 
@@ -176,6 +187,7 @@ void ESPHelper::resubscribe(){
 	for(int i = 0; i < MAX_SUBSCRIPTIONS; i++){
 		if(_subscriptions[i].isUsed){
 			subscribe(_subscriptions[i].topic);
+			yield();
 		}
 	}
 }

@@ -34,7 +34,9 @@
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-// #define DEBUG
+#define VERSION "1-2-1"
+
+#define DEBUG
 
 enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
 
@@ -126,6 +128,7 @@ public:
 	void OTA_begin();
 	void OTA_setPassword(char* pass);
 	void OTA_setHostname(char* hostname);
+	void OTA_setHostnameWithVersion(char* hostname);
 
 private:
 	WiFiClient wifiClient;
@@ -152,6 +155,8 @@ private:
 	bool _heartbeatEnabled = false;
 
 	subscription _subscriptions[MAX_SUBSCRIPTIONS];
+
+	char _hostname[64];
 
 
 	void changeNetwork();

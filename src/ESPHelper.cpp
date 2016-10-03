@@ -511,7 +511,16 @@ void ESPHelper::OTA_setPassword(char* pass){
 }
 
 void ESPHelper::OTA_setHostname(char* hostname){
-	ArduinoOTA.setHostname(hostname);
+	strcpy(_hostname, hostname);
+	ArduinoOTA.setHostname(_hostname);
+}
+
+void ESPHelper::OTA_setHostnameWithVersion(char* hostname){
+	strcpy(_hostname, hostname);
+	strcat(_hostname, "----");
+	strcat(_hostname, VERSION);
+
+	ArduinoOTA.setHostname(_hostname);
 }
 
 

@@ -34,9 +34,11 @@
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-#define VERSION "1-2-1"
+#define VERSION "1-2-5"
 
-#define DEBUG
+#define DEFAULT_QOS 1;
+
+// #define DEBUG
 
 enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
 
@@ -87,10 +89,12 @@ public:
 
 	int loop();
 
-	bool subscribe(char* topic);
+	bool subscribe(char* topic, int qos);
 	bool addSubscription(char* topic);
 	bool removeSubscription(char* topic);
+
 	void publish(char* topic, char* payload);
+	void publish(char* topic, char* payload, bool retain);
 
 	bool setCallback(MQTT_CALLBACK_SIGNATURE);
 
@@ -106,6 +110,9 @@ public:
 
 	char* getMQTTIP();
 	void setMQTTIP(char *mqttIP);
+
+	int getMQTTQOS();
+	void setMQTTQOS(int qos);
 
 	String getIP();
 
@@ -157,6 +164,8 @@ private:
 	subscription _subscriptions[MAX_SUBSCRIPTIONS];
 
 	char _hostname[64];
+
+	int _qos = DEFAULT_QOS;
 
 
 	void changeNetwork();

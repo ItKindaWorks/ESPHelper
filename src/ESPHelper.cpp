@@ -154,9 +154,9 @@ int ESPHelper::loop(){
 //subscribe to a speicifc topic (does not add to topic list)
 	//true on: subscription success
 	//false on: subscription failed (either from PubSub lib or network is disconnected)
-bool ESPHelper::subscribe(char* topic){		
+bool ESPHelper::subscribe(char* topic, int qos){		
 	if(_connectionStatus == FULL_CONNECTION){
-		bool returnVal = client.subscribe(topic);
+		bool returnVal = client.subscribe(topic, qos);
 		client.loop();
 		return returnVal;
 	}
@@ -176,7 +176,7 @@ bool ESPHelper::addSubscription(char* topic){
 			break;
 		}
 	}
-	if(subscribed){subscribe(topic);}
+	if(subscribed){subscribe(topic, _qos);}
 	
 
 	return subscribed;
@@ -186,7 +186,7 @@ bool ESPHelper::addSubscription(char* topic){
 void ESPHelper::resubscribe(){	
 	for(int i = 0; i < MAX_SUBSCRIPTIONS; i++){
 		if(_subscriptions[i].isUsed){
-			subscribe(_subscriptions[i].topic);
+			subscribe(_subscriptions[i].topic, _qos);
 			yield();
 		}
 	}
@@ -215,7 +215,12 @@ bool ESPHelper::removeSubscription(char* topic){
 
 //publish to a specified topic
 void ESPHelper::publish(char* topic, char* payload){		
-	client.publish(topic, payload);
+	publish(topic, payload, false);
+}
+
+//publish to a specified topic with a given retain level
+void ESPHelper::publish(char* topic, char* payload, bool retain){		
+	client.publish((const char *)topic, payload, retain);
 }
 
 //set the callback function for MQTT
@@ -391,6 +396,15 @@ char* ESPHelper::getMQTTIP(){
 void ESPHelper::setMQTTIP(char* mqttIP){ 
 	_currentNet.mqtt = mqttIP;
 	_mqttSet = true;
+}
+
+
+int ESPHelper::getMQTTQOS(){
+	return _qos;
+
+}
+void ESPHelper::setMQTTQOS(int qos){
+	_qos = qos;
 }
 
 

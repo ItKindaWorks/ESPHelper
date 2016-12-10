@@ -36,7 +36,7 @@
 
 #define VERSION "1-2-5"
 
-#define DEFAULT_QOS 1;
+#define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
 
 // #define DEBUG
 

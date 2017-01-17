@@ -21,7 +21,7 @@
 /*
 	This is a simple demo of an MQTT enabled button. A button is attahed
 	to pin 0 with a pull-up resistor and each time the button is pressed,
-	it toggles the state and published the new state to the MQTT broker.
+	it toggles the state and publishes the new state to the MQTT broker.
 	It is also subscribed to the same topic that it publishes to so that
 	the state of the toggle can be updated from the MQTT side.
 */

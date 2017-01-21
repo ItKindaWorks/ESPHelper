@@ -98,8 +98,8 @@ void loop(){
 			delay(500);
 		}
 
-		//else the button is not pressed so set lastButtonState to HIGH
-		else{lastButtonState = HIGH;}
+		//else if  the button is not pressed and set lastButtonState to HIGH
+		else if(buttonState == HIGH){lastButtonState = HIGH;}
 	}
 	yield();
 }

@@ -34,7 +34,7 @@ void setup() {
 
 	myESP.OTA_enable();
 	myESP.OTA_setPassword("SET OTA PASSWORD");
-	myESP.OTA_setHostname("SET OTA HOSTNAME");
+	myESP.OTA_setHostnameWithVersion("SET OTA HOSTNAME");
 
 	myESP.addSubscription("/test");
 
@@ -50,7 +50,7 @@ void loop(){
 	//Put application code here
 
 	yield();
-}
+} 
 
 void callback(char* topic, uint8_t* payload, unsigned int length) {
 	//put mqtt callback code here

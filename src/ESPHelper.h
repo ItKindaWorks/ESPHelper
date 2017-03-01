@@ -40,7 +40,7 @@
 
 // #define DEBUG
 
-enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
+enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 
 
 #ifdef DEBUG
@@ -86,6 +86,8 @@ public:
 
 	bool begin();
 	void end();
+
+	void broadcastMode(const char* ssid, const char* password, const char* ip);
 
 	int loop();
 
@@ -138,6 +140,8 @@ public:
 	void OTA_setHostnameWithVersion(char* hostname);
 
 private:
+
+
 	WiFiClient wifiClient;
 
 	String _clientName;
@@ -167,6 +171,7 @@ private:
 
 	int _qos = DEFAULT_QOS;
 
+	IPAddress _apIP = IPAddress(192, 168, 1, 1);
 
 	void changeNetwork();
 

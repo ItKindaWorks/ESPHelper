@@ -26,7 +26,9 @@
 ESPHelper::ESPHelper(){	}
 
 //initializer with single netInfo network
-ESPHelper::ESPHelper(netInfo *startingNet){		
+ESPHelper::ESPHelper(netInfo *startingNet){	
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();	
 	_currentNet = *startingNet;
 
 	_ssidSet = true;
@@ -41,6 +43,8 @@ ESPHelper::ESPHelper(netInfo *startingNet){
 
 //initializer with netInfo array and index
 ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){	
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();	
 	_netList = netList;
 	_netCount = netCount;
 	_currentIndex = startIndex;
@@ -57,7 +61,9 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 }
 
 //initializer with single network information
-ESPHelper::ESPHelper(char *ssid, char *pass, char *mqttIP){	
+ESPHelper::ESPHelper(char *ssid, char *pass, char *mqttIP){
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();		
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
 	_currentNet.mqtt = mqttIP;
@@ -90,6 +96,7 @@ bool ESPHelper::begin(){
 
 		ArduinoOTA.onStart([]() {/* ota start code */});
 		ArduinoOTA.onEnd([]() {
+			WiFi.softAPdisconnect();
 			WiFi.disconnect();
 			int timeout = 0;
 			while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
@@ -117,7 +124,31 @@ bool ESPHelper::begin(){
 
 void ESPHelper::end(){
 	OTA_disable();
+	WiFi.softAPdisconnect();
 	WiFi.disconnect();
+
+	int timeout = 0;
+	while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
+		delay(10);
+		timeout++;
+	}
+}
+
+void ESPHelper::broadcastMode(const char* ssid, const char* password, const char* ip){
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();
+	int timeout = 0;
+	while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
+		delay(10);
+		timeout++;
+	}
+	WiFi.mode(WIFI_AP);
+	WiFi.softAPConfig(_apIP, _apIP, IPAddress(255, 255, 255, 0));
+	WiFi.softAP(ssid, password);
+	//WiFi.softAPIP(*ip);
+	//WiFi.begin(_currentNet.ssid, _currentNet.pass);
+
+	_connectionStatus = BROADCAST;
 }
 
 //main loop - should be called as often as possible - handles wifi/mqtt connection and mqtt handler
@@ -125,12 +156,13 @@ void ESPHelper::end(){
 	//false on: network or server disconnected
 int ESPHelper::loop(){	
 	if(checkParams()){
-		if (!client.connected() || WiFi.status() != WL_CONNECTED) {
+		if ((!client.connected() || WiFi.status() != WL_CONNECTED) && _connectionStatus != BROADCAST) {
 			reconnect();
 			// return _connectionStatus;
 		}
 
-		if(_connectionStatus >= WIFI_ONLY){
+		//run the wifi loop as long as the connection status is at a minimum of BROADCAST
+		if(_connectionStatus >= BROADCAST){
 			
 			if(_connectionStatus == FULL_CONNECTION){client.loop();}
 			
@@ -240,7 +272,7 @@ bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){
 void ESPHelper::reconnect() {		
 	static int tryCount = 0;
 
-	if(reconnectMetro.check()){
+	if(reconnectMetro.check() && _connectionStatus != BROADCAST){
 		//attempt to connect to the wifi if connection is lost
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
@@ -507,7 +539,7 @@ void ESPHelper::OTA_enable(){
 
 //begin the OTA subsystem but with a check for connectivity and enabled use of OTA
 void ESPHelper::OTA_begin(){
-	if(_connectionStatus >= WIFI_ONLY && _useOTA){
+	if(_connectionStatus >= BROADCAST && _useOTA){
 		ArduinoOTA.begin();
 		_OTArunning = true;
 	}

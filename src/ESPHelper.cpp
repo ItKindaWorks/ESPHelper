@@ -134,7 +134,7 @@ void ESPHelper::end(){
 	}
 }
 
-void ESPHelper::broadcastMode(const char* ssid, const char* password, const char* ip){
+void ESPHelper::broadcastMode(const char* ssid, const char* password, const IPAddress ip){
 	WiFi.softAPdisconnect();
 	WiFi.disconnect();
 	int timeout = 0;
@@ -143,12 +143,24 @@ void ESPHelper::broadcastMode(const char* ssid, const char* password, const char
 		timeout++;
 	}
 	WiFi.mode(WIFI_AP);
-	WiFi.softAPConfig(_apIP, _apIP, IPAddress(255, 255, 255, 0));
+	WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
 	WiFi.softAP(ssid, password);
 	//WiFi.softAPIP(*ip);
 	//WiFi.begin(_currentNet.ssid, _currentNet.pass);
 
 	_connectionStatus = BROADCAST;
+}
+
+void ESPHelper::disableBroadcast(){
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();
+	int timeout = 0;
+	while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
+		delay(10);
+		timeout++;
+	}
+	_connectionStatus = NO_CONNECTION;
+	begin();
 }
 
 //main loop - should be called as often as possible - handles wifi/mqtt connection and mqtt handler

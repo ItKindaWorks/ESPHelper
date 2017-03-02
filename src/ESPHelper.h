@@ -87,7 +87,8 @@ public:
 	bool begin();
 	void end();
 
-	void broadcastMode(const char* ssid, const char* password, const char* ip);
+	void broadcastMode(const char* ssid, const char* password, const IPAddress ip);
+	void disableBroadcast();
 
 	int loop();
 

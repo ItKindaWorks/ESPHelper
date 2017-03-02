@@ -57,7 +57,7 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 }
 
 //initializer with single network information
-ESPHelper::ESPHelper(char *ssid, char *pass, char *mqttIP){	
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
 	_currentNet.mqtt = mqttIP;
@@ -154,7 +154,7 @@ int ESPHelper::loop(){
 //subscribe to a speicifc topic (does not add to topic list)
 	//true on: subscription success
 	//false on: subscription failed (either from PubSub lib or network is disconnected)
-bool ESPHelper::subscribe(char* topic, int qos){		
+bool ESPHelper::subscribe(const char* topic, int qos){		
 	if(_connectionStatus == FULL_CONNECTION){
 		bool returnVal = client.subscribe(topic, qos);
 		client.loop();
@@ -166,7 +166,7 @@ bool ESPHelper::subscribe(char* topic, int qos){
 //add a topic to the list of subscriptions and attempt to subscribe to the topic on the spot
 	//true on: subscription added to list (does not guarantee that the topic was subscribed to, only that it was added to the list)
 	//false on: subscription not added to list
-bool ESPHelper::addSubscription(char* topic){	
+bool ESPHelper::addSubscription(const char* topic){	
 	bool subscribed = false;
 	for(int i = 0; i < MAX_SUBSCRIPTIONS; i++){
 		if(_subscriptions[i].isUsed == false){
@@ -195,7 +195,7 @@ void ESPHelper::resubscribe(){
 //attempts to remove a topic from the topic list
 	//true on: subscription removed from list (does not guarantee that the topic was unsubscribed from, only that it was removed from the list)
 	//false on: topic was not found in list and therefore cannot be removed
-bool ESPHelper::removeSubscription(char* topic){	
+bool ESPHelper::removeSubscription(const char* topic){	
 	bool returnVal = false;
 	String topicStr = topic;
 	for(int i = 0; i < MAX_SUBSCRIPTIONS; i++){
@@ -214,13 +214,13 @@ bool ESPHelper::removeSubscription(char* topic){
 }
 
 //publish to a specified topic
-void ESPHelper::publish(char* topic, char* payload){		
+void ESPHelper::publish(const char* topic, const char* payload){		
 	publish(topic, payload, false);
 }
 
 //publish to a specified topic with a given retain level
-void ESPHelper::publish(char* topic, char* payload, bool retain){		
-	client.publish((const char *)topic, payload, retain);
+void ESPHelper::publish(const char* topic, const char* payload, bool retain){		
+	client.publish(topic, payload, retain);
 }
 
 //set the callback function for MQTT
@@ -366,34 +366,34 @@ netInfo* ESPHelper::getNetInfo(){
 }
 
 //return the current SSID
-char* ESPHelper::getSSID(){			
+const char* ESPHelper::getSSID(){			
 	if(_ssidSet){return _currentNet.ssid;}
 	return "SSID NOT SET";
 }
 //set a new SSID - does not automatically disconnect from current network if already connected
-void ESPHelper::setSSID(char* ssid){		
+void ESPHelper::setSSID(const char* ssid){		
 	_currentNet.ssid = ssid;
 	_ssidSet = true;
 }
 
 //return the current network password
-char* ESPHelper::getPASS(){			
+const char* ESPHelper::getPASS(){			
 	if(_passSet){return _currentNet.pass;}
 	return "PASS NOT SET";
 }
 //set a new network password - does not automatically disconnect from current network if already connected
-void ESPHelper::setPASS(char* pass){ 	
+void ESPHelper::setPASS(const char* pass){ 	
 	_currentNet.pass = pass;
 	_passSet = true;
 }
 
 //return the current MQTT server IP
-char* ESPHelper::getMQTTIP(){		
+const char* ESPHelper::getMQTTIP(){		
 	if(_mqttSet){return _currentNet.mqtt;}
 	return "MQTT IP NOT SET";
 }
 //set a new MQTT server IP - does not automatically disconnect from current network/server if already connected
-void ESPHelper::setMQTTIP(char* mqttIP){ 
+void ESPHelper::setMQTTIP(const char* mqttIP){ 
 	_currentNet.mqtt = mqttIP;
 	_mqttSet = true;
 }
@@ -520,16 +520,16 @@ void ESPHelper::OTA_disable(){
 }
 
 //set a password for OTA updates
-void ESPHelper::OTA_setPassword(char* pass){
+void ESPHelper::OTA_setPassword(const char* pass){
 	ArduinoOTA.setPassword(pass);
 }
 
-void ESPHelper::OTA_setHostname(char* hostname){
+void ESPHelper::OTA_setHostname(const char* hostname){
 	strcpy(_hostname, hostname);
 	ArduinoOTA.setHostname(_hostname);
 }
 
-void ESPHelper::OTA_setHostnameWithVersion(char* hostname){
+void ESPHelper::OTA_setHostnameWithVersion(const char* hostname){
 	strcpy(_hostname, hostname);
 	strcat(_hostname, "----");
 	strcat(_hostname, VERSION);

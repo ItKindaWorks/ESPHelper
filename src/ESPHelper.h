@@ -52,16 +52,16 @@ enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
 #endif
 
 struct netInfo {
-	char* name;
-	char* mqtt;
-	char* ssid;
-	char* pass;
+	const char* name;
+	const char* mqtt;
+	const char* ssid;
+	const char* pass;
 };
 typedef struct netInfo netInfo;
 
 struct subscription{
 	bool isUsed = false;
-	char* topic;
+	const char* topic;
 };
 typedef struct subscription subscription;
 
@@ -82,19 +82,19 @@ public:
 	ESPHelper();
 	ESPHelper(netInfo *startingNet);
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
-	ESPHelper(char *ssid, char *pass, char *mqttIP);
+	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
 
 	bool begin();
 	void end();
 
 	int loop();
 
-	bool subscribe(char* topic, int qos);
-	bool addSubscription(char* topic);
-	bool removeSubscription(char* topic);
+	bool subscribe(const char* topic, int qos);
+	bool addSubscription(const char* topic);
+	bool removeSubscription(const char* topic);
 
-	void publish(char* topic, char* payload);
-	void publish(char* topic, char* payload, bool retain);
+	void publish(const char* topic, const char* payload);
+	void publish(const char* topic, const char* payload, bool retain);
 
 	bool setCallback(MQTT_CALLBACK_SIGNATURE);
 
@@ -102,14 +102,14 @@ public:
 
 	void updateNetwork();	//manually disconnect and reconnecting to network/mqtt using current values (generally called after setting new network values)
 
-	char* getSSID();
-	void setSSID(char *ssid);
+	const char* getSSID();
+	void setSSID(const char *ssid);
 
-	char* getPASS();
-	void setPASS(char *pass);
+	const char* getPASS();
+	void setPASS(const char *pass);
 
-	char* getMQTTIP();
-	void setMQTTIP(char *mqttIP);
+	const char* getMQTTIP();
+	void setMQTTIP(const char *mqttIP);
 
 	int getMQTTQOS();
 	void setMQTTQOS(int qos);
@@ -133,9 +133,9 @@ public:
 	void OTA_enable();
 	void OTA_disable();
 	void OTA_begin();
-	void OTA_setPassword(char* pass);
-	void OTA_setHostname(char* hostname);
-	void OTA_setHostnameWithVersion(char* hostname);
+	void OTA_setPassword(const char* pass);
+	void OTA_setHostname(const char* hostname);
+	void OTA_setHostnameWithVersion(const char* hostname);
 
 private:
 	WiFiClient wifiClient;

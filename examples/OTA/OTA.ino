@@ -50,7 +50,7 @@ void loop(){
 	//Put application code here
 
 	yield();
-} 
+}
 
 void callback(char* topic, uint8_t* payload, unsigned int length) {
 	//put mqtt callback code here

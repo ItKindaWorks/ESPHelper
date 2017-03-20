@@ -52,10 +52,11 @@ enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 #endif
 
 struct netInfo {
-	const char* name;
-	const char* mqtt;
-	const char* ssid;
-	const char* pass;
+	const char* name;		//nickname for netinfo
+	const char* mqtt;		//mqtt ip address
+	const char* ssid;		//ssid for network
+	const char* pass;		//pass for network (can be empty string)
+	const char* hostname;	//hostname for device
 };
 typedef struct netInfo netInfo;
 

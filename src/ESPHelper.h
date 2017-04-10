@@ -54,6 +54,8 @@ enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
 struct netInfo {
 	const char* name;
 	const char* mqtt;
+	const char* mqtt_user;
+	const char* mqtt_pass;
 	const char* ssid;
 	const char* pass;
 };
@@ -83,6 +85,7 @@ public:
 	ESPHelper(netInfo *startingNet);
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
+	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass);
 
 	bool begin();
 	void end();
@@ -110,6 +113,7 @@ public:
 
 	const char* getMQTTIP();
 	void setMQTTIP(const char *mqttIP);
+	void setMQTTIP(const char *mqttIP, const char *mqttUser, const char *mqttPass);
 
 	int getMQTTQOS();
 	void setMQTTQOS(int qos);
@@ -150,6 +154,7 @@ private:
 	bool _ssidSet = false;
 	bool _passSet = false;
 	bool _mqttSet = false;
+	bool _mqttUserSet = false;
 
 	bool _useOTA = false;
 	bool _OTArunning = false;

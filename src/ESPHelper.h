@@ -40,7 +40,7 @@
 
 // #define DEBUG
 
-enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
+enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 
 
 #ifdef DEBUG
@@ -52,10 +52,11 @@ enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
 #endif
 
 struct netInfo {
-	const char* name;
-	const char* mqtt;
-	const char* ssid;
-	const char* pass;
+	const char* name;		//nickname for netinfo
+	const char* mqtt;		//mqtt ip address
+	const char* ssid;		//ssid for network
+	const char* pass;		//pass for network (can be empty string)
+	const char* hostname;	//hostname for device
 };
 typedef struct netInfo netInfo;
 
@@ -86,6 +87,9 @@ public:
 
 	bool begin();
 	void end();
+
+	void broadcastMode(const char* ssid, const char* password, const IPAddress ip);
+	void disableBroadcast();
 
 	int loop();
 
@@ -138,6 +142,8 @@ public:
 	void OTA_setHostnameWithVersion(const char* hostname);
 
 private:
+
+
 	WiFiClient wifiClient;
 
 	String _clientName;
@@ -167,6 +173,7 @@ private:
 
 	int _qos = DEFAULT_QOS;
 
+	IPAddress _apIP = IPAddress(192, 168, 1, 1);
 
 	void changeNetwork();
 

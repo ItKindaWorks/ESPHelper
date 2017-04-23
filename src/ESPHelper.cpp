@@ -332,7 +332,7 @@ void ESPHelper::reconnect() {
 				debugPrint("Attemping MQTT connection");
 
 				//if connected, subscribe to the topic(s) we want to be notified about
-				if (client.connect((char*) _clientName.c_str())) {
+				if (client.connect((char*) _clientName.c_str(),_currentNet.mqttUsername, _currentNet.mqttPassword)) {
 					debugPrintln(" -- Connected");
 					// _connected = true;
 					_connectionStatus = FULL_CONNECTION;

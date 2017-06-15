@@ -52,8 +52,6 @@ enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 #endif
 
 struct netInfo {
-
-	const char* name;
 	const char* mqttHost;
 	const char* mqttUser;
 	const char* mqttPass;

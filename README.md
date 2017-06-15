@@ -20,12 +20,14 @@ This library does requre the use of these libraries (so make sure they're instal
  * 
  [pubsubclient](https://github.com/knolleary/pubsubclient)
 
+ In addition to those libraries, make sure that you have the ESP8266 core installed. That can be found [here](https://github.com/esp8266/Arduino)
+
 Useful Methods:
 ---------------
 
 * bool begin(); //must be called (once) to start the system
 
-* bool loop();  //must be called as often as possible to maintain connections and run the various subsystems
+* int loop();  //must be called as often as possible to maintain connections and run the various subsystems
 
 
 * bool subscribe(char* topic);  //subscribe to a given MQTT topic (will NOT auto re-subscribe on connection lost)

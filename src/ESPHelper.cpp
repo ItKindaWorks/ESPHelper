@@ -26,13 +26,26 @@
 ESPHelper::ESPHelper(){	}
 
 //initializer with single netInfo network
-ESPHelper::ESPHelper(netInfo *startingNet){		
+ESPHelper::ESPHelper(netInfo *startingNet){	
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();	
 	_currentNet = *startingNet;
 
-	_ssidSet = true;
-	_passSet = true;
-	_mqttSet = true;
-	_mqttUserSet = true;
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
+
+	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
+	else{_mqttSet = true;}
+  
+  
+  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+  else{_mqttUserSet = true;}
+  
+  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+  else{_mqttPassSet = true;}
 
 	_hoppingAllowed = false;
 
@@ -42,6 +55,8 @@ ESPHelper::ESPHelper(netInfo *startingNet){
 
 //initializer with netInfo array and index
 ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){	
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();	
 	_netList = netList;
 	_netCount = netCount;
 	_currentIndex = startIndex;
@@ -52,14 +67,28 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 
 	_currentNet = *netList[constrain(_currentIndex, 0, _netCount)];
 
-	_ssidSet = true;
-	_passSet = true;
-	_mqttSet = true;
-	_mqttUserSet = true;
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
+
+	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	else{_mqttSet = true;}
+  
+  
+  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+  else{_mqttUserSet = true;}
+  
+  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+  else{_mqttPassSet = true;}
+
 }
 
 //initializer with single network information
 ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
+    WiFi.softAPdisconnect();
+	WiFi.disconnect();
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
 	_currentNet.mqtt = mqttIP;
@@ -68,9 +97,37 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){
 
 	_useOTA = false;
 
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
+
+	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	else{_mqttSet = true;}
+}
+
+//initializer with single network information
+ESPHelper::ESPHelper(const char *ssid, const char *pass){	
+    WiFi.softAPdisconnect();
+	WiFi.disconnect();
+	_currentNet.ssid = ssid;
+	_currentNet.pass = pass;
+	_currentNet.mqtt = '\0';
+
+	_hoppingAllowed = false;
+
+	_useOTA = false;
+
+	_mqttSet = false;
 	_ssidSet = true;
-	_passSet = true;
-	_mqttSet = true;
+
+
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
 }
 
 //initializer with single network information
@@ -85,31 +142,49 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 
 	_useOTA = false;
 
-	_ssidSet = true;
-	_passSet = true;
-	_mqttSet = true;
-	_mqttUserSet = true;
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
+
+	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	else{_mqttSet = true;}
+  
+  
+  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+  else{_mqttUserSet = true;}
+  
+  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+  else{_mqttPassSet = true;}
 }
 
 //start the wifi & mqtt systems and attempt connection (currently blocking)
 	//true on: parameter check validated
 	//false on: parameter check failed
 bool ESPHelper::begin(){	
-
-	if(checkParams()){
+	if(_ssidSet){
 		// Generate client name based on MAC address and last 8 bits of microsecond counter
 		_clientName += "esp8266-";
 		uint8_t mac[6];
 		WiFi.macAddress(mac);
 		_clientName += macToStr(mac);
 
-		client = PubSubClient(_currentNet.mqtt, 1883, wifiClient);
-
 		WiFi.mode(WIFI_STA);
-		WiFi.begin(_currentNet.ssid, _currentNet.pass);
+		if(_passSet){WiFi.begin(_currentNet.ssid, _currentNet.pass);}
+		else{WiFi.begin(_currentNet.ssid);}
 
+		//as long as an mqtt ip has been set create an instance of PubSub for client
+		if(_mqttSet){client = PubSubClient(_currentNet.mqtt, 1883, wifiClient);}
+
+		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
+		else{client = PubSubClient("192.0.2.0", 1883, wifiClient);}
+
+		
+		//ota event handlers
 		ArduinoOTA.onStart([]() {/* ota start code */});
 		ArduinoOTA.onEnd([]() {
+			WiFi.softAPdisconnect();
 			WiFi.disconnect();
 			int timeout = 0;
 			while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
@@ -121,7 +196,7 @@ bool ESPHelper::begin(){
 		ArduinoOTA.onError([](ota_error_t error) {/* ota error code */});
 
 		int timeout = 0;	//counter for begin connection attempts
-		while ((!client.connected() || WiFi.status() != WL_CONNECTED) && timeout < 200 ) {	//max 2 sec before timeout
+		while (((!client.connected() && _mqttSet) || WiFi.status() != WL_CONNECTED) && timeout < 200 ) {	//max 2 sec before timeout
 			reconnect();
 			delay(10);
 			timeout++;
@@ -137,20 +212,57 @@ bool ESPHelper::begin(){
 
 void ESPHelper::end(){
 	OTA_disable();
+	WiFi.softAPdisconnect();
 	WiFi.disconnect();
+
+	int timeout = 0;
+	while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
+		delay(10);
+		timeout++;
+	}
+}
+
+void ESPHelper::broadcastMode(const char* ssid, const char* password, const IPAddress ip){
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();
+	int timeout = 0;
+	while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
+		delay(10);
+		timeout++;
+	}
+	WiFi.mode(WIFI_AP);
+	WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
+	WiFi.softAP(ssid, password);
+	//WiFi.softAPIP(*ip);
+	//WiFi.begin(_currentNet.ssid, _currentNet.pass);
+
+	_connectionStatus = BROADCAST;
+}
+
+void ESPHelper::disableBroadcast(){
+	WiFi.softAPdisconnect();
+	WiFi.disconnect();
+	int timeout = 0;
+	while(WiFi.status() != WL_DISCONNECTED && timeout < 200){
+		delay(10);
+		timeout++;
+	}
+	_connectionStatus = NO_CONNECTION;
+	begin();
 }
 
 //main loop - should be called as often as possible - handles wifi/mqtt connection and mqtt handler
 	//true on: network/server connected
 	//false on: network or server disconnected
 int ESPHelper::loop(){	
-	if(checkParams()){
-		if (!client.connected() || WiFi.status() != WL_CONNECTED) {
+	if(_ssidSet){
+
+		if (((_mqttSet && !client.connected()) || setConnectionStatus() < WIFI_ONLY) && _connectionStatus != BROADCAST) {
 			reconnect();
-			// return _connectionStatus;
 		}
 
-		if(_connectionStatus >= WIFI_ONLY){
+		//run the wifi loop as long as the connection status is at a minimum of BROADCAST
+		if(_connectionStatus >= BROADCAST){
 			
 			if(_connectionStatus == FULL_CONNECTION){client.loop();}
 			
@@ -168,7 +280,8 @@ int ESPHelper::loop(){
 			return _connectionStatus;
 		}
 	}
-	return false;
+
+	return -1;
 }
 
 //subscribe to a speicifc topic (does not add to topic list)
@@ -247,7 +360,7 @@ void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 	//true on: mqtt has been initialized
 	//false on: mqtt not been inistialized
 bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){	
-	if(_hasBegun) {
+	if(_hasBegun && _mqttSet) {
 		client.setCallback(callback);
 		return true;
 	}
@@ -260,7 +373,8 @@ bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){
 void ESPHelper::reconnect() {		
 	static int tryCount = 0;
 
-	if(reconnectMetro.check()){
+	if(reconnectMetro.check() && _connectionStatus != BROADCAST){
+		debugPrintln("Attempting Conn...");
 		//attempt to connect to the wifi if connection is lost
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
@@ -280,43 +394,70 @@ void ESPHelper::reconnect() {
 			debugPrintln("\n---WIFI Connected!---");
 			_connectionStatus = WIFI_ONLY;
 
-			int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
-			while (!client.connected() && timeout < 10) {
-				debugPrint("Attemping MQTT connection");
+			if(_mqttSet){
 
-				//if connected, subscribe to the topic(s) we want to be notified about
-				int connected = 0;
-				if (_mqttUserSet) {
-					connected = client.connect((char*) _clientName.c_str(), _currentNet.mqtt_user, _currentNet.mqtt_pass);
+				int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
+				while (!client.connected() && timeout < 10) {
+					debugPrint("Attemping MQTT connection");
+
+					
+					int connected = 0;
+					if (_mqttUserSet) {
+						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqtt_user, _currentNet.mqtt_pass);
+					}
+					else{
+						connected = client.connect((char*) _clientName.c_str());
+					}
+
+					//if connected, subscribe to the topic(s) we want to be notified about
+					if (connected) {
+						debugPrintln(" -- Connected");
+						// _connected = true;
+						_connectionStatus = FULL_CONNECTION;
+						resubscribe();
+					}
+					else{
+						debugPrintln(" -- Failed");
+						// _connected = false;
+					}
+					timeout++;
+
 				}
-				else{
-					connected = client.connect((char*) _clientName.c_str());
+
+				if(timeout >= 10 && !client.connected()){	//if we still cant connect to mqtt after 10 attempts increment the try count
+					tryCount++;
+					if(tryCount == 20){
+						changeNetwork();
+						tryCount = 0;
+						return;
+					}
 				}
-				if (connected) {
-					debugPrintln(" -- Connected");
-					// _connected = true;
-					_connectionStatus = FULL_CONNECTION;
-					resubscribe();
-				}
-				else{
-					debugPrintln(" -- Failed");
-					// _connected = false;
-				}
-				timeout++;
 			}
 
-			if(timeout >= 10 && !client.connected()){	//if we still cant connect to mqtt after 10 attempts increment the try count
-				tryCount++;
-				if(tryCount == 20){
-					changeNetwork();
-					tryCount = 0;
-					return;
-				}
-			}
+
 		}
 
 		reconnectMetro.reset();
 	}
+}
+
+int ESPHelper::setConnectionStatus(){
+	int returnVal = NO_CONNECTION;
+
+	if(_connectionStatus != BROADCAST){
+
+		if(WiFi.status() == WL_CONNECTED){
+			returnVal = WIFI_ONLY;
+			if(client.connected()){
+				returnVal = FULL_CONNECTION;
+			}
+		}
+	}
+	else{
+		returnVal = BROADCAST;
+	}
+	_connectionStatus = returnVal;
+	return returnVal;
 }
 
 //changes the current network settings to the next listed network if network hopping is allowed
@@ -327,6 +468,15 @@ void ESPHelper::changeNetwork(){
 		if(_currentIndex >= _netCount){_currentIndex = 0;}
 
 		_currentNet = *_netList[_currentIndex];
+
+		if(_currentNet.pass[0] == '\0'){_passSet = false;}
+		else{_passSet = true;}
+
+		if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+		else{_ssidSet = true;}	
+
+		if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+		else{_mqttSet = true;}
 
 		debugPrint("Trying next network: ");
 		debugPrintln(_currentNet.ssid);
@@ -349,9 +499,16 @@ void ESPHelper::updateNetwork(){
 	debugPrintln("\tDisconnecting from WiFi");
 	WiFi.disconnect();
 	debugPrintln("\tAttempting to begin on new network");
-	WiFi.begin(_currentNet.ssid, _currentNet.pass);
+
+	WiFi.mode(WIFI_STA);
+	if(_passSet && _ssidSet){WiFi.begin(_currentNet.ssid, _currentNet.pass);}
+	else if(_ssidSet){WiFi.begin(_currentNet.ssid);}
+	else{WiFi.begin("NO_SSID_SET");}
+
 	debugPrintln("\tSetting new MQTT server");
-	client.setServer(_currentNet.mqtt, 1883);
+	if(_mqttSet){client.setServer(_currentNet.mqtt, 1883);}
+	else{client.setServer("192.0.2.0", 1883);}
+	
 	debugPrintln("\tDone - Ready for next reconnect attempt");
 }
 
@@ -455,16 +612,6 @@ int ESPHelper::getStatus(){
 	return _connectionStatus;
 }
 
-
-
-//make sure all network parameters are set
-	//true on: all network parameters have been set 
-	//false on: not all network parameters have been set 
-bool ESPHelper::checkParams(){		
-	if(_ssidSet && _passSet && _mqttSet){return true;}
-	return false;
-}
-
 //enable or disable hopping - generally set automatically by initializer
 void ESPHelper::setHopping(bool canHop){	
 	_hoppingAllowed = canHop;
@@ -545,7 +692,7 @@ void ESPHelper::OTA_enable(){
 
 //begin the OTA subsystem but with a check for connectivity and enabled use of OTA
 void ESPHelper::OTA_begin(){
-	if(_connectionStatus >= WIFI_ONLY && _useOTA){
+	if(_connectionStatus >= BROADCAST && _useOTA){
 		ArduinoOTA.begin();
 		_OTArunning = true;
 	}

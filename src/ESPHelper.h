@@ -34,13 +34,13 @@
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-#define VERSION "1-2-5"
+#define VERSION "1-2-6"
 
 #define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
 
 // #define DEBUG
 
-enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
+enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 
 
 #ifdef DEBUG
@@ -52,13 +52,15 @@ enum connStatus {NO_CONNECTION, WIFI_ONLY, FULL_CONNECTION};
 #endif
 
 struct netInfo {
+
 	const char* name;
-	const char* mqtt;
-	const char* mqtt_user;
-	const char* mqtt_pass;
+	const char* mqttHost;
+	const char* mqttUser;
+	const char* mqttPass;
 	const char* ssid;
 	const char* pass;
 };
+
 typedef struct netInfo netInfo;
 
 struct subscription{
@@ -77,7 +79,6 @@ public:
 	netInfo _currentNet;
 	netInfo *_currentNetwork;
 
-	Metro reconnectMetro = Metro(500);
 	
 	PubSubClient client;
 
@@ -85,10 +86,14 @@ public:
 	ESPHelper(netInfo *startingNet);
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
+
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass);
 
 	bool begin();
 	void end();
+
+	void broadcastMode(const char* ssid, const char* password, const IPAddress ip);
+	void disableBroadcast();
 
 	int loop();
 
@@ -142,6 +147,9 @@ public:
 	void OTA_setHostnameWithVersion(const char* hostname);
 
 private:
+
+	Metro reconnectMetro = Metro(500);
+
 	WiFiClient wifiClient;
 
 	String _clientName;
@@ -155,6 +163,7 @@ private:
 	bool _passSet = false;
 	bool _mqttSet = false;
 	bool _mqttUserSet = false;
+  bool _mqttPassSet = false;
 
 	bool _useOTA = false;
 	bool _OTArunning = false;
@@ -172,6 +181,7 @@ private:
 
 	int _qos = DEFAULT_QOS;
 
+	IPAddress _apIP = IPAddress(192, 168, 1, 1);
 
 	void changeNetwork();
 
@@ -180,6 +190,8 @@ private:
 	bool checkParams();
 
 	void resubscribe();
+
+	int setConnectionStatus();
 };
 
 #endif

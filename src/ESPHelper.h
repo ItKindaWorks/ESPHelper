@@ -34,7 +34,7 @@
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-#define VERSION "1-2-6"
+#define VERSION "1-2-7"
 
 #define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
 

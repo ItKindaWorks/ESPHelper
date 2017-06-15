@@ -22,9 +22,24 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 #include "ESPHelper.h"
 
 
-netInfo homeNet1 = {.name = "NETWORK NICKNAME1", .mqtt = "YOUR MQTT-IP1", .ssid = "YOUR SSID1", .pass = "YOUR NETWORK PASS1"};
-netInfo homeNet2 = {.name = "NETWORK NICKNAME2", .mqtt = "YOUR MQTT-IP2", .ssid = "YOUR SSID2", .pass = "YOUR NETWORK PASS2"};
-netInfo homeNet3 = {.name = "NETWORK NICKNAME3", .mqtt = "YOUR MQTT-IP3", .ssid = "YOUR SSID3", .pass = "YOUR NETWORK PASS3"};
+//set this info for your own network
+netInfo homeNet1 = {.mqttHost = "YOUR MQTT-IP",			//can be blank if not using MQTT
+					.mqttUser = "YOUR MQTT USERNAME", 	//can be blank
+					.mqttPass = "YOUR MQTT PASSWORD", 	//can be blank
+					.ssid = "YOUR SSID", 
+					.pass = "YOUR NETWORK PASS"};
+					
+netInfo homeNet2 = {.mqttHost = "YOUR MQTT-IP",			//can be blank if not using MQTT
+					.mqttUser = "YOUR MQTT USERNAME", 	//can be blank
+					.mqttPass = "YOUR MQTT PASSWORD", 	//can be blank
+					.ssid = "YOUR SSID", 
+					.pass = "YOUR NETWORK PASS"};
+
+netInfo homeNet3 = {.mqttHost = "YOUR MQTT-IP",			//can be blank if not using MQTT
+					.mqttUser = "YOUR MQTT USERNAME", 	//can be blank
+					.mqttPass = "YOUR MQTT PASSWORD", 	//can be blank
+					.ssid = "YOUR SSID", 
+					.pass = "YOUR NETWORK PASS"};
 
 netInfo *knownNetworks[3] = {
 	&homeNet1,

@@ -53,7 +53,12 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 //set this info for your own network
-netInfo homeNet = {.name = "NETWORK NICKNAME", .mqtt = "YOUR MQTT-IP", .ssid = "YOUR SSID", .pass = "YOUR NETWORK PASS"};
+netInfo homeNet = {	.mqttHost = "YOUR MQTT-IP",			//can be blank if not using MQTT
+					.mqttUser = "YOUR MQTT USERNAME", 	//can be blank
+					.mqttPass = "YOUR MQTT PASSWORD", 	//can be blank
+					.ssid = "YOUR SSID", 
+					.pass = "YOUR NETWORK PASS"};
+					
 ESPHelper myESP(&homeNet);
 
 void setup() {

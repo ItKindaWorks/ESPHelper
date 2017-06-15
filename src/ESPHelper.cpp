@@ -93,11 +93,33 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){
 	else{_mqttSet = true;}
 }
 
+//initializer with single network information
+ESPHelper::ESPHelper(const char *ssid, const char *pass){	
+    WiFi.softAPdisconnect();
+	WiFi.disconnect();
+	_currentNet.ssid = ssid;
+	_currentNet.pass = pass;
+	_currentNet.mqtt = '\0';
+
+	_hoppingAllowed = false;
+
+	_useOTA = false;
+
+	_mqttSet = false;
+	_ssidSet = true;
+
+
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
+}
+
 //start the wifi & mqtt systems and attempt connection (currently blocking)
 	//true on: parameter check validated
 	//false on: parameter check failed
 bool ESPHelper::begin(){	
-
 	if(_ssidSet){
 		// Generate client name based on MAC address and last 8 bits of microsecond counter
 		_clientName += "esp8266-";
@@ -131,7 +153,7 @@ bool ESPHelper::begin(){
 		ArduinoOTA.onError([](ota_error_t error) {/* ota error code */});
 
 		int timeout = 0;	//counter for begin connection attempts
-		while ((!client.connected() || WiFi.status() != WL_CONNECTED) && timeout < 200 ) {	//max 2 sec before timeout
+		while (((!client.connected() && _mqttSet) || WiFi.status() != WL_CONNECTED) && timeout < 200 ) {	//max 2 sec before timeout
 			reconnect();
 			delay(10);
 			timeout++;
@@ -191,9 +213,9 @@ void ESPHelper::disableBroadcast(){
 	//false on: network or server disconnected
 int ESPHelper::loop(){	
 	if(_ssidSet){
-		if ((!client.connected() || WiFi.status() != WL_CONNECTED) && _connectionStatus != BROADCAST) {
+
+		if (((_mqttSet && !client.connected()) || setConnectionStatus() < WIFI_ONLY) && _connectionStatus != BROADCAST) {
 			reconnect();
-			// return _connectionStatus;
 		}
 
 		//run the wifi loop as long as the connection status is at a minimum of BROADCAST
@@ -215,7 +237,8 @@ int ESPHelper::loop(){
 			return _connectionStatus;
 		}
 	}
-	return false;
+
+	return -1;
 }
 
 //subscribe to a speicifc topic (does not add to topic list)
@@ -294,7 +317,7 @@ void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 	//true on: mqtt has been initialized
 	//false on: mqtt not been inistialized
 bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){	
-	if(_hasBegun) {
+	if(_hasBegun && _mqttSet) {
 		client.setCallback(callback);
 		return true;
 	}
@@ -308,6 +331,7 @@ void ESPHelper::reconnect() {
 	static int tryCount = 0;
 
 	if(reconnectMetro.check() && _connectionStatus != BROADCAST){
+		debugPrintln("Attempting Conn...");
 		//attempt to connect to the wifi if connection is lost
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
@@ -327,36 +351,62 @@ void ESPHelper::reconnect() {
 			debugPrintln("\n---WIFI Connected!---");
 			_connectionStatus = WIFI_ONLY;
 
-			int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
-			while (!client.connected() && timeout < 10) {
-				debugPrint("Attemping MQTT connection");
 
-				//if connected, subscribe to the topic(s) we want to be notified about
-				if (client.connect((char*) _clientName.c_str())) {
-					debugPrintln(" -- Connected");
-					// _connected = true;
-					_connectionStatus = FULL_CONNECTION;
-					resubscribe();
+
+			if(_mqttSet){
+
+				int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
+				while (!client.connected() && timeout < 10) {
+					debugPrint("Attemping MQTT connection");
+
+					//if connected, subscribe to the topic(s) we want to be notified about
+					if (client.connect((char*) _clientName.c_str())) {
+						debugPrintln(" -- Connected");
+						// _connected = true;
+						_connectionStatus = FULL_CONNECTION;
+						resubscribe();
+					}
+					else{
+						debugPrintln(" -- Failed");
+						// _connected = false;
+					}
+					timeout++;
 				}
-				else{
-					debugPrintln(" -- Failed");
-					// _connected = false;
+
+				if(timeout >= 10 && !client.connected()){	//if we still cant connect to mqtt after 10 attempts increment the try count
+					tryCount++;
+					if(tryCount == 20){
+						changeNetwork();
+						tryCount = 0;
+						return;
+					}
 				}
-				timeout++;
 			}
 
-			if(timeout >= 10 && !client.connected()){	//if we still cant connect to mqtt after 10 attempts increment the try count
-				tryCount++;
-				if(tryCount == 20){
-					changeNetwork();
-					tryCount = 0;
-					return;
-				}
-			}
+
 		}
 
 		reconnectMetro.reset();
 	}
+}
+
+int ESPHelper::setConnectionStatus(){
+	int returnVal = NO_CONNECTION;
+
+	if(_connectionStatus != BROADCAST){
+
+		if(WiFi.status() == WL_CONNECTED){
+			returnVal = WIFI_ONLY;
+			if(client.connected()){
+				returnVal = FULL_CONNECTION;
+			}
+		}
+	}
+	else{
+		returnVal = BROADCAST;
+	}
+	_connectionStatus = returnVal;
+	return returnVal;
 }
 
 //changes the current network settings to the next listed network if network hopping is allowed

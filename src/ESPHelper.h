@@ -34,7 +34,7 @@
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-#define VERSION "1-2-5"
+#define VERSION "1-2-6"
 
 #define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
 
@@ -76,7 +76,6 @@ public:
 	netInfo _currentNet;
 	netInfo *_currentNetwork;
 
-	Metro reconnectMetro = Metro(500);
 	
 	PubSubClient client;
 
@@ -84,6 +83,7 @@ public:
 	ESPHelper(netInfo *startingNet);
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
+	ESPHelper(const char *ssid, const char *pass);
 
 	bool begin();
 	void end();
@@ -143,6 +143,7 @@ public:
 
 private:
 
+	Metro reconnectMetro = Metro(500);
 
 	WiFiClient wifiClient;
 
@@ -182,6 +183,8 @@ private:
 	bool checkParams();
 
 	void resubscribe();
+
+	int setConnectionStatus();
 };
 
 #endif

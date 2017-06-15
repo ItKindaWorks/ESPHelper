@@ -73,7 +73,7 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
 	else{_ssidSet = true;}	
 
-	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
   
   
@@ -91,7 +91,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){
 	WiFi.disconnect();
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
-	_currentNet.mqtt = mqttIP;
+	_currentNet.mqttHost= mqttIP;
 
 	_hoppingAllowed = false;
 
@@ -103,7 +103,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){
 	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
 	else{_ssidSet = true;}	
 
-	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
 }
 
@@ -113,7 +113,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass){
 	WiFi.disconnect();
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
-	_currentNet.mqtt = '\0';
+	_currentNet.mqttHost= '\0';
 
 	_hoppingAllowed = false;
 
@@ -134,9 +134,9 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass){
 ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass){
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
-	_currentNet.mqtt = mqttIP;
-	_currentNet.mqtt_user = mqttUser;
-	_currentNet.mqtt_pass = mqttPass;
+	_currentNet.mqttHost= mqttIP;
+	_currentNet.mqttUser = mqttUser;
+	_currentNet.mqttPass = mqttPass;
 
 	_hoppingAllowed = false;
 
@@ -148,7 +148,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
 	else{_ssidSet = true;}	
 
-	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
   
   
@@ -175,7 +175,7 @@ bool ESPHelper::begin(){
 		else{WiFi.begin(_currentNet.ssid);}
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
-		if(_mqttSet){client = PubSubClient(_currentNet.mqtt, 1883, wifiClient);}
+		if(_mqttSet){client = PubSubClient(_currentNet.mqttHost, 1883, wifiClient);}
 
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
 		else{client = PubSubClient("192.0.2.0", 1883, wifiClient);}
@@ -403,7 +403,7 @@ void ESPHelper::reconnect() {
 					
 					int connected = 0;
 					if (_mqttUserSet) {
-						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqtt_user, _currentNet.mqtt_pass);
+						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass);
 					}
 					else{
 						connected = client.connect((char*) _clientName.c_str());
@@ -475,7 +475,7 @@ void ESPHelper::changeNetwork(){
 		if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
 		else{_ssidSet = true;}	
 
-		if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+		if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 		else{_mqttSet = true;}
 
 		debugPrint("Trying next network: ");
@@ -506,7 +506,7 @@ void ESPHelper::updateNetwork(){
 	else{WiFi.begin("NO_SSID_SET");}
 
 	debugPrintln("\tSetting new MQTT server");
-	if(_mqttSet){client.setServer(_currentNet.mqtt, 1883);}
+	if(_mqttSet){client.setServer(_currentNet.mqttHost, 1883);}
 	else{client.setServer("192.0.2.0", 1883);}
 	
 	debugPrintln("\tDone - Ready for next reconnect attempt");
@@ -575,20 +575,20 @@ void ESPHelper::setPASS(const char* pass){
 
 //return the current MQTT server IP
 const char* ESPHelper::getMQTTIP(){		
-	if(_mqttSet){return _currentNet.mqtt;}
+	if(_mqttSet){return _currentNet.mqttHost;}
 	return "MQTT IP NOT SET";
 }
 //set a new MQTT server IP - does not automatically disconnect from current network/server if already connected
 void ESPHelper::setMQTTIP(const char* mqttIP){ 
-	_currentNet.mqtt = mqttIP;
+	_currentNet.mqttHost= mqttIP;
 	_mqttSet = true;
 }
 
 //set a new MQTT server IP - does not automatically disconnect from current network/server if already connected
 void ESPHelper::setMQTTIP(const char* mqttIP, const char* mqttUser, const char* mqttPass){
-	_currentNet.mqtt = mqttIP;
-	_currentNet.mqtt_user = mqttUser;
-	_currentNet.mqtt_pass = mqttPass;
+	_currentNet.mqttHost= mqttIP;
+	_currentNet.mqttUser = mqttUser;
+	_currentNet.mqttPass = mqttPass;
 	_mqttSet = true;
 	_mqttUserSet = true;
 }

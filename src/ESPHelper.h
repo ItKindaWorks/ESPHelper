@@ -86,7 +86,7 @@ public:
 	ESPHelper(netInfo *startingNet);
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
-
+	ESPHelper(const char *ssid, const char *pass);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass);
 
 	bool begin();

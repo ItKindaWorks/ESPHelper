@@ -1,6 +1,6 @@
 /*    
 MultiNetwork.ino
-Copyright (c) 2016 ItKindaWorks All right reserved.
+Copyright (c) 2017 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
 This file is part of ESPHelper
@@ -26,18 +26,21 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 netInfo homeNet1 = {.mqttHost = "YOUR MQTT-IP",			//can be blank if not using MQTT
 					.mqttUser = "YOUR MQTT USERNAME", 	//can be blank
 					.mqttPass = "YOUR MQTT PASSWORD", 	//can be blank
+					.mqttPort = 1883,					//default port for MQTT is 1883 - only chance if needed.
 					.ssid = "YOUR SSID", 
 					.pass = "YOUR NETWORK PASS"};
 					
 netInfo homeNet2 = {.mqttHost = "YOUR MQTT-IP",			//can be blank if not using MQTT
 					.mqttUser = "YOUR MQTT USERNAME", 	//can be blank
 					.mqttPass = "YOUR MQTT PASSWORD", 	//can be blank
+					.mqttPort = 1883,					//default port for MQTT is 1883 - only chance if needed.
 					.ssid = "YOUR SSID", 
 					.pass = "YOUR NETWORK PASS"};
 
 netInfo homeNet3 = {.mqttHost = "YOUR MQTT-IP",			//can be blank if not using MQTT
 					.mqttUser = "YOUR MQTT USERNAME", 	//can be blank
 					.mqttPass = "YOUR MQTT PASSWORD", 	//can be blank
+					.mqttPort = 1883,					//default port for MQTT is 1883 - only chance if needed.
 					.ssid = "YOUR SSID", 
 					.pass = "YOUR NETWORK PASS"};
 

@@ -1,6 +1,6 @@
 /*    
     ESPHelper.cpp
-    Copyright (c) 2016 ItKindaWorks Inc All right reserved.
+    Copyright (c) 2017 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
 
     This file is part of ESPHelper
@@ -39,13 +39,14 @@ ESPHelper::ESPHelper(netInfo *startingNet){
 
 	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
+
+  	if(_currentNet.mqttPort == 0){_currentNet.mqttPort = 1883;}
   
-  
-  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
-  else{_mqttUserSet = true;}
-  
-  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
-  else{_mqttPassSet = true;}
+	if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+	else{_mqttUserSet = true;}
+
+	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+	else{_mqttPassSet = true;}
 
 	_hoppingAllowed = false;
 
@@ -75,13 +76,14 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 
 	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
+
+  	if(_currentNet.mqttPort == 0){_currentNet.mqttPort = 1883;}
   
-  
-  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
-  else{_mqttUserSet = true;}
-  
-  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
-  else{_mqttPassSet = true;}
+	if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+	else{_mqttUserSet = true;}
+
+	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+	else{_mqttPassSet = true;}
 
 }
 
@@ -92,6 +94,33 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
 	_currentNet.mqttHost= mqttIP;
+	_currentNet.mqttPort = 1883;
+
+	_hoppingAllowed = false;
+
+	_useOTA = false;
+
+	_mqttPassSet = false;
+	_mqttUserSet = false;
+
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
+
+	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
+	else{_mqttSet = true;}
+}
+
+//initializer with single network information (MQTT user/pass)
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
+	_currentNet.ssid = ssid;
+	_currentNet.pass = pass;
+	_currentNet.mqttHost= mqttIP;
+	_currentNet.mqttUser = mqttUser;
+	_currentNet.mqttPass = mqttPass;
+	_currentNet.mqttPort = mqttPort;
 
 	_hoppingAllowed = false;
 
@@ -105,6 +134,13 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){
 
 	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
+  
+  
+	if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+	else{_mqttUserSet = true;}
+
+	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+	else{_mqttPassSet = true;}
 }
 
 //initializer with single network information
@@ -114,13 +150,15 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass){
 	_currentNet.ssid = ssid;
 	_currentNet.pass = pass;
 	_currentNet.mqttHost= '\0';
+	_currentNet.mqttPort = 1883;
 
 	_hoppingAllowed = false;
 
 	_useOTA = false;
 
 	_mqttSet = false;
-	_ssidSet = true;
+	_mqttUserSet = false;
+	_mqttPassSet = false;
 
 
 	if(_currentNet.pass[0] == '\0'){_passSet = false;}
@@ -130,34 +168,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass){
 	else{_ssidSet = true;}	
 }
 
-//initializer with single network information
-ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass){
-	_currentNet.ssid = ssid;
-	_currentNet.pass = pass;
-	_currentNet.mqttHost= mqttIP;
-	_currentNet.mqttUser = mqttUser;
-	_currentNet.mqttPass = mqttPass;
 
-	_hoppingAllowed = false;
-
-	_useOTA = false;
-
-	if(_currentNet.pass[0] == '\0'){_passSet = false;}
-	else{_passSet = true;}
-
-	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
-	else{_ssidSet = true;}	
-
-	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
-	else{_mqttSet = true;}
-  
-  
-  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
-  else{_mqttUserSet = true;}
-  
-  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
-  else{_mqttPassSet = true;}
-}
 
 //start the wifi & mqtt systems and attempt connection (currently blocking)
 	//true on: parameter check validated
@@ -175,10 +186,10 @@ bool ESPHelper::begin(){
 		else{WiFi.begin(_currentNet.ssid);}
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
-		if(_mqttSet){client = PubSubClient(_currentNet.mqttHost, 1883, wifiClient);}
+		if(_mqttSet){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
 
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
-		else{client = PubSubClient("192.0.2.0", 1883, wifiClient);}
+		else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
 
 		
 		//ota event handlers

@@ -1,6 +1,6 @@
 /*    
     ESPHelper.h 
-    Copyright (c) 2016 ItKindaWorks Inc All right reserved.
+    Copyright (c) 2017 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
 
     This file is part of ESPHelper
@@ -34,7 +34,7 @@
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-#define VERSION "1-2-7"
+#define VERSION "1-2-8"
 
 #define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
 
@@ -55,6 +55,7 @@ struct netInfo {
 	const char* mqttHost;
 	const char* mqttUser;
 	const char* mqttPass;
+	int mqttPort;
 	const char* ssid;
 	const char* pass;
 };
@@ -85,7 +86,7 @@ public:
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
 	ESPHelper(const char *ssid, const char *pass);
-	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass);
+	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
 
 	bool begin();
 	void end();

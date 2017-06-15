@@ -37,9 +37,15 @@ ESPHelper::ESPHelper(netInfo *startingNet){
 	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
 	else{_ssidSet = true;}	
 
-	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
-	
+  
+  
+  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+  else{_mqttUserSet = true;}
+  
+  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+  else{_mqttPassSet = true;}
 
 	_hoppingAllowed = false;
 
@@ -69,6 +75,14 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 
 	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
+  
+  
+  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+  else{_mqttUserSet = true;}
+  
+  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+  else{_mqttPassSet = true;}
+
 }
 
 //initializer with single network information
@@ -114,6 +128,35 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass){
 
 	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
 	else{_ssidSet = true;}	
+}
+
+//initializer with single network information
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass){
+	_currentNet.ssid = ssid;
+	_currentNet.pass = pass;
+	_currentNet.mqtt = mqttIP;
+	_currentNet.mqtt_user = mqttUser;
+	_currentNet.mqtt_pass = mqttPass;
+
+	_hoppingAllowed = false;
+
+	_useOTA = false;
+
+	if(_currentNet.pass[0] == '\0'){_passSet = false;}
+	else{_passSet = true;}
+
+	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
+	else{_ssidSet = true;}	
+
+	if(_currentNet.mqtt[0] == '\0'){_mqttSet = false;}
+	else{_mqttSet = true;}
+  
+  
+  if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
+  else{_mqttUserSet = true;}
+  
+  if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
+  else{_mqttPassSet = true;}
 }
 
 //start the wifi & mqtt systems and attempt connection (currently blocking)
@@ -351,16 +394,23 @@ void ESPHelper::reconnect() {
 			debugPrintln("\n---WIFI Connected!---");
 			_connectionStatus = WIFI_ONLY;
 
-
-
 			if(_mqttSet){
 
 				int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
 				while (!client.connected() && timeout < 10) {
 					debugPrint("Attemping MQTT connection");
 
+					
+					int connected = 0;
+					if (_mqttUserSet) {
+						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqtt_user, _currentNet.mqtt_pass);
+					}
+					else{
+						connected = client.connect((char*) _clientName.c_str());
+					}
+
 					//if connected, subscribe to the topic(s) we want to be notified about
-					if (client.connect((char*) _clientName.c_str())) {
+					if (connected) {
 						debugPrintln(" -- Connected");
 						// _connected = true;
 						_connectionStatus = FULL_CONNECTION;
@@ -371,6 +421,7 @@ void ESPHelper::reconnect() {
 						// _connected = false;
 					}
 					timeout++;
+
 				}
 
 				if(timeout >= 10 && !client.connected()){	//if we still cant connect to mqtt after 10 attempts increment the try count
@@ -483,6 +534,7 @@ void ESPHelper::setNetInfo(netInfo newNetwork){
 	_ssidSet = true;
 	_passSet = true;
 	_mqttSet = true;
+	_mqttUserSet = true;
 }
 
 //change the current network info to a new *netInfo - does not automatically disconnect from current network if already connected
@@ -491,6 +543,7 @@ void ESPHelper::setNetInfo(netInfo *newNetwork){
 	_ssidSet = true;
 	_passSet = true;
 	_mqttSet = true;
+	_mqttUserSet = true;
 }
 
 //return the current netInfo state
@@ -529,6 +582,15 @@ const char* ESPHelper::getMQTTIP(){
 void ESPHelper::setMQTTIP(const char* mqttIP){ 
 	_currentNet.mqtt = mqttIP;
 	_mqttSet = true;
+}
+
+//set a new MQTT server IP - does not automatically disconnect from current network/server if already connected
+void ESPHelper::setMQTTIP(const char* mqttIP, const char* mqttUser, const char* mqttPass){
+	_currentNet.mqtt = mqttIP;
+	_currentNet.mqtt_user = mqttUser;
+	_currentNet.mqtt_pass = mqttPass;
+	_mqttSet = true;
+	_mqttUserSet = true;
 }
 
 

@@ -52,12 +52,15 @@ enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 #endif
 
 struct netInfo {
-	const char* name;		//nickname for netinfo
-	const char* mqtt;		//mqtt ip address
-	const char* ssid;		//ssid for network
-	const char* pass;		//pass for network (can be empty string)
-	const char* hostname;	//hostname for device
+
+	const char* name;
+	const char* mqttHost;
+	const char* mqttUser;
+	const char* mqttPass;
+	const char* ssid;
+	const char* pass;
 };
+
 typedef struct netInfo netInfo;
 
 struct subscription{
@@ -83,7 +86,8 @@ public:
 	ESPHelper(netInfo *startingNet);
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
-	ESPHelper(const char *ssid, const char *pass);
+
+	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass);
 
 	bool begin();
 	void end();
@@ -114,6 +118,7 @@ public:
 
 	const char* getMQTTIP();
 	void setMQTTIP(const char *mqttIP);
+	void setMQTTIP(const char *mqttIP, const char *mqttUser, const char *mqttPass);
 
 	int getMQTTQOS();
 	void setMQTTQOS(int qos);
@@ -157,6 +162,8 @@ private:
 	bool _ssidSet = false;
 	bool _passSet = false;
 	bool _mqttSet = false;
+	bool _mqttUserSet = false;
+  bool _mqttPassSet = false;
 
 	bool _useOTA = false;
 	bool _OTArunning = false;

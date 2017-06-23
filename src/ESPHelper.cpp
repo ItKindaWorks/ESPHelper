@@ -144,7 +144,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 }
 
 //initializer with single network information
-ESPHelper::ESPHelper(const char *ssid, const char *pass){	
+ESPHelper::ESPHelper(const char *ssid, const char *pass){
     WiFi.softAPdisconnect();
 	WiFi.disconnect();
 	_currentNet.ssid = ssid;
@@ -186,7 +186,12 @@ bool ESPHelper::begin(){
 		else{WiFi.begin(_currentNet.ssid);}
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
-		if(_mqttSet){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
+		if(_mqttSet){
+			client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);
+			if(_mqttCallbackSet){
+				client.setCallback(_mqttCallback);
+			}
+		}
 
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
 		else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
@@ -368,22 +373,22 @@ void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 }
 
 //set the callback function for MQTT
-	//true on: mqtt has been initialized
-	//false on: mqtt not been inistialized
-bool ESPHelper::setMQTTCallback(MQTT_CALLBACK_SIGNATURE){	
+void ESPHelper::setMQTTCallback(MQTT_CALLBACK_SIGNATURE){
+	_mqttCallback = callback;	
 	if(_hasBegun && _mqttSet) {
-		client.setCallback(callback);
-		return true;
+		client.setCallback(_mqttCallback);
 	}
-	else{
-		return false;
-	}
+	_mqttCallbackSet = true;
 }
 
 //legacy funtion - here for compatibility
 bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){
-	return setMQTTCallback(callback);
+	setMQTTCallback(callback);
+	return true;
 }
+
+
+
 
 //sets a custom function to run when connection to wifi is established
 void ESPHelper::setWifiCallback(void (*callback)()){

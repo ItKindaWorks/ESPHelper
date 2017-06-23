@@ -65,8 +65,8 @@ void setup() {
 	//setup the rest of ESPHelper
 	myESP.enableHeartbeat(blinkPin);	//comment out to disable the heartbeat
 	myESP.addSubscription(relayTopic);	//add the relay topic to the subscription list
+	myESP.setMQTTCallback(callback);
 	myESP.begin();
-	myESP.setCallback(callback);
 	
 
 	pinMode(relayPin, OUTPUT);

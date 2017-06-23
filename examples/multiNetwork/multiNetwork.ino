@@ -62,9 +62,8 @@ void setup() {
 	// myESP.setHopping(false);	//uncomment to prevent hopping between networks in network array
 
 	myESP.addSubscription("/test");
-
+	myESP.setMQTTCallback(callback);
 	myESP.begin();
-	myESP.setCallback(callback);   //can only set callback after begin method. Calling before begin() will not set the callback (return false)
 	
 	Serial.println("Initialization Finished.");
 }

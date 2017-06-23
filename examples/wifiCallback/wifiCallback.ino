@@ -39,9 +39,9 @@ void setup() {
 
 	myESP.addSubscription("/test");
 	myESP.setWifiCallback(wifiCallback);
-
+	myESP.setMQTTCallback(MQTTcallback);
 	myESP.begin();
-	myESP.setMQTTCallback(MQTTcallback);   //can only set callback after begin method. Calling before begin() will not set the callback (return false)
+	
 	
 	Serial.println("Initialization Finished.");
 }

@@ -74,11 +74,11 @@ void setup() {
 	//add a subscription to the relatTopic
 	myESP.addSubscription(relayTopic);
 
+	//add in the MQTT callback
+	myESP.setMQTTCallback(callback);
+
 	//start ESPHelper
 	myESP.begin();
-
-	//add in the MQTT callback
-	myESP.setCallback(callback);
 
 	//set the button as an input
  	pinMode(buttonPin, INPUT);

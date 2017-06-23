@@ -67,11 +67,11 @@ void setup() {
 	//subscribe to the button topic (this allows outside control of the state of the switch)
 	myESP.addSubscription(buttonTopic);	
 
+	//setup the mqtt callback function
+	myESP.setMQTTCallback(callback);
+
 	//start ESPHelper
 	myESP.begin();
-
-	//setup the mqtt callback function
-	myESP.setCallback(callback);
 
 	//set the button pin as an input
  	pinMode(buttonPin, INPUT);

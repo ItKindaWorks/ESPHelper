@@ -123,9 +123,9 @@ void setup() {
 	myESP.OTA_setHostnameWithVersion(hostnameStr);
 
 	//subscribe to the lighttopic
+	myESP.setMQTTCallback(callback);
 	myESP.addSubscription(lightTopic);
 	myESP.begin();
-	myESP.setCallback(callback);
 }
 
 

@@ -34,7 +34,7 @@
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-#define VERSION "1-2-8"
+#define VERSION "1-3-0"
 
 #define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
 
@@ -67,6 +67,8 @@ struct subscription{
 	const char* topic;
 };
 typedef struct subscription subscription;
+
+
 
 
 class ESPHelper{
@@ -104,7 +106,8 @@ public:
 	void publish(const char* topic, const char* payload, bool retain);
 
 	bool setCallback(MQTT_CALLBACK_SIGNATURE);
-	bool setMQTTCallback(MQTT_CALLBACK_SIGNATURE);
+	void setMQTTCallback(MQTT_CALLBACK_SIGNATURE);
+	// void defaultCallback(char*, uint8_t*, unsigned int){};
 
 	void setWifiCallback(void (*callback)());
 
@@ -157,6 +160,10 @@ private:
 	String _clientName;
 
 	void (*_wifiCallback)();
+
+
+	std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;
+	bool _mqttCallbackSet = false;
 
 	int _connectionStatus = NO_CONNECTION;
 

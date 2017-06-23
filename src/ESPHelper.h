@@ -104,6 +104,9 @@ public:
 	void publish(const char* topic, const char* payload, bool retain);
 
 	bool setCallback(MQTT_CALLBACK_SIGNATURE);
+	bool setMQTTCallback(MQTT_CALLBACK_SIGNATURE);
+
+	void setWifiCallback(void (*callback)());
 
 	void reconnect();
 
@@ -153,6 +156,8 @@ private:
 
 	String _clientName;
 
+	void (*_wifiCallback)();
+
 	int _connectionStatus = NO_CONNECTION;
 
 	uint8_t _netCount = 0;
@@ -162,7 +167,7 @@ private:
 	bool _passSet = false;
 	bool _mqttSet = false;
 	bool _mqttUserSet = false;
-  bool _mqttPassSet = false;
+  	bool _mqttPassSet = false;
 
 	bool _useOTA = false;
 	bool _OTArunning = false;

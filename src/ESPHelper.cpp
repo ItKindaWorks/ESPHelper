@@ -393,6 +393,7 @@ bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){
 //sets a custom function to run when connection to wifi is established
 void ESPHelper::setWifiCallback(void (*callback)()){
 	_wifiCallback = callback;
+	_wifiCallbackSet = true;
 }
 
 //attempts to connect to wifi & mqtt server if not connected
@@ -417,7 +418,7 @@ void ESPHelper::reconnect() {
 		// make sure we are connected to WIFI before attemping to reconnect to MQTT
 		//----note---- maybe want to reset tryCount whenever we succeed at getting wifi connection?
 		if(WiFi.status() == WL_CONNECTED){
-			if(_connectionStatus < WIFI_ONLY){	//if the wifi previously wasnt connected but now is, run the callback
+			if(_connectionStatus < WIFI_ONLY && _wifiCallbackSet){	//if the wifi previously wasnt connected but now is, run the callback
 				_wifiCallback();
 			}
 			debugPrintln("\n---WIFI Connected!---");
@@ -478,7 +479,7 @@ int ESPHelper::setConnectionStatus(){
 	if(_connectionStatus != BROADCAST){
 
 		if(WiFi.status() == WL_CONNECTED){
-			if(_connectionStatus < WIFI_ONLY){	//if the wifi previously wasnt connected but now is, run the callback
+			if(_connectionStatus < WIFI_ONLY && _wifiCallbackSet){	//if the wifi previously wasnt connected but now is, run the callback
 				_wifiCallback();
 			}
 			returnVal = WIFI_ONLY;

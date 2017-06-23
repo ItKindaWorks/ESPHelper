@@ -160,6 +160,7 @@ private:
 	String _clientName;
 
 	void (*_wifiCallback)();
+	bool _wifiCallbackSet = false;
 
 
 	std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;

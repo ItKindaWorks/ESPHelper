@@ -2,7 +2,7 @@
     "name": "ESPHelper",
     "keywords": "mqtt, iot, esp8266",
     "description": "A library to make using WiFi & MQTT on the ESP8266 easy.",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "examples": "examples/*/*.ino",
     "frameworks": "arduino",
     "platforms": [

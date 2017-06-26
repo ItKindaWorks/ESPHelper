@@ -428,7 +428,7 @@ void ESPHelper::reconnect() {
 			if(_mqttSet){
 
 				int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
-				while (!client.connected() && timeout < 10) {
+				while (!client.connected() && timeout < 2) {
 					debugPrint("Attemping MQTT connection");
 
 					

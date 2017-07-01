@@ -37,6 +37,7 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
+#include <WiFiClientSecure.h>
 
 
 #include "Metro.h"
@@ -45,9 +46,9 @@
 
 #define VERSION "1-3-5"
 
-#define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
+#define DEFAULT_QOS 1;	//at least once - devices are guarantee to get a message.
 
-// #define DEBUG
+#define DEBUG
 
 enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 
@@ -101,6 +102,8 @@ public:
 
 	bool begin();
 	void end();
+
+	void useSecureClient(const char* fingerprint);
 
 	void broadcastMode(const char* ssid, const char* password, const IPAddress ip);
 	void disableBroadcast();
@@ -165,6 +168,10 @@ private:
 	Metro reconnectMetro = Metro(500);
 
 	WiFiClient wifiClient;
+	WiFiClientSecure wifiClientSecure;
+	const char* _fingerprint;
+	bool _useSecureClient = false;
+
 
 	String _clientName;
 

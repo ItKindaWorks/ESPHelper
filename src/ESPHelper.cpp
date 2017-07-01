@@ -21,12 +21,12 @@
 
 
 #include "ESPHelper.h"
-
+#include <WiFiClientSecure.h>
 //empy initializer 
 ESPHelper::ESPHelper(){	}
 
 //initializer with single netInfo network
-ESPHelper::ESPHelper(netInfo *startingNet){	
+ESPHelper::ESPHelper(netInfo *startingNet){
 	WiFi.softAPdisconnect();
 	WiFi.disconnect();	
 	_currentNet = *startingNet;
@@ -87,7 +87,7 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 
 }
 
-//initializer with single network information
+//initializer with single network information and MQTT broker
 ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
     WiFi.softAPdisconnect();
 	WiFi.disconnect();
@@ -143,7 +143,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 	else{_mqttPassSet = true;}
 }
 
-//initializer with single network information
+//initializer with single network information (no MQTT)
 ESPHelper::ESPHelper(const char *ssid, const char *pass){
     WiFi.softAPdisconnect();
 	WiFi.disconnect();
@@ -187,14 +187,20 @@ bool ESPHelper::begin(){
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
 		if(_mqttSet){
-			client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);
+			if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+			else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
+			
 			if(_mqttCallbackSet){
 				client.setCallback(_mqttCallback);
 			}
 		}
 
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
-		else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
+		else{
+			if(_useSecureClient){client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClientSecure);}
+			else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
+			
+		}
 
 		
 		//ota event handlers
@@ -236,6 +242,15 @@ void ESPHelper::end(){
 		delay(10);
 		timeout++;
 	}
+}
+
+void ESPHelper::useSecureClient(const char* fingerprint){
+	_fingerprint = fingerprint;
+	if(setConnectionStatus() == FULL_CONNECTION){
+		_connectionStatus = WIFI_ONLY;
+	}
+	// wifiClientToUse = (Client*)&wifiClientSecure;
+	_useSecureClient = true;
 }
 
 void ESPHelper::broadcastMode(const char* ssid, const char* password, const IPAddress ip){
@@ -400,13 +415,12 @@ void ESPHelper::setWifiCallback(void (*callback)()){
 void ESPHelper::reconnect() {		
 	static int tryCount = 0;
 
-	if(reconnectMetro.check() && _connectionStatus != BROADCAST){
-		debugPrintln("Attempting Conn...");
+	if(reconnectMetro.check() && _connectionStatus != BROADCAST && setConnectionStatus() != FULL_CONNECTION){
+		debugPrintln("Attempting WiFi Connection...");
 		//attempt to connect to the wifi if connection is lost
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
 			// _connected = false;
-			debugPrint(".");
 			tryCount++;
 			if(tryCount == 20){
 				changeNetwork();
@@ -428,8 +442,9 @@ void ESPHelper::reconnect() {
 			if(_mqttSet){
 
 				int timeout = 0;	//allow a max of 10 mqtt connection attempts before timing out
-				while (!client.connected() && timeout < 2) {
-					debugPrint("Attemping MQTT connection");
+				while (!client.connected() && timeout < 3) {
+					debugPrintln("Attemping MQTT connection");
+					if(_useSecureClient){debugPrintln("Using Secure Connection...");}
 
 					
 					int connected = 0;
@@ -443,6 +458,16 @@ void ESPHelper::reconnect() {
 					//if connected, subscribe to the topic(s) we want to be notified about
 					if (connected) {
 						debugPrintln(" -- Connected");
+
+						if(_useSecureClient){
+							if (wifiClientSecure.verify(_fingerprint, _currentNet.mqttHost)) {
+								debugPrintln("certificate matches");
+							} else {
+								debugPrintln("certificate doesn't match");
+								return;
+							}
+						}
+
 						// _connected = true;
 						_connectionStatus = FULL_CONNECTION;
 						resubscribe();
@@ -483,6 +508,9 @@ int ESPHelper::setConnectionStatus(){
 				_wifiCallback();
 			}
 			returnVal = WIFI_ONLY;
+
+			// debugPrint("MQTT Conn Status: ");
+			// debugPrintln(client.connected());
 			if(client.connected()){
 				returnVal = FULL_CONNECTION;
 			}

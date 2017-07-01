@@ -24,17 +24,26 @@
 #ifndef ESP_HELPER_H
 #define ESP_HELPER_H
 
-#include <ESP8266mDNS.h>
+#ifdef ESP8266
+	#include <ESP8266WiFi.h>
+	#include <ESP8266mDNS.h>
+#endif
+
+#ifdef ESP32
+	#include <ESPmDNS.h>
+	#include <WiFi.h>
+#endif
+
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-
 #include <PubSubClient.h>
-#include <ESP8266WiFi.h>
+
+
 #include "Metro.h"
 
 #define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
 
-#define VERSION "1-3-1"
+#define VERSION "1-3-5"
 
 #define DEFAULT_QOS 1;	//at least once - devices are garunteed to get a message.
 
@@ -162,8 +171,12 @@ private:
 	void (*_wifiCallback)();
 	bool _wifiCallbackSet = false;
 
-
-	std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;
+	#ifdef ESP8266
+		std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;
+	#endif
+	#ifdef ESP32
+		void(*_mqttCallback)(char*, uint8_t*, unsigned int) ;
+	#endif
 	bool _mqttCallbackSet = false;
 
 	int _connectionStatus = NO_CONNECTION;

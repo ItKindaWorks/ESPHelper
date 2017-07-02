@@ -21,7 +21,7 @@
 
 
 #include "ESPHelper.h"
-
+#include <WiFiClientSecure.h>
 //empy initializer 
 ESPHelper::ESPHelper(){	}
 
@@ -114,7 +114,7 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 
 }
 
-//initializer with single network information
+//initializer with single network information and MQTT broker
 ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
 
 	//diconnect from and previous wifi networks
@@ -190,7 +190,7 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 	else{_mqttPassSet = true;}
 }
 
-//initializer with single network information
+//initializer with single network information (no MQTT)
 ESPHelper::ESPHelper(const char *ssid, const char *pass){
 
 	//diconnect from and previous wifi networks
@@ -241,16 +241,24 @@ bool ESPHelper::begin(){
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
 		if(_mqttSet){
-			client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);
-
-			//if the callback has been set also set that for pubsubclient (this can also be set later on)
+			//make mqtt client use either the secure or non-secure wifi client depending on the setting
+			if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+			else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
+			
+			//set the mqtt message callback if needed
 			if(_mqttCallbackSet){
 				client.setCallback(_mqttCallback);
 			}
 		}
 
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
-		else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
+		else{
+			//make mqtt client use either the secure or non-secure wifi client depending on the setting
+			//(this shouldnt be needed if making a dummy connection since the idea would be that there wont be mqtt in this case)
+			if(_useSecureClient){client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClientSecure);}
+			else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
+			
+		}
 
 		
 		//ota event handlers
@@ -300,6 +308,24 @@ void ESPHelper::end(){
 		delay(10);
 		timeout++;
 	}
+}
+
+//enables the use of a secure (SSL) connection to an MQTT broker. 
+//(Make sure your mqtt port is set to one expecting a secure connection)
+void ESPHelper::useSecureClient(const char* fingerprint){
+	_fingerprint = fingerprint;
+
+	//fall back to wifi only connection if it was previously at full connection 
+	//(because we just changed how the device is going to connect to the mqtt broker)
+	if(setConnectionStatus() == FULL_CONNECTION){
+		_connectionStatus = WIFI_ONLY;
+	}
+
+	//if use of secure connection is set retroactivly (after begin), then re-instantiate client
+	if(_hasBegun){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+	
+	//flag use of secure client
+	_useSecureClient = true;
 }
 
 //enables and sets up broadcast mode rather than station mode. This allows users to create a network from the ESP
@@ -453,6 +479,11 @@ bool ESPHelper::removeSubscription(const char* topic){
 	return returnVal;
 }
 
+//manually unsubscribes from a topic (This is basically just a wrapper for the pubsubclient function)
+bool ESPHelper::unsubscribe(const char* topic){
+	return client.unsubscribe(topic);
+}
+
 //publish to a specified topic
 void ESPHelper::publish(const char* topic, const char* payload){		
 	publish(topic, payload, false);
@@ -474,7 +505,7 @@ void ESPHelper::setMQTTCallback(MQTT_CALLBACK_SIGNATURE){
 	_mqttCallbackSet = true;
 }
 
-//legacy funtion - here for compatibility. Sets the callback function for MQTT
+//legacy funtion - here for compatibility. Sets the callback function for MQTT (see function above)
 bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){
 	setMQTTCallback(callback);
 	return true;
@@ -493,11 +524,8 @@ void ESPHelper::setWifiCallback(void (*callback)()){
 void ESPHelper::reconnect() {		
 	static int tryCount = 0;
 
-	//only attempt reconnects every so often. This keeps down on the blocking time of loop if the connection is lost
-	//also make sure that the system is not set to broadcast mode since in broadcast mode this reconnect code does not apply
-	if(reconnectMetro.check() && _connectionStatus != BROADCAST){
-		debugPrintln("Attempting Conn...");
-
+	if(reconnectMetro.check() && _connectionStatus != BROADCAST && setConnectionStatus() != FULL_CONNECTION){
+		debugPrintln("Attempting WiFi Connection...");
 		//attempt to connect to the wifi if connection is lost
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
@@ -548,11 +576,24 @@ void ESPHelper::reconnect() {
 					//if connected, subscribe to the topic(s) we want to be notified about
 					if (connected) {
 						debugPrintln(" -- Connected");
+
+						//if using https, verify the fingerprint of the server before setting full connection (return on fail)
+						if(_useSecureClient){
+							if (wifiClientSecure.verify(_fingerprint, _currentNet.mqttHost)) {
+								debugPrintln("Certificate Matches - SUCESS");
+							} else {
+								debugPrintln("Certificate Doesn't Match - FAIL");
+								return;
+							}
+						}
+
 						_connectionStatus = FULL_CONNECTION;
 						resubscribe();
 						timeout = 0;
 					}
-					else{debugPrintln(" -- Failed");}
+					else{
+						debugPrintln(" -- Failed");
+					}
 					timeout++;
 
 				}

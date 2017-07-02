@@ -1,5 +1,5 @@
 # ESPHelper
-A library to make using WiFi and MQTT on the ESP8266 easy.
+A library to make using WiFi and MQTT on the ESP8266 and ESP32 easy.
 
 I wrote this library to help with my own home automation projects. It handles connecting (and reconnecting 
 when the connection is lost) for both a wifi network and MQTT broker. When reconnecting it automatically 
@@ -20,7 +20,7 @@ This library does requre the use of these libraries (so make sure they're instal
  * 
  [pubsubclient](https://github.com/knolleary/pubsubclient)
 
- In addition to those libraries, make sure that you have the ESP8266 core installed. That can be found [here](https://github.com/esp8266/Arduino)
+ In addition to those libraries, make sure that you have the ESP8266 and/or ESP32 core installed. That can be found [here](https://github.com/esp8266/Arduino)
 
 Useful Methods:
 ---------------

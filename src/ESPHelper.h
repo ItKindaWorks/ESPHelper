@@ -108,6 +108,7 @@ public:
 	bool subscribe(const char* topic, int qos);
 	bool addSubscription(const char* topic);
 	bool removeSubscription(const char* topic);
+	bool unsubscribe(const char* topic);
 
 	void publish(const char* topic, const char* payload);
 	void publish(const char* topic, const char* payload, bool retain);

@@ -241,9 +241,11 @@ bool ESPHelper::begin(){
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
 		if(_mqttSet){
+			//make mqtt client use either the secure or non-secure wifi client depending on the setting
 			if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
 			else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
 			
+			//set the mqtt message callback if needed
 			if(_mqttCallbackSet){
 				client.setCallback(_mqttCallback);
 			}
@@ -251,6 +253,8 @@ bool ESPHelper::begin(){
 
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
 		else{
+			//make mqtt client use either the secure or non-secure wifi client depending on the setting
+			//(this shouldnt be needed if making a dummy connection since the idea would be that there wont be mqtt in this case)
 			if(_useSecureClient){client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClientSecure);}
 			else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
 			
@@ -306,11 +310,21 @@ void ESPHelper::end(){
 	}
 }
 
+//enables the use of a secure (SSL) connection to an MQTT broker. 
+//(Make sure your mqtt port is set to one expecting a secure connection)
 void ESPHelper::useSecureClient(const char* fingerprint){
 	_fingerprint = fingerprint;
+
+	//fall back to wifi only connection if it was previously at full connection 
+	//(because we just changed how the device is going to connect to the mqtt broker)
 	if(setConnectionStatus() == FULL_CONNECTION){
 		_connectionStatus = WIFI_ONLY;
 	}
+
+	//if use of secure connection is set retroactivly (after begin), then re-instantiate client
+	if(_hasBegun){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+	
+	//flag use of secure client
 	_useSecureClient = true;
 }
 
@@ -463,6 +477,11 @@ bool ESPHelper::removeSubscription(const char* topic){
 	return returnVal;
 }
 
+//manually unsubscribes from a topic (This is basically just a wrapper for the pubsubclient function)
+bool ESPHelper::unsubscribe(const char* topic){
+	return client.unsubscribe(topic);
+}
+
 //publish to a specified topic
 void ESPHelper::publish(const char* topic, const char* payload){		
 	publish(topic, payload, false);
@@ -484,7 +503,7 @@ void ESPHelper::setMQTTCallback(MQTT_CALLBACK_SIGNATURE){
 	_mqttCallbackSet = true;
 }
 
-//legacy funtion - here for compatibility. Sets the callback function for MQTT
+//legacy funtion - here for compatibility. Sets the callback function for MQTT (see function above)
 bool ESPHelper::setCallback(MQTT_CALLBACK_SIGNATURE){
 	setMQTTCallback(callback);
 	return true;
@@ -556,23 +575,22 @@ void ESPHelper::reconnect() {
 					if (connected) {
 						debugPrintln(" -- Connected");
 
+						//if using https, verify the fingerprint of the server before setting full connection (return on fail)
 						if(_useSecureClient){
 							if (wifiClientSecure.verify(_fingerprint, _currentNet.mqttHost)) {
-								debugPrintln("certificate matches");
+								debugPrintln("Certificate Matches - SUCESS");
 							} else {
-								debugPrintln("certificate doesn't match");
+								debugPrintln("Certificate Doesn't Match - FAIL");
 								return;
 							}
 						}
 
-						// _connected = true;
 						_connectionStatus = FULL_CONNECTION;
 						resubscribe();
 						timeout = 0;
 					}
 					else{
 						debugPrintln(" -- Failed");
-						// _connected = false;
 					}
 					timeout++;
 

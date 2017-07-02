@@ -8,31 +8,42 @@
 
 ESPHelper	KEYWORD1
 netInfo	KEYWORD1
+subscription 	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
 begin 	KEYWORD2
-reconnect 	KEYWORD2
 end 	KEYWORD2
+useSecureClient 	KEYWORD2
+broadcastMode 	KEYWORD2
+disableBroadcast 	KEYWORD2
 loop 	KEYWORD2
-publish 	KEYWORD2
 subscribe 	KEYWORD2
 addSubscription 	KEYWORD2
-unsubscribe 	KEYWORD2
 removeSubscription 	KEYWORD2
+unsubscribe 	KEYWORD2
+publish 	KEYWORD2
 setCallback	KEYWORD2
+setMQTTCallback 	KEYWORD2
+setWifiCallback 	KEYWORD2
+reconnect 	KEYWORD2
+updateNetwork 	KEYWORD2
 getSSID	KEYWORD2
 serSSID	KEYWORD2
 getPASS	KEYWORD2
 setPass	KEYWORD2
 getMQTTIP	KEYWORD2
 setMQTTIP	KEYWORD2
+getMQTTQOS 	KEYWORD2
+setMQTTQOS 	KEYWORD2
 getIP	KEYWORD2
+getIPAddress 	KEYWORD2
 getNetInfo	KEYWORD2
 setNetInfo	KEYWORD2
 setHopping	KEYWORD2
+listSubscriptions
 heartbeat 	KEYWORD2
 enableHeartbeat	KEYWORD2
 disableHeartbeat	KEYWORD2
@@ -41,7 +52,12 @@ OTA_disable	KEYWORD2
 OTA_begin	KEYWORD2
 OTA_setPassword	KEYWORD2
 OTA_setHostname	KEYWORD2
+OTA_setHostnameWithVersion 	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
+
+MAX_SUBSCRIPTIONS 	LITERAL1
+DEFAULT_QOS 	LITERAL1
+VERSION 	LITERAL1

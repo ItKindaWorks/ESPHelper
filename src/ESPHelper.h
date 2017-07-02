@@ -138,6 +138,7 @@ public:
 	void setMQTTQOS(int qos);
 
 	String getIP();
+	IPAddress getIPAddress();
 
 	int getStatus();
 

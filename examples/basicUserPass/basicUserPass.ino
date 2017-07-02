@@ -27,7 +27,7 @@
 
 #define MQTT_HOST       "MQTT_HOST"
 #define MQTT_USERNAME   "YOUR_MQTT_USERNAME"
-#define MQTT_PASS       "YOUR_MQTT_KEY"
+#define MQTT_PASS       "YOUR_MQTT_PASSWORD"
 #define MQTT_PORT       1883
 #define MQTT_TOPIC      "/test"
 
@@ -39,7 +39,7 @@ Metro postMetro = Metro(5000);
 netInfo homeNet = { .mqttHost = MQTT_HOST,
                     .mqttUser = MQTT_USERNAME,   
                     .mqttPass = MQTT_PASS,
-                    .mqttPort = 1883,                   //default port for MQTT is 1883 - only chance if needed.
+                    .mqttPort = MQTT_PORT,                   //default port for MQTT is 1883 - only change if needed.
                     .ssid = SSID, 
                     .pass = NETWORK_PASS};
 

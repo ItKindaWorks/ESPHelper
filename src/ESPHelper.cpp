@@ -252,7 +252,7 @@ bool ESPHelper::begin(){
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
 		else{
 			if(_useSecureClient){client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClientSecure);}
-		else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
+			else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
 			
 		}
 
@@ -311,7 +311,6 @@ void ESPHelper::useSecureClient(const char* fingerprint){
 	if(setConnectionStatus() == FULL_CONNECTION){
 		_connectionStatus = WIFI_ONLY;
 	}
-	// wifiClientToUse = (Client*)&wifiClientSecure;
 	_useSecureClient = true;
 }
 

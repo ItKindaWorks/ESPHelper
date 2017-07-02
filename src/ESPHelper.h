@@ -42,16 +42,9 @@
 
 #include "Metro.h"
 
-#define MAX_SUBSCRIPTIONS 25	//feel free to change this if you need more subsciptions
-
-#define VERSION "1-3-5"
-
-#define DEFAULT_QOS 1;	//at least once - devices are guarantee to get a message.
+#define VERSION "1-4-0"
 
 #define DEBUG
-
-enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
-
 
 #ifdef DEBUG
 	#define debugPrint(x) Serial.print(x) //debug on
@@ -61,6 +54,15 @@ enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 	#define debugPrintln(x) {;} //debug off
 #endif
 
+//Maximum number of subscriptions that can be auto-subscribed
+//feel free to change this if you need more subsciptions
+#define MAX_SUBSCRIPTIONS 25	
+
+#define DEFAULT_QOS 1;	//at least once - devices are guarantee to get a message.
+
+
+enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
+
 struct netInfo {
 	const char* mqttHost;
 	const char* mqttUser;
@@ -69,8 +71,8 @@ struct netInfo {
 	const char* ssid;
 	const char* pass;
 };
-
 typedef struct netInfo netInfo;
+
 
 struct subscription{
 	bool isUsed = false;
@@ -81,18 +83,11 @@ typedef struct subscription subscription;
 
 
 
+
+
 class ESPHelper{
 
-public:
-	int16_t _hoppingAllowed = false;
-	bool _fullyConnected = false;
-
-	netInfo _currentNet;
-	netInfo *_currentNetwork;
-
-	
-	PubSubClient client;
-
+public:	
 	ESPHelper();
 	ESPHelper(netInfo *startingNet);
 	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
@@ -119,7 +114,6 @@ public:
 
 	bool setCallback(MQTT_CALLBACK_SIGNATURE);
 	void setMQTTCallback(MQTT_CALLBACK_SIGNATURE);
-	// void defaultCallback(char*, uint8_t*, unsigned int){};
 
 	void setWifiCallback(void (*callback)());
 
@@ -166,6 +160,10 @@ public:
 
 private:
 
+	netInfo _currentNet;
+	
+	PubSubClient client;
+
 	Metro reconnectMetro = Metro(500);
 
 	WiFiClient wifiClient;
@@ -200,6 +198,8 @@ private:
 
 	bool _useOTA = false;
 	bool _OTArunning = false;
+
+	bool _hoppingAllowed = false;
 
 	bool _hasBegun = false;
 

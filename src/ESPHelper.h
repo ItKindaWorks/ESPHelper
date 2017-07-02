@@ -44,7 +44,7 @@
 
 #define VERSION "1-4-0"
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 	#define debugPrint(x) Serial.print(x) //debug on

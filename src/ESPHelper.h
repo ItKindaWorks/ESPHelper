@@ -42,7 +42,7 @@
 
 #include "Metro.h"
 
-#define VERSION "1-4-0"
+#define VERSION "1-4-2"
 
 // #define DEBUG
 
@@ -138,8 +138,7 @@ public:
 	ESPHelper(const char *ssid, const char *pass);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
 
-	void init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
-	void validateConfig();
+	
 
 	bool begin(const netInfo *startingNet);
 	bool begin(const char *ssid, const char *pass, const char *mqttIP);
@@ -211,6 +210,19 @@ public:
 
 private:
 
+	void init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
+	void validateConfig();
+
+	void changeNetwork();
+
+	String macToStr(const uint8_t* mac);
+
+	bool checkParams();
+
+	void resubscribe();
+
+	int setConnectionStatus();
+
 	netInfo _currentNet;
 	
 	PubSubClient client;
@@ -267,15 +279,7 @@ private:
 
 	IPAddress _apIP = IPAddress(192, 168, 1, 1);
 
-	void changeNetwork();
-
-	String macToStr(const uint8_t* mac);
-
-	bool checkParams();
-
-	void resubscribe();
-
-	int setConnectionStatus();
+	
 };
 
 #endif

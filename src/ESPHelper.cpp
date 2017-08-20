@@ -59,19 +59,16 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	_netCount = netCount;
 	_currentIndex = startIndex;
 
-	netInfo* tmp = netList[constrain(_currentIndex, 0, _netCount)];
-	init(tmp->ssid, tmp->pass, tmp->mqttHost, tmp->mqttUser, tmp->mqttPass, tmp->mqttPort);
-
 	//enable hopping since we have an array of networks to use
 	_hoppingAllowed = true;
 
 	//disable ota by default
 	_useOTA = false;
 
-	//validate various bits of network/MQTT info
-	validateConfig();
-
+	netInfo* tmp = netList[constrain(_currentIndex, 0, _netCount)];
+	init(tmp->ssid, tmp->pass, tmp->mqttHost, tmp->mqttUser, tmp->mqttPass, tmp->mqttPort);
 }
+
 
 //initialize the netinfo data and reset wifi. set hopping and OTA to off
 void ESPHelper::init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
@@ -89,9 +86,6 @@ void ESPHelper::init(const char *ssid, const char *pass, const char *mqttIP, con
 	//validate various bits of network/MQTT info
 	validateConfig();
 }
-
-
-
 
 void ESPHelper::validateConfig(){
 	//network pass

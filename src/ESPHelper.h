@@ -64,14 +64,57 @@
 enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
 
 struct netInfo {
+	const char* name;
 	const char* mqttHost;
 	const char* mqttUser;
 	const char* mqttPass;
 	int mqttPort;
 	const char* ssid;
 	const char* pass;
+	const char* otaPassword;
+	const char* hostname;
+	
+	netInfo() : mqttPort(1883) {}
+	netInfo(const char* _name,
+			const char* _mqttHost,  
+			const char* _ssid,
+			const char* _pass) : 
+			name(_name),
+			mqttHost(_mqttHost), 
+			ssid(_ssid),
+			pass(_pass),
+			mqttPort(1883) {}
+	netInfo(const char* _mqttHost, 
+			const char* _mqttUser, 
+			const char* _mqttPass, 
+			int _mqttPort, 
+			const char* _ssid,
+			const char* _pass) : 
+			mqttHost(_mqttHost), 
+			mqttUser(_mqttUser),
+			mqttPass(_mqttPass),
+			mqttPort(_mqttPort),
+			ssid(_ssid),
+			pass(_pass) {}
+
+	netInfo(const char* _mqttHost, 
+			const char* _mqttUser, 
+			const char* _mqttPass, 
+			int _mqttPort, 
+			const char* _ssid,
+			const char* _pass,
+			const char* _otaPassword,
+			const char* _hostname) : 
+			mqttHost(_mqttHost), 
+			mqttUser(_mqttUser),
+			mqttPass(_mqttPass),
+			mqttPort(_mqttPort),
+			ssid(_ssid),
+			pass(_pass),
+			otaPassword(_otaPassword),
+			hostname(_hostname) {}
 };
-typedef struct netInfo netInfo;
+// typedef struct netInfo netInfo;
 
 
 struct subscription{
@@ -89,12 +132,19 @@ class ESPHelper{
 
 public:	
 	ESPHelper();
-	ESPHelper(netInfo *startingNet);
-	ESPHelper(netInfo **startingNet, uint8_t netCount, uint8_t startIndex = 0);
+	ESPHelper(const netInfo *startingNet);
+	ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex = 0);	//remember netInfo *netList[] is really netinfo**
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
 	ESPHelper(const char *ssid, const char *pass);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
 
+	void init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
+	void validateConfig();
+
+	bool begin(const netInfo *startingNet);
+	bool begin(const char *ssid, const char *pass, const char *mqttIP);
+	bool begin(const char *ssid, const char *pass);
+	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
 	bool begin();
 	void end();
 

@@ -23,60 +23,44 @@
 #include "ESPHelper.h"
 #include <WiFiClientSecure.h>
 //empy initializer 
-ESPHelper::ESPHelper(){	}
-
-//initializer with single netInfo network
-ESPHelper::ESPHelper(netInfo *startingNet){	
-
-	//diconnect from and previous wifi networks
-	WiFi.softAPdisconnect();
-	WiFi.disconnect();	
-
-	//setup current network information
-	_currentNet = *startingNet;
-
-	//validate various bits of network/MQTT info
-
-	//network pass
-	if(_currentNet.pass[0] == '\0'){_passSet = false;}
-	else{_passSet = true;}
-
-	//ssid
-	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
-	else{_ssidSet = true;}	
-
-	//mqtt host
-	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
-	else{_mqttSet = true;}
-
-	//mqtt port
-  	if(_currentNet.mqttPort == 0){_currentNet.mqttPort = 1883;}
-  
-  	//mqtt username
-	if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
-	else{_mqttUserSet = true;}
-
-	//mqtt password
-	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
-	else{_mqttPassSet = true;}
-
-	//disable hopping on single network
-	_hoppingAllowed = false;
-
-	//disable ota by default
-	_useOTA = false;
+ESPHelper::ESPHelper(){
+	init("", "", "", "", "", 1883);
 }
 
 
+//Yes yes I know how messy it is to have all these different constructors that all call init AND
+//have a bunch of overloaded init methods that do the same thing more or less but this lets me
+//instantiate a blank ESPHelper globally and then in setup configure it without having to use new
+
+
+//initializer with single netInfo network
+ESPHelper::ESPHelper(const netInfo *startingNet){	
+	init(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort);
+}
+
+//initializer with single network information and MQTT broker
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
+	init(ssid, pass, mqttIP, "", "", 1883);
+}
+
+//initializer with single network information (MQTT user/pass)
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
+	init(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort);
+}
+
+//initializer with single network information (no MQTT)
+ESPHelper::ESPHelper(const char *ssid, const char *pass){
+	init(ssid, pass, "", "", "", 1883);	
+}
+
 //initializer with netInfo array and index
 ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){	
-
-	//diconnect from and previous wifi networks
-	WiFi.softAPdisconnect();
-	WiFi.disconnect();	
 	_netList = netList;
 	_netCount = netCount;
 	_currentIndex = startIndex;
+
+	netInfo* tmp = netList[constrain(_currentIndex, 0, _netCount)];
+	init(tmp->ssid, tmp->pass, tmp->mqttHost, tmp->mqttUser, tmp->mqttPass, tmp->mqttPort);
 
 	//enable hopping since we have an array of networks to use
 	_hoppingAllowed = true;
@@ -84,73 +68,13 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	//disable ota by default
 	_useOTA = false;
 
-	//select the network from the array that the user specfied
-	_currentNet = *netList[constrain(_currentIndex, 0, _netCount)];
-
 	//validate various bits of network/MQTT info
-
-	//network pass
-	if(_currentNet.pass[0] == '\0'){_passSet = false;}
-	else{_passSet = true;}
-
-	//ssid
-	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
-	else{_ssidSet = true;}	
-
-	//mqtt host
-	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
-	else{_mqttSet = true;}
-
-	//mqtt port
-  	if(_currentNet.mqttPort == 0){_currentNet.mqttPort = 1883;}
-  
-  	//mqtt username
-	if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
-	else{_mqttUserSet = true;}
-
-	//mqtt password
-	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
-	else{_mqttPassSet = true;}
+	validateConfig();
 
 }
 
-//initializer with single network information and MQTT broker
-ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
-
-	//diconnect from and previous wifi networks
-    WiFi.softAPdisconnect();
-	WiFi.disconnect();
-	_currentNet.ssid = ssid;
-	_currentNet.pass = pass;
-	_currentNet.mqttHost= mqttIP;
-	_currentNet.mqttPort = 1883;
-
-	//disable hopping on single network
-	_hoppingAllowed = false;
-
-	_useOTA = false;
-
-	_mqttPassSet = false;
-	_mqttUserSet = false;
-
-	//validate various bits of network/MQTT info
-
-	//network pass
-	if(_currentNet.pass[0] == '\0'){_passSet = false;}
-	else{_passSet = true;}
-
-	//ssid
-	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
-	else{_ssidSet = true;}	
-
-	//mqtt host
-	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
-	else{_mqttSet = true;}
-}
-
-//initializer with single network information (MQTT user/pass)
-ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
-
+//initialize the netinfo data and reset wifi. set hopping and OTA to off
+void ESPHelper::init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
 	//diconnect from and previous wifi networks
     WiFi.softAPdisconnect();
 	WiFi.disconnect();
@@ -162,13 +86,14 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 	_currentNet.mqttPass = mqttPass;
 	_currentNet.mqttPort = mqttPort;
 
-	//disable hopping on single network
-	_hoppingAllowed = false;
-
-	_useOTA = false;
-
 	//validate various bits of network/MQTT info
+	validateConfig();
+}
 
+
+
+
+void ESPHelper::validateConfig(){
 	//network pass
 	if(_currentNet.pass[0] == '\0'){_passSet = false;}
 	else{_passSet = true;}
@@ -180,6 +105,9 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 	//mqtt host
 	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
 	else{_mqttSet = true;}
+
+	//mqtt port
+  	if(_currentNet.mqttPort == 0){_currentNet.mqttPort = 1883;}
   
   	//mqtt username
 	if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
@@ -190,39 +118,25 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 	else{_mqttPassSet = true;}
 }
 
-//initializer with single network information (no MQTT)
-ESPHelper::ESPHelper(const char *ssid, const char *pass){
 
-	//diconnect from and previous wifi networks
-    WiFi.softAPdisconnect();
-	WiFi.disconnect();
-	_currentNet.ssid = ssid;
-	_currentNet.pass = pass;
-	_currentNet.mqttHost= '\0';
-	_currentNet.mqttPort = 1883;
-
-	//disable hopping on single network
-	_hoppingAllowed = false;
-
-	_useOTA = false;
-
-	_mqttSet = false;
-	_mqttUserSet = false;
-	_mqttPassSet = false;
-
-	//validate various bits of network info
-
-	//network pass
-	if(_currentNet.pass[0] == '\0'){_passSet = false;}
-	else{_passSet = true;}
-
-	//ssid
-	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
-	else{_ssidSet = true;}	
+bool ESPHelper::begin(const netInfo *startingNet){	
+	return begin(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort);
 }
 
+//initializer with single network information and MQTT broker
+bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP){	
+	return begin(ssid, pass, mqttIP, "", "", 1883);
+}
 
+//initializer with single network information (no MQTT)
+bool ESPHelper::begin(const char *ssid, const char *pass){
+	return begin(ssid, pass, "", "", "", 1883);	
+}
 
+bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
+	init(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort);
+	return begin();
+}
 //start the wifi & mqtt systems and attempt connection (currently blocking)
 	//true on: parameter check validated
 	//false on: parameter check failed

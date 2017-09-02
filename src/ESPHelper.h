@@ -38,6 +38,7 @@
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+// #include "ESPHelperFS.h"
 
 
 #include "Metro.h"
@@ -137,15 +138,19 @@ public:
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
 	ESPHelper(const char *ssid, const char *pass);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
+	ESPHelper(const char* configFile);
 
 	
-
+	bool begin(const char* filename);
 	bool begin(const netInfo *startingNet);
 	bool begin(const char *ssid, const char *pass, const char *mqttIP);
 	bool begin(const char *ssid, const char *pass);
 	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
 	bool begin();
 	void end();
+
+	netInfo loadConfigFile(const char* filename);
+	bool saveConfigFile(const netInfo config, const char* filename);
 
 	void useSecureClient(const char* fingerprint);
 
@@ -191,7 +196,8 @@ public:
 
 	void setNetInfo(netInfo newNetwork);
 	void setNetInfo(netInfo *newNetwork);
-	netInfo* getNetInfo();
+	// netInfo* getNetInfo();
+	netInfo getNetInfo();
 
 	void setHopping(bool canHop); 
 

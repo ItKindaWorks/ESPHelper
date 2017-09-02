@@ -22,6 +22,8 @@
 
 #include "ESPHelper.h"
 #include <WiFiClientSecure.h>
+#include "ESPHelperFS.h"
+
 //empy initializer 
 ESPHelper::ESPHelper(){
 	init("", "", "", "", "", 1883);
@@ -69,6 +71,11 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	init(tmp->ssid, tmp->pass, tmp->mqttHost, tmp->mqttUser, tmp->mqttPass, tmp->mqttPort);
 }
 
+ESPHelper::ESPHelper(const char* configFile){
+	netInfo ESPConfig = loadConfigFile(configFile);
+	init(ESPConfig.ssid, ESPConfig.pass, ESPConfig.mqttHost, ESPConfig.mqttUser, ESPConfig.mqttPass, ESPConfig.mqttPort);
+}
+
 
 //initialize the netinfo data and reset wifi. set hopping and OTA to off
 void ESPHelper::init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
@@ -110,6 +117,15 @@ void ESPHelper::validateConfig(){
 	//mqtt password
 	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
 	else{_mqttPassSet = true;}
+}
+
+bool ESPHelper::begin(const char* filename){
+	_currentNet = loadConfigFile(filename);
+	// Serial.println(ESPConfig.ssid);
+	bool returnVal = begin(_currentNet.ssid, _currentNet.pass, _currentNet.mqttHost, _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.mqttPort);
+
+	Serial.println(_currentNet.ssid);
+	return returnVal;
 }
 
 
@@ -216,6 +232,52 @@ void ESPHelper::end(){
 		delay(10);
 		timeout++;
 	}
+}
+
+
+netInfo ESPHelper::loadConfigFile(const char* filename){
+	bool configLoaded = false;
+	for(int tryCount = 0; tryCount < 3 && configLoaded == false; tryCount++){
+		ESPHelperFS configLoader(filename);
+
+
+		if(configLoader.begin()){
+	    	configLoaded = configLoader.loadNetworkConfig();
+
+
+		    if(!configLoaded){
+				FSdebugPrintln("Could not load config - generating new config and restarting...");
+				configLoader.createConfig(filename);
+				FSdebugPrintln("Config File loading failed. Retrying...");
+				configLoader.end();
+		    }
+		    else{
+		    	FSdebugPrintln("Config loaded, getting info");
+			    _currentNet = configLoader.getNetInfo();
+
+			    WiFi.softAPdisconnect();
+				WiFi.disconnect();
+
+				validateConfig();
+
+			    FSdebugPrintln("done.");
+		    }
+		}
+	}
+
+	return _currentNet;
+}
+
+
+bool ESPHelper::saveConfigFile(const netInfo config, const char* filename){
+	ESPHelperFS configLoader(filename);
+	if(configLoader.begin()){
+		configLoader.createConfig(&config);
+		configLoader.end();
+		return true;
+	}
+
+	return false;
 }
 
 //enables the use of a secure (SSL) connection to an MQTT broker. 
@@ -656,8 +718,13 @@ void ESPHelper::setNetInfo(netInfo *newNetwork){
 }
 
 //return the current netInfo state
-netInfo* ESPHelper::getNetInfo(){	
-	return &_currentNet;
+// netInfo* ESPHelper::getNetInfo(){	
+// 	return &_currentNet;
+// }
+
+//return the current netInfo state
+netInfo ESPHelper::getNetInfo(){	
+	return _currentNet;
 }
 
 //return the current SSID

@@ -121,10 +121,8 @@ void ESPHelper::validateConfig(){
 
 bool ESPHelper::begin(const char* filename){
 	_currentNet = loadConfigFile(filename);
-	// Serial.println(ESPConfig.ssid);
 	bool returnVal = begin(_currentNet.ssid, _currentNet.pass, _currentNet.mqttHost, _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.mqttPort);
 
-	Serial.println(_currentNet.ssid);
 	return returnVal;
 }
 
@@ -237,35 +235,30 @@ void ESPHelper::end(){
 
 netInfo ESPHelper::loadConfigFile(const char* filename){
 	bool configLoaded = false;
-	for(int tryCount = 0; tryCount < 3 && configLoaded == false; tryCount++){
-		ESPHelperFS configLoader(filename);
+	netInfo returnConfig;
+	static ESPHelperFS configLoader(filename);
 
+	for(int tryCount = 0; tryCount < 3 && configLoaded == false; tryCount++){
 
 		if(configLoader.begin()){
 	    	configLoaded = configLoader.loadNetworkConfig();
 
-
 		    if(!configLoaded){
-				FSdebugPrintln("Could not load config - generating new config and restarting...");
+				debugPrintln("Could not load config - generating new config and restarting...");
 				configLoader.createConfig(filename);
-				FSdebugPrintln("Config File loading failed. Retrying...");
 				configLoader.end();
+				debugPrintln("Config File loading failed. Retrying...");
 		    }
 		    else{
-		    	FSdebugPrintln("Config loaded, getting info");
-			    _currentNet = configLoader.getNetInfo();
-
-			    WiFi.softAPdisconnect();
-				WiFi.disconnect();
-
-				validateConfig();
-
-			    FSdebugPrintln("done.");
+		    	debugPrintln("Config loaded, getting info");
+			    returnConfig = configLoader.getNetInfo();
+			    configLoader.end();
+			    debugPrintln("done.");
 		    }
 		}
 	}
 
-	return _currentNet;
+	return returnConfig;
 }
 
 

@@ -33,7 +33,9 @@ netInfo homeNet = { .mqttHost = "YOUR MQTT-IP",     //can be blank if not using 
           .mqttPass = "YOUR MQTT PASSWORD",   //can be blank
           .mqttPort = 1883,         //default port for MQTT is 1883 - only chance if needed.
           .ssid = "YOUR SSID", 
-          .pass = "YOUR NETWORK PASS"};
+          .pass = "YOUR NETWORK PASS",
+          .otaPassword = "YOUR OTA PASS",
+          .hostname = "NEW-ESP8266"}; 
 
 Metro connectTimeout = Metro(20000);
 bool timeout = false;

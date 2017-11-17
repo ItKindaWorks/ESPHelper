@@ -75,6 +75,8 @@ struct netInfo {
 	const char* hostname;
 	
 	netInfo() : mqttPort(1883) {}
+
+	//name | mqtt host | ssid | network pass
 	netInfo(const char* _name,
 			const char* _mqttHost,  
 			const char* _ssid,
@@ -83,7 +85,13 @@ struct netInfo {
 			mqttHost(_mqttHost), 
 			ssid(_ssid),
 			pass(_pass),
-			mqttPort(1883) {}
+			mqttPort(1883),
+			mqttUser("defaultMqttUser"),
+			mqttPass("defaultMqttPass"),
+			otaPassword("defaultOTA_PASS"),
+			hostname("defaultHostname") {}
+
+	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass
 	netInfo(const char* _mqttHost, 
 			const char* _mqttUser, 
 			const char* _mqttPass, 
@@ -95,8 +103,11 @@ struct netInfo {
 			mqttPass(_mqttPass),
 			mqttPort(_mqttPort),
 			ssid(_ssid),
-			pass(_pass) {}
+			pass(_pass),
+			otaPassword("defaultOtaPASS"),
+			hostname("defaultHostname")  {}
 
+	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname
 	netInfo(const char* _mqttHost, 
 			const char* _mqttUser, 
 			const char* _mqttPass, 

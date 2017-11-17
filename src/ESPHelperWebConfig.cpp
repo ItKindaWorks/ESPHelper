@@ -53,6 +53,11 @@ bool ESPHelperWebConfig::begin(){
 	return true;
 }
 
+void ESPHelperWebConfig::fillConfig(netInfo* fillInfo){
+  _fillData = fillInfo;
+  _preFill = true;
+}
+
 bool ESPHelperWebConfig::handle(){
 	_server->handleClient();
 	return _configLoaded;
@@ -67,19 +72,39 @@ netInfo ESPHelperWebConfig::getConfig(){
 
 
 //main config page that allows user to enter in configuration info
-void ESPHelperWebConfig::handleGet() {                      
-  _server->send(200, "text/html", 
+void ESPHelperWebConfig::handleGet() {
+  if(_preFill){
+    _server->send(200, "text/html", 
     String("<form action=\"" + String(_pageURI) + "\" method=\"POST\">\
-    <input type=\"text\" name=\"hostname\" placeholder=\"Device Hostname  (Required)\"></br>\
-    <input type=\"text\" name=\"ssid\" placeholder=\"SSID  (Required)\"></br>\
-    <input type=\"password\" name=\"netPass\" placeholder=\"Network Password\"></br>\
-    <input type=\"password\" name=\"otaPassword\" placeholder=\"OTA Password\"></br>\
-    <input type=\"text\" name=\"mqttHost\" placeholder=\"MQTT Host\"></br>\
-    <input type=\"text\" name=\"mqttUser\" placeholder=\"MQTT Username\"></br>\
-    <input type=\"text\" name=\"mqttPort\" placeholder=\"MQTT Port\"></br>\
-    <input type=\"password\" name=\"mqttPass\" placeholder=\"MQTT Password\"></br>\
+    <input type=\"text\" name=\"hostname\" size=\"64\" placeholder=\"Device Hostname  (Required)\" value=\"" + String(_fillData->hostname) + "\"></br>\
+    <input type=\"text\" name=\"ssid\" size=\"64\" placeholder=\"SSID  (Required)\" value=\"" + String(_fillData->ssid) + "\"></br>\
+    <input type=\"password\" name=\"netPass\" size=\"64\" placeholder=\"Network Password (Previous value used if blank)\"></br>\
+    <input type=\"password\" name=\"otaPassword\" size=\"64\" placeholder=\"OTA Password (Previous value used if blank)\"></br>\
+    <input type=\"text\" name=\"mqttHost\" size=\"64\" placeholder=\"MQTT Host\" value=\"" + String(_fillData->mqttHost) + "\"></br>\
+    <input type=\"text\" name=\"mqttUser\" size=\"64\" placeholder=\"MQTT Username\" value=\"" + String(_fillData->mqttUser) + "\"></br>\
+    <input type=\"text\" name=\"mqttPort\" size=\"64\" placeholder=\"MQTT Port\" value=\"" + String(_fillData->mqttPort) + "\"></br>\
+    <input type=\"password\" name=\"mqttPass\" size=\"64\" placeholder=\"MQTT Password (Previous value used if blank)\"></br>\
     <input type=\"submit\" value=\"Submit\"></form>\
     <p>Press Submit to update ESP8266 config file</p>"));
+  }
+
+
+
+  else{
+    _server->send(200, "text/html", 
+    String("<form action=\"" + String(_pageURI) + "\" method=\"POST\">\
+    <input type=\"text\" name=\"hostname\" size=\"64\" placeholder=\"Device Hostname  (Required)\"></br>\
+    <input type=\"text\" name=\"ssid\" size=\"64\" placeholder=\"SSID  (Required)\"></br>\
+    <input type=\"password\" name=\"netPass\" size=\"64\" placeholder=\"Network Password\"></br>\
+    <input type=\"password\" name=\"otaPassword\" size=\"64\" placeholder=\"OTA Password\"></br>\
+    <input type=\"text\" name=\"mqttHost\" size=\"64\" placeholder=\"MQTT Host\"></br>\
+    <input type=\"text\" name=\"mqttUser\" size=\"64\" placeholder=\"MQTT Username\"></br>\
+    <input type=\"text\" name=\"mqttPort\" size=\"64\" placeholder=\"MQTT Port\"></br>\
+    <input type=\"password\" name=\"mqttPass\" size=\"64\" placeholder=\"MQTT Password\"></br>\
+    <input type=\"submit\" value=\"Submit\"></form>\
+    <p>Press Submit to update ESP8266 config file</p>"));
+  }
+  
 }
 
 // If a POST request is made to URI /config
@@ -108,18 +133,38 @@ void ESPHelperWebConfig::handlePost() {
   //convert the Strings returned by _server->arg to char arrays that can be entered into netInfo
   
 
-  _server->arg("ssid").toCharArray(_newSsid, 64);
-  _server->arg("netPass").toCharArray(_newNetPass, 64);
-  _server->arg("mqttHost").toCharArray(_newMqttHost, 64);
-  _server->arg("mqttUser").toCharArray(_newMqttUser, 64);
-  _server->arg("mqttPass").toCharArray(_newMqttPass, 64);
-  _server->arg("hostname").toCharArray(_newHostname, 64);
-  _server->arg("otaPassword").toCharArray(_newOTAPass, 64);
+  //network pass
+  if(_preFill && _server->arg("netPass").length() == 0){
+    strncpy(_newNetPass,_fillData->pass,64);
+    _newNetPass[sizeof(_newNetPass) - 1] = '\0';
+  }
+  else{_server->arg("netPass").toCharArray(_newNetPass, sizeof(_newNetPass));}
+  
+  //mqtt pass
+  if(_preFill && _server->arg("mqttPass").length() == 0){
+    strncpy(_newMqttPass,_fillData->mqttPass,64);
+    _newMqttPass[sizeof(_newNetPass) - 1] = '\0';
+  }
+  else{_server->arg("mqttPass").toCharArray(_newMqttPass, sizeof(_newMqttPass));}
+
+  //ota pass
+  if(_preFill && _server->arg("otaPassword").length() == 0){
+    strncpy(_newOTAPass,_fillData->otaPassword,64);
+    _newOTAPass[sizeof(_newNetPass) - 1] = '\0';
+  }
+  else{_server->arg("otaPassword").toCharArray(_newOTAPass, sizeof(_newOTAPass));}
+    
+  //other non protected vars
+  _server->arg("ssid").toCharArray(_newSsid, sizeof(_newSsid));
+  _server->arg("hostname").toCharArray(_newHostname, sizeof(_newHostname));
+  _server->arg("mqttHost").toCharArray(_newMqttHost, sizeof(_newMqttHost));
+  _server->arg("mqttUser").toCharArray(_newMqttUser, sizeof(_newMqttUser));
 
   //the port is special because it doesnt get stored as a string so we take care of that
   
   if(_server->arg("mqttPort") != NULL){_newMqttPort = _server->arg("mqttPort").toInt();}
   else{_newMqttPort = 1883;}
+
 
   //tell the user that the config is loaded in and the module is restarting
   _server->send(200, "text/plain", "Config Info Loaded");

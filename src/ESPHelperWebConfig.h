@@ -38,6 +38,8 @@ public:
     bool begin(const char* hostname);
     bool begin();
 
+    void fillConfig(netInfo* fillInfo);
+
     bool handle();
 
     netInfo getConfig();
@@ -63,6 +65,9 @@ private:
     int _newMqttPort;
 
     const char *_pageURI;
+
+    netInfo* _fillData;
+    bool _preFill = false;
 
     netInfo _config;
     bool _configLoaded = false;

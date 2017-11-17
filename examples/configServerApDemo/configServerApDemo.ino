@@ -75,6 +75,20 @@ void loop(void){
 
 
 
+
+
+
+
+
+
+
+
+//ESPHelper & config setup and runtime handler functions
+
+
+
+
+
 void manageESPHelper(int wifiStatus){
   //if the unit is broadcasting or connected to wifi then reset the timeout vars
   if(wifiStatus == BROADCAST || wifiStatus >= WIFI_ONLY){
@@ -95,30 +109,7 @@ void manageESPHelper(int wifiStatus){
 }
 
 void startWifi(){
-  //check for a good config file and start ESPHelper with the file stored on the ESP
-  if(ESPHelperFS::begin()){
-    Serial.println("Filesystem loaded - Loading Config");
-    if(ESPHelperFS::validateConfig("/netConfig.json") == GOOD_CONFIG){
-      Serial.println("Config loaded");
-      delay(10);
-      myESP.begin("/netConfig.json");
-    }
-    else{
-      Serial.println("Could not load config - saving new config from default values and restarting");
-      delay(10);
-      ESPHelperFS::createConfig(&homeNet, "/netConfig.json");
-      ESPHelperFS::end();
-      ESP.restart();
-    }
-  }
-  
-  //if the filesystem cannot be started, just fail over to the built in network config
-  else{
-    Serial.println("Could not load filesystem, proceeding with default config values");
-    delay(10);
-    myESP.begin(&homeNet);
-  }
-  config = myESP.getNetInfo();
+  loadConfig();
 
   //setup other ESPHelper info and enable OTA updates
   myESP.setHopping(false);
@@ -138,7 +129,43 @@ void startWifi(){
   Serial.println("Sucess!");
 }
 
-//this is more or less the same procedure as above however this is for checking during runtime
+
+//attempt to load a network configuration from the filesystem
+void loadConfig(){
+  //check for a good config file and start ESPHelper with the file stored on the ESP
+  if(ESPHelperFS::begin()){
+    Serial.println("Filesystem loaded - Loading Config");
+    if(ESPHelperFS::validateConfig("/netConfig.json") == GOOD_CONFIG){
+      Serial.println("Config loaded");
+      delay(10);
+      myESP.begin("/netConfig.json");
+    }
+
+    //if no good config can be loaded (no file/corruption/etc.) then 
+    //attempt to generate a new config and restart the module
+    else{
+      Serial.println("Could not load config - saving new config from default values and restarting");
+      delay(10);
+      ESPHelperFS::createConfig(&homeNet, "/netConfig.json");
+      ESPHelperFS::end();
+      ESP.restart();
+    }
+  }
+  
+  //if the filesystem cannot be started, just fail over to the 
+  //built in network config hardcoded in here
+  else{
+    Serial.println("Could not load filesystem, proceeding with default config values");
+    delay(10);
+    myESP.begin(&homeNet);
+  }
+
+  config = myESP.getNetInfo();
+}
+
+
+//function that checks for no network connection for a period of time 
+//and starting up AP mode when that time has elapsed
 void checkForWifiTimeout(){
   if(connectTimeout.check() && !timeout){
       Serial.println("Network Connection timeout - starting broadcast (AP) mode...");

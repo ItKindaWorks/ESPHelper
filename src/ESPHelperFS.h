@@ -28,7 +28,7 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 #include <ArduinoJson.h>
 #include "FS.h"
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
   #define FSdebugPrint(x) Serial.print(x) //debug on
@@ -39,6 +39,8 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
   #define FSdebugPrintln(x) {;} //debug off
   #define DEBUG_PRINT_SPEED 1
 #endif
+
+const uint16_t JSON_SIZE = 512;
 
 enum validateStates {NO_CONFIG, CONFIG_TOO_BIG, CANNOT_PARSE, INCOMPLETE, GOOD_CONFIG};
 
@@ -52,6 +54,9 @@ public:
   static void end();
 
   void printFile();
+
+  static void openFile(const char* filename, std::unique_ptr<char[]> *buf);
+
   static int8_t validateConfig(const char* filename);
 
   bool createConfig(const char* filename);
@@ -59,6 +64,12 @@ public:
   static bool createConfig(const netInfo* config, const char* filename);
 
   bool loadNetworkConfig();
+
+  bool addKey(const char* keyName, const char* value);
+  bool addKey(const char* keyName, const char* value, const char* filename);
+
+  String loadKey(const char* keyName);
+  String loadKey(const char* keyName, const char* filename);
 
   netInfo getNetInfo();
 

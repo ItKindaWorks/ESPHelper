@@ -55,7 +55,7 @@ public:
 
   void printFile();
 
-  static void openFile(const char* filename, std::unique_ptr<char[]> *buf);
+  
 
   static int8_t validateConfig(const char* filename);
 
@@ -66,10 +66,10 @@ public:
   bool loadNetworkConfig();
 
   bool addKey(const char* keyName, const char* value);
-  bool addKey(const char* keyName, const char* value, const char* filename);
+  static bool addKey(const char* keyName, const char* value, const char* filename);
 
   String loadKey(const char* keyName);
-  String loadKey(const char* keyName, const char* filename);
+  static String loadKey(const char* keyName, const char* filename);
 
   netInfo getNetInfo();
 
@@ -86,8 +86,10 @@ public:
   void printFSinfo();
 
   
-
+  static StaticJsonBuffer<JSON_SIZE> *_tmpBufPtr;
 private:
+  static bool loadFile(const char* filename, std::unique_ptr<char[]> &buf);
+
 
 
   char ssid[64];

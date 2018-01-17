@@ -19,6 +19,8 @@ This library does requre the use of these libraries (so make sure they're instal
  [Metro](https://www.pjrc.com/teensy/td_libs_Metro.html)
  * 
  [pubsubclient](https://github.com/knolleary/pubsubclient)
+  * 
+ [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 
  In addition to those libraries, make sure that you have the ESP8266 and/or ESP32 core installed. That can be found [here](https://github.com/esp8266/Arduino)
 

@@ -24,10 +24,11 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ESPHELPER_WEBCONFIG_H
 #define ESPHELPER_WEBCONFIG_H
 
+#include <ESP8266WebServer.h>
 #include "ESPHelper.h"
 #include <WiFiClient.h>
 #include <ESP8266mDNS.h>
-#include <ESP8266WebServer.h>
+
 
 class ESPHelperWebConfig{
 

@@ -26,7 +26,7 @@
 
 //empy initializer 
 ESPHelper::ESPHelper(){
-	init("", "", "", "", "", 1883);
+	init("", "", "", "", "", 1883, "defaultWillTopic", "", 0, 1);
 }
 
 
@@ -37,22 +37,37 @@ ESPHelper::ESPHelper(){
 
 //initializer with single netInfo network
 ESPHelper::ESPHelper(const netInfo *startingNet){	
-	init(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort);
+	init(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort, startingNet->willTopic, startingNet->willMessage, startingNet->willQoS, startingNet->willRetain);
 }
 
 //initializer with single network information and MQTT broker
 ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
-	init(ssid, pass, mqttIP, "", "", 1883);
+	init(ssid, pass, mqttIP, "", "", 1883, "defaultWillTopic", "", 0, 1);
+}
+
+//initializer with single network information, MQTT broker and MQTT Last Will
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage){	
+	init(ssid, pass, mqttIP, "", "", 1883, willTopic, willMessage, 0, 1);
+}
+
+//initializer with single network information, MQTT broker, MQTT Last Will and Testament options
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){	
+	init(ssid, pass, mqttIP, "", "", 1883, willTopic, willMessage, 0, 1);
 }
 
 //initializer with single network information (MQTT user/pass)
 ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
-	init(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort);
+	init(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort, "defaultWillTopic", "", 0, 1);
+}
+
+//initializer with single network information (MQTT user/pass) + Testament
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){
+	init(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort, willTopic, willMessage, willQoS, willRetain);
 }
 
 //initializer with single network information (no MQTT)
 ESPHelper::ESPHelper(const char *ssid, const char *pass){
-	init(ssid, pass, "", "", "", 1883);	
+	init(ssid, pass, "", "", "", 1883, "defaultWillTopic","",0,1);	
 }
 
 //initializer with netInfo array and index
@@ -68,17 +83,17 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	_useOTA = false;
 
 	netInfo* tmp = netList[constrain(_currentIndex, 0, _netCount)];
-	init(tmp->ssid, tmp->pass, tmp->mqttHost, tmp->mqttUser, tmp->mqttPass, tmp->mqttPort);
+	init(tmp->ssid, tmp->pass, tmp->mqttHost, tmp->mqttUser, tmp->mqttPass, tmp->mqttPort, tmp->willTopic, tmp->willMessage, tmp->willQoS, tmp->willRetain);
 }
 
 ESPHelper::ESPHelper(const char* configFile){
 	netInfo ESPConfig = loadConfigFile(configFile);
-	init(ESPConfig.ssid, ESPConfig.pass, ESPConfig.mqttHost, ESPConfig.mqttUser, ESPConfig.mqttPass, ESPConfig.mqttPort);
+	init(ESPConfig.ssid, ESPConfig.pass, ESPConfig.mqttHost, ESPConfig.mqttUser, ESPConfig.mqttPass, ESPConfig.mqttPort, ESPConfig.willTopic, ESPConfig.willMessage, ESPConfig.willQoS, ESPConfig.willRetain);
 }
 
 
 //initialize the netinfo data and reset wifi. set hopping and OTA to off
-void ESPHelper::init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
+void ESPHelper::init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){
 	//diconnect from and previous wifi networks
     WiFi.softAPdisconnect();
 	WiFi.disconnect();
@@ -89,6 +104,11 @@ void ESPHelper::init(const char *ssid, const char *pass, const char *mqttIP, con
 	_currentNet.mqttUser = mqttUser;
 	_currentNet.mqttPass = mqttPass;
 	_currentNet.mqttPort = mqttPort;
+	_currentNet.willTopic = willTopic;
+	_currentNet.willMessage = willMessage;
+	_currentNet.willQoS = willQoS;
+	_currentNet.willRetain = willRetain;
+
 
 	//validate various bits of network/MQTT info
 	validateConfig();
@@ -117,33 +137,46 @@ void ESPHelper::validateConfig(){
 	//mqtt password
 	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
 	else{_mqttPassSet = true;}
+	
+	//Will Topic
+	if(_currentNet.willTopic[0] == '\0'){_willTopicSet = false;}
+	else{_willTopicSet = true;}
+
+	//Will Message
+	if(_currentNet.willTopic[0] == '\0'){_willMessageSet = false;}
+	else{_willMessageSet = true;}
+	
 }
 
 bool ESPHelper::begin(const char* filename){
 	_currentNet = loadConfigFile(filename);
-	bool returnVal = begin(_currentNet.ssid, _currentNet.pass, _currentNet.mqttHost, _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.mqttPort);
+	bool returnVal = begin(_currentNet.ssid, _currentNet.pass, _currentNet.mqttHost, _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.mqttPort, _currentNet.willTopic, _currentNet.willMessage, _currentNet.willQoS, _currentNet.willRetain);
 
 	return returnVal;
 }
 
 
 bool ESPHelper::begin(const netInfo *startingNet){	
-	return begin(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort);
+	return begin(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort, startingNet->willTopic, startingNet->willMessage, startingNet->willQoS, startingNet->willRetain);
 }
 
 //initializer with single network information and MQTT broker
 bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP){	
-	return begin(ssid, pass, mqttIP, "", "", 1883);
+	return begin(ssid, pass, mqttIP, "", "", 1883, "defaultWillTopic","",0,1);
 }
 
 //initializer with single network information (no MQTT)
 bool ESPHelper::begin(const char *ssid, const char *pass){
-	return begin(ssid, pass, "", "", "", 1883);	
+	return begin(ssid, pass, "", "", "", 1883, "defaultWillTopic","",0,1);	
+}
+
+bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){
+	init(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort, willTopic, willMessage, willQoS, willRetain);
+	return begin();
 }
 
 bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
-	init(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort);
-	return begin();
+	return begin(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort, "defaultWillTopic","",0,1);	
 }
 //start the wifi & mqtt systems and attempt connection (currently blocking)
 	//true on: parameter check validated
@@ -527,12 +560,16 @@ void ESPHelper::reconnect() {
 					int connected = 0;
 
 					//connect to mqtt with user/pass
-					if (_mqttUserSet) {
-						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass);
+					if (_mqttUserSet && _willMessageSet) {
+						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
 					}
 
 					//connect to mqtt without credentials
-					else{
+					else if (!_mqttUserSet && _willMessageSet) {
+						connected = client.connect((char*) _clientName.c_str(), _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
+					} else if (_mqttUserSet && !_willMessageSet) {
+						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass);
+					} else {
 						connected = client.connect((char*) _clientName.c_str());
 					}
 
@@ -646,6 +683,14 @@ void ESPHelper::changeNetwork(){
 		//mqtt password
 		if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
 		else{_mqttPassSet = true;}
+	
+	        //Will Topic
+	        if(_currentNet.willTopic[0] == '\0'){_willTopicSet = false;}
+	        else{_willTopicSet = true;}
+
+	        //Will Message
+	        if(_currentNet.willTopic[0] == '\0'){_willMessageSet = false;}
+	        else{_willMessageSet = true;}
 
 		debugPrint("Trying next network: ");
 		debugPrintln(_currentNet.ssid);
@@ -760,6 +805,24 @@ void ESPHelper::setMQTTIP(const char* mqttIP, const char* mqttUser, const char* 
 	_currentNet.mqttPass = mqttPass;
 	_mqttSet = true;
 	_mqttUserSet = true;
+}
+
+//set a new MQTT Will - does not automatically disconnect from current network/server if already connected
+void ESPHelper::setWill(const char *willTopic, const char *willMessage){
+	_currentNet.willTopic = willTopic;
+	_currentNet.willMessage = willMessage;
+	_willTopicSet = true;
+	_willMessageSet = true;
+}
+
+//set a new MQTT Will - does not automatically disconnect from current network/server if already connected
+void ESPHelper::setWill(const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){
+	_currentNet.willTopic = willTopic;
+	_currentNet.willMessage = willMessage;
+	_currentNet.willQoS = willQoS;
+	_currentNet.willRetain = willRetain;
+	_willTopicSet = true;
+	_willMessageSet = true;
 }
 
 //return the QOS level for mqtt

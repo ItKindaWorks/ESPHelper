@@ -156,7 +156,11 @@ int8_t ESPHelperFS::validateConfig(const char* filename){
     || !json.containsKey("mqttPASS")
     || !json.containsKey("mqttPORT")
     || !json.containsKey("hostname")
-    || !json.containsKey("OTA_Password")){
+    || !json.containsKey("OTA_Password")
+    || !json.containsKey("willTopic")
+    || !json.containsKey("willMessage")
+    || !json.containsKey("willQoS")
+    || !json.containsKey("willRetain")){
 
     FSdebugPrintln("Config incomplete");
     
@@ -191,8 +195,14 @@ bool ESPHelperFS::loadNetworkConfig(){
     strcpy(mqttPort, json["mqttPORT"]);
     strcpy(mqttUser, json["mqttUSER"]);
     strcpy(mqttPass, json["mqttPASS"]);
+    strcpy(willTopic, json["willTopic"]);
+    strcpy(willMessage, json["willMessage"]);
+    strcpy(willQoS, json["willQoS"]);
+    strcpy(willRetain, json["willRetain"]);
 
     int port = atoi(mqttPort);
+    int numQoS = atoi(willQoS);
+    int numRetain = atoi(willRetain);
 
     //then set that data into a netInfo object
     _networkData = {mqttHost : mqtt_ip,
@@ -202,7 +212,11 @@ bool ESPHelperFS::loadNetworkConfig(){
                     ssid : ssid,
                     pass : netPass,
                     otaPassword : otaPass,
-                    hostname : hostName};
+                    hostname : hostName,
+                    willTopic : willTopic,
+                    willMessage : willMessage,
+                    willQoS : numQoS,
+                    willRetain : numRetain};
 
     
                     
@@ -223,6 +237,14 @@ bool ESPHelperFS::loadNetworkConfig(){
     FSdebugPrintln(_networkData.hostname);
     FSdebugPrint("OTA Password: ");
     FSdebugPrintln(_networkData.otaPassword);
+    FSdebugPrint("Last Will Topic: ");
+    FSdebugPrintln(_networkData.willTopic);
+    FSdebugPrint("Last Will Message: ");
+    FSdebugPrintln(_networkData.willMessage);
+    FSdebugPrint("Last Will QoS: ");
+    FSdebugPrintln(_networkData.willQoS);
+    FSdebugPrint("Last Will Retain: ");
+    FSdebugPrintln(_networkData.willRetain);
 
     // configFile.close();
   }
@@ -322,7 +344,11 @@ bool ESPHelperFS::createConfig(const char* filename){
                       defaultConfig.mqttUser, 
                       defaultConfig.mqttPass, 
                       defaultConfig.mqttPort,
-                      defaultConfig.otaPassword);
+                      defaultConfig.otaPassword,
+                      defaultConfig.willTopic,
+                      defaultConfig.willMessage,
+                      defaultConfig.willQoS,
+                      defaultConfig.willRetain);
 }
 
 
@@ -335,7 +361,11 @@ bool ESPHelperFS::createConfig(const netInfo* config){
                       config->mqttUser, 
                       config->mqttPass, 
                       config->mqttPort,
-                      config->otaPassword);
+                      config->otaPassword,
+                      config->willTopic,
+                      config->willMessage,
+                      config->willQoS,
+                      config->willRetain);
 }
 
 bool ESPHelperFS::createConfig(const netInfo* config, const char* filename){
@@ -347,7 +377,11 @@ bool ESPHelperFS::createConfig(const netInfo* config, const char* filename){
                       config->mqttUser, 
                       config->mqttPass, 
                       config->mqttPort,
-                      config->otaPassword);
+                      config->otaPassword,
+                      config->willTopic,
+                      config->willMessage,
+                      config->willQoS,
+                      config->willRetain);
 }
 
 bool ESPHelperFS::createConfig( const char* filename,
@@ -358,7 +392,11 @@ bool ESPHelperFS::createConfig( const char* filename,
                                 const char* _mqttUser,
                                 const char* _mqttPass,
                                 const int _mqttPort,
-                                const char* _otaPass) {
+                                const char* _otaPass,
+				const char* _willTopic,
+				const char* _willMessage,
+				const int _willQoS,
+				const int _willRetain) {
 
   FSdebugPrintln("Generating new config file with values: ");
   FSdebugPrint("SSID: ");
@@ -377,9 +415,21 @@ bool ESPHelperFS::createConfig( const char* filename,
   FSdebugPrintln(_mqttPort);
   FSdebugPrint("OTA Password: ");
   FSdebugPrintln(_otaPass);
+  FSdebugPrint("Last Will Topic: ");
+  FSdebugPrintln(_willTopic);
+  FSdebugPrint("Last Will Message: ");
+  FSdebugPrintln(_willMessage);
+  FSdebugPrint("Last Will QoS: ");
+  FSdebugPrintln(_willQoS);
+  FSdebugPrint("Last Will Retain: ");
+  FSdebugPrintln(_willRetain);
 
   char portString[10];
   sprintf(portString, "%d", _mqttPort);
+  char qoSString[1];
+  sprintf(qoSString, "%d", _willQoS);
+  char retainString[1];
+  sprintf(retainString, "%d", _willRetain);
 
   FSdebugPrintln("creating json");
 
@@ -399,6 +449,10 @@ bool ESPHelperFS::createConfig( const char* filename,
   json["mqttUSER"] = _mqttUser;
   json["mqttPASS"] = _mqttPass;
   json["OTA_Password"] = _otaPass;
+  json["willTopic"] = _willTopic;
+  json["willMessage"] = _willMessage;
+  json["willQoS"] = qoSString;
+  json["willRetain"] = retainString;
 
   FSdebugPrintln("done");
 

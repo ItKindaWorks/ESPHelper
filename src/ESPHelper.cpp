@@ -143,7 +143,7 @@ void ESPHelper::validateConfig(){
 	else{_willTopicSet = true;}
 
 	//Will Message
-	if(_currentNet.willTopic[0] == '\0'){_willMessageSet = false;}
+	if(_currentNet.willMessage[0] == '\0'){_willMessageSet = false;}
 	else{_willMessageSet = true;}
 	
 }

@@ -94,7 +94,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 	//else turn the relay off and update the status topic with 0
 	else if (payload[0] == '0'){
 		digitalWrite(relayPin, LOW);
-		myESP.client.publish(statusTopic, "0", true);
+		myESP.publish(statusTopic, "0", true);
 	}
 
 }

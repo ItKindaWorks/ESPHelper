@@ -97,9 +97,9 @@ struct netInfo {
 			otaPassword("defaultOTA_PASS"),
 			hostname("defaultHostname"),
 			willTopic("defaultWillTopic"),
+			willMessage(""),
 			willQoS(1),
-			willRetain(1),
-			willMessage("")  {}
+			willRetain(1) {}
 
 	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass
 	netInfo(const char* _mqttHost, 
@@ -117,9 +117,9 @@ struct netInfo {
 			otaPassword("defaultOtaPASS"),
 			hostname("defaultHostname"),
 			willTopic("defaultWillTopic"),
+			willMessage(""),
 			willQoS(1),
-			willRetain(1),
-			willMessage("")  {}
+			willRetain(1)  {}
 
 
 	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname
@@ -140,9 +140,9 @@ struct netInfo {
 			otaPassword(_otaPassword),
 			hostname(_hostname),
 			willTopic("defaultWillTopic"),
+			willMessage(""),
 			willQoS(1),
-			willRetain(1),
-			willMessage("")  {}
+			willRetain(1) {}
 
 
 	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname | willTopic | willMessage
@@ -165,12 +165,12 @@ struct netInfo {
 			otaPassword(_otaPassword),
 			hostname(_hostname),
 			willTopic(_willTopic),
+			willMessage(_willMessage),
 			willQoS(1),
-			willRetain(1),
-			willMessage(_willMessage)  {}
+			willRetain(1) {}
 
 
-	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname | willTopic | willRetain | willQoS | willMessage
+	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname | willTopic | willMessage | willRetain | willQoS
 	netInfo(const char* _mqttHost, 
 			const char* _mqttUser, 
 			const char* _mqttPass, 
@@ -274,11 +274,11 @@ public:
 	void setMQTTIP(const char *mqttIP);
 	void setMQTTIP(const char *mqttIP, const char *mqttUser, const char *mqttPass);
 
-	void setWill(const char *willTopic, const char *willMessage);
-	void setWill(const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
-
 	int getMQTTQOS();
 	void setMQTTQOS(int qos);
+
+	void setWill(const char *willTopic, const char *willMessage);
+	void setWill(const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
 
 	String getIP();
 	IPAddress getIPAddress();

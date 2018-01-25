@@ -1,5 +1,5 @@
-/*    
-    ESPHelper.h 
+/*
+    ESPHelper.h
     Copyright (c) 2017 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
 
@@ -18,7 +18,7 @@
     You should have received a copy of the GNU General Public License
     along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
 
 
 #ifndef ESP_HELPER_H
@@ -57,7 +57,7 @@
 
 //Maximum number of subscriptions that can be auto-subscribed
 //feel free to change this if you need more subsciptions
-#define MAX_SUBSCRIPTIONS 25	
+#define MAX_SUBSCRIPTIONS 25
 
 #define DEFAULT_QOS 1;	//at least once - devices are guarantee to get a message.
 
@@ -74,57 +74,171 @@ struct netInfo {
 	const char* pass;
 	const char* otaPassword;
 	const char* hostname;
-	
+	const char* willTopic;
+	const char* willMessage;
+	int willQoS;
+	int willRetain;
+
 	netInfo() : mqttPort(1883) {}
 
 	//name | mqtt host | ssid | network pass
 	netInfo(const char* _name,
-			const char* _mqttHost,  
+			const char* _mqttHost,
 			const char* _ssid,
-			const char* _pass) : 
+			const char* _pass) :
 			name(_name),
-			mqttHost(_mqttHost), 
+			mqttHost(_mqttHost),
 			ssid(_ssid),
 			pass(_pass),
 			mqttPort(1883),
 			mqttUser("defaultMqttUser"),
 			mqttPass("defaultMqttPass"),
 			otaPassword("defaultOTA_PASS"),
-			hostname("defaultHostname") {}
+			hostname("defaultHostname"),
+			willTopic("defaultWillTopic"),
+			willMessage(""),
+			willQoS(1),
+			willRetain(1) {}
+
+  //mqtt host | ssid | network pass | willTopic | willMessage
+  netInfo(const char* _mqttHost,
+    const char* _ssid,
+    const char* _pass,
+    const char* _willTopic,
+    const char* _willMessage) :
+    mqttHost(_mqttHost),
+    ssid(_ssid),
+    pass(_pass),
+    mqttPort(1883),
+    mqttUser("defaultMqttUser"),
+    mqttPass("defaultMqttPass"),
+    otaPassword("defaultOTA_PASS"),
+    hostname("defaultHostname"),
+    willTopic(_willTopic),
+    willMessage(_willMessage),
+    willQoS(1),
+    willRetain(1) {}
 
 	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass
-	netInfo(const char* _mqttHost, 
-			const char* _mqttUser, 
-			const char* _mqttPass, 
-			int _mqttPort, 
+	netInfo(const char* _mqttHost,
+			const char* _mqttUser,
+			const char* _mqttPass,
+			int _mqttPort,
 			const char* _ssid,
-			const char* _pass) : 
-			mqttHost(_mqttHost), 
+			const char* _pass) :
+			mqttHost(_mqttHost),
 			mqttUser(_mqttUser),
 			mqttPass(_mqttPass),
 			mqttPort(_mqttPort),
 			ssid(_ssid),
 			pass(_pass),
 			otaPassword("defaultOtaPASS"),
-			hostname("defaultHostname")  {}
+			hostname("defaultHostname"),
+			willTopic("defaultWillTopic"),
+			willMessage(""),
+			willQoS(1),
+			willRetain(1)  {}
+
 
 	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname
-	netInfo(const char* _mqttHost, 
-			const char* _mqttUser, 
-			const char* _mqttPass, 
-			int _mqttPort, 
+	netInfo(const char* _mqttHost,
+			const char* _mqttUser,
+			const char* _mqttPass,
+			int _mqttPort,
 			const char* _ssid,
 			const char* _pass,
 			const char* _otaPassword,
-			const char* _hostname) : 
-			mqttHost(_mqttHost), 
+			const char* _hostname) :
+			mqttHost(_mqttHost),
 			mqttUser(_mqttUser),
 			mqttPass(_mqttPass),
 			mqttPort(_mqttPort),
 			ssid(_ssid),
 			pass(_pass),
 			otaPassword(_otaPassword),
-			hostname(_hostname) {}
+			hostname(_hostname),
+			willTopic("defaultWillTopic"),
+			willMessage(""),
+			willQoS(1),
+			willRetain(1) {}
+
+
+	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname | willTopic | willMessage
+	netInfo(const char* _mqttHost,
+			const char* _mqttUser,
+			const char* _mqttPass,
+			int _mqttPort,
+			const char* _ssid,
+			const char* _pass,
+			const char* _otaPassword,
+			const char* _hostname,
+			const char* _willTopic,
+			const char* _willMessage) :
+			mqttHost(_mqttHost),
+			mqttUser(_mqttUser),
+			mqttPass(_mqttPass),
+			mqttPort(_mqttPort),
+			ssid(_ssid),
+			pass(_pass),
+			otaPassword("defaultOtaPASS"),
+			hostname("defaultHostname"),
+			willTopic(_willTopic),
+			willMessage(_willMessage),
+			willQoS(1),
+			willRetain(1) {}
+
+
+	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | willTopic | willMessage | willRetain | willQoS
+	netInfo(const char* _mqttHost,
+			const char* _mqttUser,
+			const char* _mqttPass,
+			int _mqttPort,
+			const char* _ssid,
+			const char* _pass,
+			const char* _willTopic,
+			const char* _willMessage,
+			int _willQoS,
+			int _willRetain) :
+			mqttHost(_mqttHost),
+			mqttUser(_mqttUser),
+			mqttPass(_mqttPass),
+			mqttPort(_mqttPort),
+			ssid(_ssid),
+			pass(_pass),
+			otaPassword("defaultOtaPASS"),
+			hostname("defaultHostname"),
+			willTopic(_willTopic),
+			willMessage(_willMessage),
+			willQoS(1),
+			willRetain(1) {}
+
+
+	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname | willTopic | willMessage | willRetain | willQoS
+	netInfo(const char* _mqttHost,
+			const char* _mqttUser,
+			const char* _mqttPass,
+			int _mqttPort,
+			const char* _ssid,
+			const char* _pass,
+			const char* _otaPassword,
+			const char* _hostname,
+			const char* _willTopic,
+			const char* _willMessage,
+			int _willQoS,
+			int _willRetain) :
+			mqttHost(_mqttHost),
+			mqttUser(_mqttUser),
+			mqttPass(_mqttPass),
+			mqttPort(_mqttPort),
+			ssid(_ssid),
+			pass(_pass),
+			otaPassword(_otaPassword),
+			hostname(_hostname),
+			willTopic(_willTopic),
+			willMessage(_willMessage),
+			willQoS(_willQoS),
+			willRetain(_willRetain)  {}
+
 };
 // typedef struct netInfo netInfo;
 
@@ -142,21 +256,27 @@ typedef struct subscription subscription;
 
 class ESPHelper{
 
-public:	
+public:
 	ESPHelper();
 	ESPHelper(const netInfo *startingNet);
 	ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex = 0);	//remember netInfo *netList[] is really netinfo**
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
 	ESPHelper(const char *ssid, const char *pass);
 	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
+	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage);
+	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
+	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
+
 	ESPHelper(const char* configFile);
 
-	
+
 	bool begin(const char* filename);
 	bool begin(const netInfo *startingNet);
 	bool begin(const char *ssid, const char *pass, const char *mqttIP);
 	bool begin(const char *ssid, const char *pass);
 	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
+	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage);
+	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
 	bool begin();
 	void end();
 
@@ -200,6 +320,9 @@ public:
 	int getMQTTQOS();
 	void setMQTTQOS(int qos);
 
+	void setWill(const char *willTopic, const char *willMessage);
+	void setWill(const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
+
 	String getIP();
 	IPAddress getIPAddress();
 
@@ -210,7 +333,7 @@ public:
 	// netInfo* getNetInfo();
 	netInfo getNetInfo();
 
-	void setHopping(bool canHop); 
+	void setHopping(bool canHop);
 
 	void listSubscriptions();
 
@@ -228,7 +351,7 @@ public:
 
 private:
 
-	void init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
+	void init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
 	void validateConfig();
 
 	void changeNetwork();
@@ -242,7 +365,7 @@ private:
 	int setConnectionStatus();
 
 	netInfo _currentNet;
-	
+
 	PubSubClient client;
 
 	Metro reconnectMetro = Metro(500);
@@ -282,6 +405,8 @@ private:
 	bool _mqttSet = false;
 	bool _mqttUserSet = false;
   	bool _mqttPassSet = false;
+	bool _willTopicSet = false;
+  	bool _willMessageSet = false;
 
 	bool _useOTA = false;
 	bool _OTArunning = false;
@@ -303,9 +428,7 @@ private:
 
 	IPAddress _apIP = IPAddress(192, 168, 1, 1);
 
-	
+
 };
 
 #endif
-
-

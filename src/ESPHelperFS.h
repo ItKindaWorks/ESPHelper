@@ -81,7 +81,11 @@ public:
                       const char* _mqttUser,
                       const char* _mqttPass,
                       const int _mqttPort,
-                      const char* _otaPass);
+                      const char* _otaPass,
+		      const char* _willTopic,
+		      const char* _willMessage,
+		      const int _willQoS,
+		      const int _willRetain);
 
   void printFSinfo();
 
@@ -100,6 +104,10 @@ private:
   char mqttPass[32];
   char mqttPort[16];
   char otaPass[32];
+  char willTopic[64];
+  char willMessage[64];
+  char willQoS[1];
+  char willRetain[1];
 
   netInfo _networkData;
 
@@ -114,7 +122,11 @@ private:
                                 ssid : "networkSSID", 
                                 pass : "networkPass",
                                 otaPassword : "otaPass",
-                                hostname : "NEW-ESP8266"}; 
+                                hostname : "NEW-ESP8266",
+				willTopic : "defaultWillTopic",
+				willMessage : "",
+				willQoS : 1,
+				willRetain : 1}; 
 };
 
 #endif

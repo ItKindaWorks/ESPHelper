@@ -25,7 +25,6 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 
 netInfo config;
 ESPHelper myESP;
-
 ESPHelperWebConfig configPage(80, "/");
 
 netInfo homeNet = { .mqttHost = "YOUR MQTT-IP",     //can be blank if not using MQTT
@@ -38,23 +37,7 @@ netInfo homeNet = { .mqttHost = "YOUR MQTT-IP",     //can be blank if not using 
           .hostname = "NEW-ESP8266"}; 
 
 void setup(void){
-  //check for a good config file and start ESPHelper with the file stored on the ESP
-  if(ESPHelperFS::begin()){
-    if(ESPHelperFS::validateConfig("/netConfig.json") == GOOD_CONFIG){
-      myESP.begin("/netConfig.json");
-    }
-    else{
-      ESPHelperFS::createConfig(&homeNet, "/netConfig.json");
-      ESPHelperFS::end();
-      ESP.restart();
-    }
-  }
-  //if the filesystem cannot be started, just fail over to the built in network config
-  else{
-    myESP.begin(&homeNet);
-  }
-  
-  config = myESP.getNetInfo();
+  loadConfig();
 
   //setup other ESPHelper info and enable OTA updates
   myESP.setHopping(false);
@@ -62,9 +45,8 @@ void setup(void){
   myESP.OTA_setHostnameWithVersion(config.hostname);
   myESP.OTA_enable();
 
-
+  //startup the config page
   configPage.begin(config.hostname);
-  
 }
 
 void loop(void){
@@ -72,8 +54,12 @@ void loop(void){
     //regular loop code goes here
   }
 
+
+
+
   //handle saving a new network config
   if(configPage.handle()){
+    Serial.println("Saving new network config and restarting...");
     myESP.saveConfigFile(configPage.getConfig(), "/netConfig.json");
     delay(500);
     ESP.restart();
@@ -82,3 +68,39 @@ void loop(void){
   delay(5);
 }
 
+
+
+
+//attempt to load a network configuration from the filesystem
+void loadConfig(){
+  //check for a good config file and start ESPHelper with the file stored on the ESP
+  if(ESPHelperFS::begin()){
+    Serial.println("Filesystem loaded - Loading Config");
+    if(ESPHelperFS::validateConfig("/netConfig.json") == GOOD_CONFIG){
+      Serial.println("Config loaded");
+      delay(10);
+      myESP.begin("/netConfig.json");
+    }
+
+    //if no good config can be loaded (no file/corruption/etc.) then 
+    //attempt to generate a new config and restart the module
+    else{
+      Serial.println("Could not load config - saving new config from default values and restarting");
+      delay(10);
+      ESPHelperFS::createConfig(&homeNet, "/netConfig.json");
+      ESPHelperFS::end();
+      ESP.restart();
+    }
+  }
+  
+  //if the filesystem cannot be started, just fail over to the 
+  //built in network config hardcoded in here
+  else{
+    Serial.println("Could not load filesystem, proceeding with default config values");
+    delay(10);
+    myESP.begin(&homeNet);
+  }
+
+  //load the netInfo from espHelper
+  config = myESP.getNetInfo();
+}

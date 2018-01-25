@@ -33,12 +33,11 @@
 	#include <ESPmDNS.h>
 	#include <WiFi.h>
 #endif
-
+	
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
-// #include "ESPHelperWebConfig.h"
 
 
 
@@ -225,6 +224,7 @@ public:
 	void OTA_setPassword(const char* pass);
 	void OTA_setHostname(const char* hostname);
 	void OTA_setHostnameWithVersion(const char* hostname);
+	char* getHostname();
 
 private:
 
@@ -268,6 +268,12 @@ private:
 
 	int _connectionStatus = NO_CONNECTION;
 
+	//AP mode variables
+	IPAddress _broadcastIP;
+	char _broadcastSSID[64];
+	char _broadcastPASS[64];
+
+	//netInfo array vars (total + current index)
 	uint8_t _netCount = 0;
 	uint8_t _currentIndex = 0;
 

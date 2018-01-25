@@ -24,7 +24,7 @@
 #include <WiFiClientSecure.h>
 #include "ESPHelperFS.h"
 
-//empy initializer 
+//empy initializer
 ESPHelper::ESPHelper(){
 	init("", "", "", "", "", 1883, "defaultWillTopic", "", 0, 1);
 }
@@ -36,22 +36,22 @@ ESPHelper::ESPHelper(){
 
 
 //initializer with single netInfo network
-ESPHelper::ESPHelper(const netInfo *startingNet){	
+ESPHelper::ESPHelper(const netInfo *startingNet){
 	init(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort, startingNet->willTopic, startingNet->willMessage, startingNet->willQoS, startingNet->willRetain);
 }
 
 //initializer with single network information and MQTT broker
-ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){	
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP){
 	init(ssid, pass, mqttIP, "", "", 1883, "defaultWillTopic", "", 0, 1);
 }
 
 //initializer with single network information, MQTT broker and MQTT Last Will
-ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage){	
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage){
 	init(ssid, pass, mqttIP, "", "", 1883, willTopic, willMessage, 0, 1);
 }
 
 //initializer with single network information, MQTT broker, MQTT Last Will and Testament options
-ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){	
+ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){
 	init(ssid, pass, mqttIP, "", "", 1883, willTopic, willMessage, 0, 1);
 }
 
@@ -67,11 +67,11 @@ ESPHelper::ESPHelper(const char *ssid, const char *pass, const char *mqttIP, con
 
 //initializer with single network information (no MQTT)
 ESPHelper::ESPHelper(const char *ssid, const char *pass){
-	init(ssid, pass, "", "", "", 1883, "defaultWillTopic","",0,1);	
+	init(ssid, pass, "", "", "", 1883, "defaultWillTopic","",0,1);
 }
 
 //initializer with netInfo array and index
-ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){	
+ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	_netList = netList;
 	_netCount = netCount;
 	_currentIndex = startIndex;
@@ -121,7 +121,7 @@ void ESPHelper::validateConfig(){
 
 	//ssid
 	if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
-	else{_ssidSet = true;}	
+	else{_ssidSet = true;}
 
 	//mqtt host
 	if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
@@ -129,7 +129,7 @@ void ESPHelper::validateConfig(){
 
 	//mqtt port
   	if(_currentNet.mqttPort == 0){_currentNet.mqttPort = 1883;}
-  
+
   	//mqtt username
 	if(_currentNet.mqttUser[0] == '\0'){_mqttUserSet = false;}
 	else{_mqttUserSet = true;}
@@ -137,7 +137,7 @@ void ESPHelper::validateConfig(){
 	//mqtt password
 	if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
 	else{_mqttPassSet = true;}
-	
+
 	//Will Topic
 	if(_currentNet.willTopic[0] == '\0'){_willTopicSet = false;}
 	else{_willTopicSet = true;}
@@ -145,7 +145,7 @@ void ESPHelper::validateConfig(){
 	//Will Message
 	if(_currentNet.willMessage[0] == '\0'){_willMessageSet = false;}
 	else{_willMessageSet = true;}
-	
+
 }
 
 bool ESPHelper::begin(const char* filename){
@@ -156,18 +156,18 @@ bool ESPHelper::begin(const char* filename){
 }
 
 
-bool ESPHelper::begin(const netInfo *startingNet){	
+bool ESPHelper::begin(const netInfo *startingNet){
 	return begin(startingNet->ssid, startingNet->pass, startingNet->mqttHost, startingNet->mqttUser, startingNet->mqttPass, startingNet->mqttPort, startingNet->willTopic, startingNet->willMessage, startingNet->willQoS, startingNet->willRetain);
 }
 
 //initializer with single network information and MQTT broker
-bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP){	
+bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP){
 	return begin(ssid, pass, mqttIP, "", "", 1883, "defaultWillTopic","",0,1);
 }
 
 //initializer with single network information (no MQTT)
 bool ESPHelper::begin(const char *ssid, const char *pass){
-	return begin(ssid, pass, "", "", "", 1883, "defaultWillTopic","",0,1);	
+	return begin(ssid, pass, "", "", "", 1883, "defaultWillTopic","",0,1);
 }
 
 bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain){
@@ -176,12 +176,12 @@ bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP, co
 }
 
 bool ESPHelper::begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort){
-	return begin(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort, "defaultWillTopic","",0,1);	
+	return begin(ssid, pass, mqttIP, mqttUser, mqttPass, mqttPort, "defaultWillTopic","",0,1);
 }
 //start the wifi & mqtt systems and attempt connection (currently blocking)
 	//true on: parameter check validated
 	//false on: parameter check failed
-bool ESPHelper::begin(){	
+bool ESPHelper::begin(){
 	if(_ssidSet){
 		// Generate client name based on MAC address and last 8 bits of microsecond counter
 		_clientName += "esp8266-";
@@ -199,7 +199,7 @@ bool ESPHelper::begin(){
 			//make mqtt client use either the secure or non-secure wifi client depending on the setting
 			if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
 			else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
-			
+
 			//set the mqtt message callback if needed
 			if(_mqttCallbackSet){
 				client.setCallback(_mqttCallback);
@@ -212,10 +212,10 @@ bool ESPHelper::begin(){
 			//(this shouldnt be needed if making a dummy connection since the idea would be that there wont be mqtt in this case)
 			if(_useSecureClient){client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClientSecure);}
 			else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
-			
+
 		}
 
-		
+
 		//ota event handlers
 		ArduinoOTA.onStart([]() {/* ota start code */});
 		ArduinoOTA.onEnd([]() {
@@ -242,7 +242,7 @@ bool ESPHelper::begin(){
 
 		//attempt to start ota if needed
 		OTA_begin();
-		
+
 		//mark the system as started and return
 		_hasBegun = true;
 		return true;
@@ -306,12 +306,12 @@ bool ESPHelper::saveConfigFile(const netInfo config, const char* filename){
 	return false;
 }
 
-//enables the use of a secure (SSL) connection to an MQTT broker. 
+//enables the use of a secure (SSL) connection to an MQTT broker.
 //(Make sure your mqtt port is set to one expecting a secure connection)
 void ESPHelper::useSecureClient(const char* fingerprint){
 	_fingerprint = fingerprint;
 
-	//fall back to wifi only connection if it was previously at full connection 
+	//fall back to wifi only connection if it was previously at full connection
 	//(because we just changed how the device is going to connect to the mqtt broker)
 	if(setConnectionStatus() == FULL_CONNECTION){
 		_connectionStatus = WIFI_ONLY;
@@ -319,7 +319,7 @@ void ESPHelper::useSecureClient(const char* fingerprint){
 
 	//if use of secure connection is set retroactivly (after begin), then re-instantiate client
 	if(_hasBegun){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
-	
+
 	//flag use of secure client
 	_useSecureClient = true;
 }
@@ -363,7 +363,7 @@ void ESPHelper::disableBroadcast(){
 //main loop - should be called as often as possible - handles wifi/mqtt connection and mqtt handler
 	//true on: network/server connected
 	//false on: network or server disconnected
-int ESPHelper::loop(){	
+int ESPHelper::loop(){
 	if(_ssidSet){
 
 		//check for good connections and attempt a reconnect if needed
@@ -373,10 +373,10 @@ int ESPHelper::loop(){
 
 		//run the wifi loop as long as the connection status is at a minimum of BROADCAST
 		if(_connectionStatus >= BROADCAST){
-			
+
 			//run the MQTT loop if we have a full connection
 			if(_connectionStatus == FULL_CONNECTION){client.loop();}
-			
+
 			//run the heartbeat
 			heartbeat();
 
@@ -401,7 +401,7 @@ int ESPHelper::loop(){
 //subscribe to a speicifc topic (does not add to topic list)
 	//true on: subscription success
 	//false on: subscription failed (either from PubSub lib or network is disconnected)
-bool ESPHelper::subscribe(const char* topic, int qos){		
+bool ESPHelper::subscribe(const char* topic, int qos){
 	if(_connectionStatus == FULL_CONNECTION){
 		//set the return value to the output of subscribe
 		bool returnVal = client.subscribe(topic, qos);
@@ -418,7 +418,7 @@ bool ESPHelper::subscribe(const char* topic, int qos){
 //add a topic to the list of subscriptions and attempt to subscribe to the topic on the spot
 	//true on: subscription added to list (does not guarantee that the topic was subscribed to, only that it was added to the list)
 	//false on: subscription not added to list
-bool ESPHelper::addSubscription(const char* topic){	
+bool ESPHelper::addSubscription(const char* topic){
 	//default return value is false
 	bool subscribed = false;
 
@@ -434,12 +434,12 @@ bool ESPHelper::addSubscription(const char* topic){
 
 	//if added to the list, subscibe to the topic
 	if(subscribed){subscribe(topic, _qos);}
-	
+
 	return subscribed;
 }
 
 //loops through list of subscriptions and attempts to subscribe to all topics
-void ESPHelper::resubscribe(){	
+void ESPHelper::resubscribe(){
 	for(int i = 0; i < MAX_SUBSCRIPTIONS; i++){
 		if(_subscriptions[i].isUsed){
 			subscribe(_subscriptions[i].topic, _qos);
@@ -451,7 +451,7 @@ void ESPHelper::resubscribe(){
 //attempts to remove a topic from the topic list
 	//true on: subscription removed from list (does not guarantee that the topic was unsubscribed from, only that it was removed from the list)
 	//false on: topic was not found in list and therefore cannot be removed
-bool ESPHelper::removeSubscription(const char* topic){	
+bool ESPHelper::removeSubscription(const char* topic){
 	bool returnVal = false;
 	String topicStr = topic;
 
@@ -481,12 +481,12 @@ bool ESPHelper::unsubscribe(const char* topic){
 }
 
 //publish to a specified topic
-void ESPHelper::publish(const char* topic, const char* payload){		
+void ESPHelper::publish(const char* topic, const char* payload){
 	publish(topic, payload, false);
 }
 
 //publish to a specified topic with a given retain level
-void ESPHelper::publish(const char* topic, const char* payload, bool retain){		
+void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 	client.publish(topic, payload, retain);
 }
 
@@ -494,7 +494,7 @@ void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 void ESPHelper::setMQTTCallback(MQTT_CALLBACK_SIGNATURE){
 	_mqttCallback = callback;
 
-	//only set the callback if using mqtt AND the system has already been started. Otherwise just save it for later	
+	//only set the callback if using mqtt AND the system has already been started. Otherwise just save it for later
 	if(_hasBegun && _mqttSet) {
 		client.setCallback(_mqttCallback);
 	}
@@ -517,7 +517,7 @@ void ESPHelper::setWifiCallback(void (*callback)()){
 }
 
 //attempts to connect to wifi & mqtt server if not connected
-void ESPHelper::reconnect() {		
+void ESPHelper::reconnect() {
 	static int tryCount = 0;
 
 	if(reconnectMetro.check() && _connectionStatus != BROADCAST && setConnectionStatus() != FULL_CONNECTION){
@@ -540,14 +540,14 @@ void ESPHelper::reconnect() {
 		//----note---- maybe want to reset tryCount whenever we succeed at getting wifi connection?
 		if(WiFi.status() == WL_CONNECTED){
 			//if the wifi previously wasnt connected but now is, run the callback
-			if(_connectionStatus < WIFI_ONLY && _wifiCallbackSet){	
+			if(_connectionStatus < WIFI_ONLY && _wifiCallbackSet){
 				_wifiCallback();
 			}
 
 
 			debugPrintln("\n---WIFI Connected!---");
 			_connectionStatus = WIFI_ONLY;
-			
+
 
 			//attempt to connect to mqtt when we finally get connected to WiFi
 			if(_mqttSet){
@@ -556,7 +556,7 @@ void ESPHelper::reconnect() {
 				if (!client.connected() && timeout < 5) {
 					debugPrint("Attemping MQTT connection");
 
-					
+
 					int connected = 0;
 
 					//connect to mqtt with user/pass
@@ -599,7 +599,7 @@ void ESPHelper::reconnect() {
 				}
 
 				//if we still cant connect to mqtt after 10 attempts increment the try count
-				if(timeout >= 5 && !client.connected()){	
+				if(timeout >= 5 && !client.connected()){
 					timeout = 0;
 					tryCount++;
 					if(tryCount == 20){
@@ -622,7 +622,7 @@ int ESPHelper::setConnectionStatus(){
 
 	//assume no connection
 	int returnVal = NO_CONNECTION;
-	
+
 	//make sure were not in broadcast mode
 	if(_connectionStatus != BROADCAST){
 
@@ -651,7 +651,7 @@ int ESPHelper::setConnectionStatus(){
 }
 
 //changes the current network settings to the next listed network if network hopping is allowed
-void ESPHelper::changeNetwork(){	
+void ESPHelper::changeNetwork(){
 
 	//only attempt to change networks if hopping is allowed
 	if(_hoppingAllowed){
@@ -670,7 +670,7 @@ void ESPHelper::changeNetwork(){
 
 		//ssid
 		if(_currentNet.ssid[0] == '\0'){_ssidSet = false;}
-		else{_ssidSet = true;}	
+		else{_ssidSet = true;}
 
 		//mqtt host
 		if(_currentNet.mqttHost[0] == '\0'){_mqttSet = false;}
@@ -683,7 +683,7 @@ void ESPHelper::changeNetwork(){
 		//mqtt password
 		if(_currentNet.mqttPass[0] == '\0'){_mqttPassSet = false;}
 		else{_mqttPassSet = true;}
-	
+
 	        //Will Topic
 	        if(_currentNet.willTopic[0] == '\0'){_willTopicSet = false;}
 	        else{_willTopicSet = true;}
@@ -717,12 +717,12 @@ void ESPHelper::updateNetwork(){
 	//setup the mqtt broker info
 	if(_mqttSet){client.setServer(_currentNet.mqttHost, _currentNet.mqttPort);}
 	else{client.setServer("192.0.2.0", 1883);}
-	
+
 	debugPrintln("\tDone - Ready for next reconnect attempt");
 }
 
 //generate unique MQTT name from MAC addr
-String ESPHelper::macToStr(const uint8_t* mac){ 
+String ESPHelper::macToStr(const uint8_t* mac){
 
   String result;
 
@@ -738,7 +738,7 @@ String ESPHelper::macToStr(const uint8_t* mac){
 }
 
 //change the current network info to a new netInfo - does not automatically disconnect from current network if already connected
-void ESPHelper::setNetInfo(netInfo newNetwork){	
+void ESPHelper::setNetInfo(netInfo newNetwork){
 	_currentNet = newNetwork;
 	_ssidSet = true;
 	_passSet = true;
@@ -747,7 +747,7 @@ void ESPHelper::setNetInfo(netInfo newNetwork){
 }
 
 //change the current network info to a new *netInfo - does not automatically disconnect from current network if already connected
-void ESPHelper::setNetInfo(netInfo *newNetwork){ 	
+void ESPHelper::setNetInfo(netInfo *newNetwork){
 	_currentNet = *newNetwork;
 	_ssidSet = true;
 	_passSet = true;
@@ -756,44 +756,44 @@ void ESPHelper::setNetInfo(netInfo *newNetwork){
 }
 
 //return the current netInfo state
-// netInfo* ESPHelper::getNetInfo(){	
+// netInfo* ESPHelper::getNetInfo(){
 // 	return &_currentNet;
 // }
 
 //return the current netInfo state
-netInfo ESPHelper::getNetInfo(){	
+netInfo ESPHelper::getNetInfo(){
 	return _currentNet;
 }
 
 //return the current SSID
-const char* ESPHelper::getSSID(){			
+const char* ESPHelper::getSSID(){
 	if(_ssidSet){return _currentNet.ssid;}
 	return "SSID NOT SET";
 }
 //set a new SSID - does not automatically disconnect from current network if already connected
-void ESPHelper::setSSID(const char* ssid){		
+void ESPHelper::setSSID(const char* ssid){
 	_currentNet.ssid = ssid;
 	_ssidSet = true;
 }
 
 //return the current network password
-const char* ESPHelper::getPASS(){			
+const char* ESPHelper::getPASS(){
 	if(_passSet){return _currentNet.pass;}
 	return "PASS NOT SET";
 }
 //set a new network password - does not automatically disconnect from current network if already connected
-void ESPHelper::setPASS(const char* pass){ 	
+void ESPHelper::setPASS(const char* pass){
 	_currentNet.pass = pass;
 	_passSet = true;
 }
 
 //return the current MQTT server IP
-const char* ESPHelper::getMQTTIP(){		
+const char* ESPHelper::getMQTTIP(){
 	if(_mqttSet){return _currentNet.mqttHost;}
 	return "MQTT IP NOT SET";
 }
 //set a new MQTT server IP - does not automatically disconnect from current network/server if already connected
-void ESPHelper::setMQTTIP(const char* mqttIP){ 
+void ESPHelper::setMQTTIP(const char* mqttIP){
 	_currentNet.mqttHost= mqttIP;
 	_mqttSet = true;
 }
@@ -831,7 +831,7 @@ int ESPHelper::getMQTTQOS(){
 
 }
 
-//set the QOS level for mqtt 
+//set the QOS level for mqtt
 void ESPHelper::setMQTTQOS(int qos){
 	_qos = qos;
 }
@@ -852,7 +852,7 @@ int ESPHelper::getStatus(){
 }
 
 //enable or disable hopping - generally set automatically by initializer
-void ESPHelper::setHopping(bool canHop){	
+void ESPHelper::setHopping(bool canHop){
 	_hoppingAllowed = canHop;
 }
 
@@ -868,7 +868,7 @@ void ESPHelper::listSubscriptions(){
 
 
 //enable the connection heartbeat on a given pin
-void ESPHelper::enableHeartbeat(int16_t pin){	
+void ESPHelper::enableHeartbeat(int16_t pin){
 	#ifdef DEBUG
 		if(pin == 1){_heartbeatEnabled = false;}
 		else{
@@ -877,7 +877,7 @@ void ESPHelper::enableHeartbeat(int16_t pin){
 			pinMode(_ledPin, OUTPUT);
 			digitalWrite(_ledPin, HIGH);
 		}
-	#else	
+	#else
 		_heartbeatEnabled = true;
 		_ledPin = pin;
 		pinMode(_ledPin, OUTPUT);
@@ -886,12 +886,12 @@ void ESPHelper::enableHeartbeat(int16_t pin){
 }
 
 //disable the connection heartbeat
-void ESPHelper::disableHeartbeat(){			
+void ESPHelper::disableHeartbeat(){
 	_heartbeatEnabled = false;
 }
 
 //heartbeat to indicate network connection
-void ESPHelper::heartbeat(){				
+void ESPHelper::heartbeat(){
 	static Metro heartbeatMetro = Metro(10);
 	static int counter = 0;
 
@@ -963,5 +963,3 @@ void ESPHelper::OTA_setHostnameWithVersion(const char* hostname){
 
 	ArduinoOTA.setHostname(_hostname);
 }
-
-

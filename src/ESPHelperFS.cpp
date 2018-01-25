@@ -264,30 +264,46 @@ bool ESPHelperFS::addKey(const char* keyName, const char* value){
 
 //add a key to a json file
 bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* filename){
-  
-    //create a buffer for the file data
-    std::unique_ptr<char[]> buf(new char[JSON_SIZE]);
-    loadFile(filename, buf);
-    StaticJsonBuffer<JSON_SIZE> jsonBuffer;
-    JsonObject& json = jsonBuffer.parseObject(buf.get());
-    if(json.success()){
+  if(!SPIFFS.exists(filename)){
+    File configFile = SPIFFS.open(filename, "w");
+    configFile.close();
+  }
 
-      //add the key to the json object
-      json[keyName] = value;
-      FSdebugPrint("Added Key ");
-      FSdebugPrint(keyName);
-      FSdebugPrint(" With Value ");
-      FSdebugPrintln(value);
+  //create a buffer for the file data
+  std::unique_ptr<char[]> buf(new char[JSON_SIZE]);
+  loadFile(filename, buf);
+  StaticJsonBuffer<JSON_SIZE> jsonBuffer;
+  JsonObject& json = jsonBuffer.parseObject(buf.get());
+  if(json.success()){
+    //add the key to the json object
+    json[keyName] = value;
+    FSdebugPrint("Added Key ");
+    FSdebugPrint(keyName);
+    FSdebugPrint(" With Value ");
+    FSdebugPrintln(value);
 
-      //save the new config with added key
-      saveConfig(json, filename);
+    //save the new config with added key
+    saveConfig(json, filename);
+    return true;
+  }
 
-      
-      return true;
-    }
+
+  StaticJsonBuffer<JSON_SIZE> blankBuffer;
+  JsonObject& blankJson = blankBuffer.createObject();
+  if(blankJson.success()){
+    //add the key to the json object
+    blankJson[keyName] = value;
+    FSdebugPrint("Added Key ");
+    FSdebugPrint(keyName);
+    FSdebugPrint(" With Value ");
+    FSdebugPrintln(value);
+
+    //save the new config with added key
+    saveConfig(blankJson, filename);
+    return true;
+  }
     
-    
-    return false;
+  return false;
 }
 
 //read a key from a json file

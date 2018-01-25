@@ -1,5 +1,5 @@
 /*    
-configServerApDemo.ino
+configAndStatusAPDemo.ino
 Copyright (c) 2017 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
@@ -26,8 +26,14 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 
 netInfo config;
 ESPHelper myESP;
-ESPHelperWebConfig configPage(80, "/");
 
+
+//setup a server on port 80 (http). We use an external server here because we want more than just a config page 
+//but also a status page or anything else that we want to display
+ESP8266WebServer server(80);
+ESPHelperWebConfig configPage(&server, "/config");
+
+//defualt net info for unconfigured devices
 netInfo homeNet = { .mqttHost = "YOUR MQTT-IP",     //can be blank if not using MQTT
           .mqttUser = "YOUR MQTT USERNAME",   //can be blank
           .mqttPass = "YOUR MQTT PASSWORD",   //can be blank
@@ -37,9 +43,11 @@ netInfo homeNet = { .mqttHost = "YOUR MQTT-IP",     //can be blank if not using 
           .otaPassword = "YOUR OTA PASS",
           .hostname = "NEW-ESP8266"}; 
 
+//timeout before starting AP mode for configuration
 Metro connectTimeout = Metro(20000);
 bool timeout = false;
 
+//AP moade setup info
 const char* broadcastSSID = "ESP-Hotspot";
 const char* broadcastPASS = "";
 IPAddress broadcastIP = {192, 168, 1, 1};
@@ -53,9 +61,18 @@ void setup(void){
   Serial.println("Starting Up - Please Wait...");
   delay(100);
 
-  //startup the wifi and web server
+  //startup the wifi and web server (more in the lines below)
   startWifi();
+
+  //setup the http server and config page (fillConfig will take the netInfo file and use that for
+  //default values)
+  configPage.fillConfig(&config);
   configPage.begin(config.hostname);
+
+  // Actually start the server (again this would be done automatically
+  //if we were just using the config page and didnt use an external server...)
+  server.begin();
+  server.on("/", HTTP_GET, handleStatus);
 }
 
 
@@ -160,7 +177,7 @@ void loadConfig(){
     myESP.begin(&homeNet);
   }
 
-  //load the netInfo from espHelper
+  //load the netInfo from espHelper for use in the config page
   config = myESP.getNetInfo();
 }
 
@@ -176,6 +193,24 @@ void checkForWifiTimeout(){
       myESP.OTA_setHostnameWithVersion(config.hostname);
       myESP.OTA_enable();
     }
+}
+
+
+//main config page that allows user to enter in configuration info
+void handleStatus() {      
+  server.send(200, "text/html", \
+  String("<html>\
+  <header>\
+  <title>Device Info</title>\
+  </header>\
+  <body>\
+    <p><strong>System Status</strong></br>\
+    Device Name: " + String(myESP.getHostname()) + "</br>\
+    Connected SSID: " + String(myESP.getSSID()) + "</br>\
+    Device IP: " + String(myESP.getIP()) + "</br>\
+    Uptime (ms): " + String(millis()) + "</p>\
+  </body>\
+  </html>"));
 }
 
 

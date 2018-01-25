@@ -7,6 +7,8 @@
 #######################################
 
 ESPHelper	KEYWORD1
+ESPHelperFS	KEYWORD1
+ESPHelperWebConfig	KEYWORD1
 netInfo	KEYWORD1
 subscription 	KEYWORD1
 

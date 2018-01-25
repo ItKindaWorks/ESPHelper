@@ -265,23 +265,33 @@ void ESPHelper::end(){
 	}
 }
 
-
+//attempts to load a config file from the filesystem - returns blank netInfo on failure
+//This will also create a new config with default values if none currently exists or is corrupted.
 netInfo ESPHelper::loadConfigFile(const char* filename){
 	bool configLoaded = false;
 	netInfo returnConfig;
+
+	//create a static instance of the FS handler so that one isnt created by default but is left in memory if we
+	//need to load a config
 	static ESPHelperFS configLoader(filename);
 
+	//attempt to load the config 3 times (really if it fails once it's probably going to fail again but why not try...)
 	for(int tryCount = 0; tryCount < 3 && configLoaded == false; tryCount++){
 
+		//attempt to start the filesystem
 		if(configLoader.begin()){
+			//attempt to load a configuration
 	    	configLoaded = configLoader.loadNetworkConfig();
 
+	    	//if no config loaded (either from corruption or no file), create a new config and close the FS
 		    if(!configLoaded){
 				debugPrintln("Could not load config - generating new config and restarting...");
 				configLoader.createConfig(filename);
 				configLoader.end();
 				debugPrintln("Config File loading failed. Retrying...");
 		    }
+
+		    //if there is a good config, load it and close the FS
 		    else{
 		    	debugPrintln("Config loaded, getting info");
 			    returnConfig = configLoader.getNetInfo();
@@ -291,11 +301,15 @@ netInfo ESPHelper::loadConfigFile(const char* filename){
 		}
 	}
 
+	//return either a loaded config or a blank one
 	return returnConfig;
 }
 
-
+//attempts to saves a new config file with a given netInfo and filename
+//Returns true on success /// false on failure
 bool ESPHelper::saveConfigFile(const netInfo config, const char* filename){
+
+	//init ESPHelper FS and begin
 	ESPHelperFS configLoader(filename);
 	if(configLoader.begin()){
 		configLoader.createConfig(&config);
@@ -303,6 +317,7 @@ bool ESPHelper::saveConfigFile(const netInfo config, const char* filename){
 		return true;
 	}
 
+	//if the FS could not be started then return false (failed)
 	return false;
 }
 
@@ -344,6 +359,10 @@ void ESPHelper::broadcastMode(const char* ssid, const char* password, const IPAd
 
 	//update the connection status
 	_connectionStatus = BROADCAST;
+	_broadcastIP = ip;
+	strcpy(_broadcastSSID, ssid);
+	strcpy(_broadcastPASS, password);
+
 }
 
 //disable broadcast mode and reset to station mode (causes a call to begin - may want to change this in the future...)
@@ -766,8 +785,9 @@ netInfo ESPHelper::getNetInfo(){
 }
 
 //return the current SSID
-const char* ESPHelper::getSSID(){
-	if(_ssidSet){return _currentNet.ssid;}
+const char* ESPHelper::getSSID(){			
+	if(_ssidSet && _connectionStatus != BROADCAST){return _currentNet.ssid;}
+	else if(_connectionStatus == BROADCAST){return _broadcastSSID;}
 	return "SSID NOT SET";
 }
 //set a new SSID - does not automatically disconnect from current network if already connected
@@ -777,8 +797,9 @@ void ESPHelper::setSSID(const char* ssid){
 }
 
 //return the current network password
-const char* ESPHelper::getPASS(){
-	if(_passSet){return _currentNet.pass;}
+const char* ESPHelper::getPASS(){			
+	if(_passSet && _connectionStatus != BROADCAST){return _currentNet.pass;}
+	else if(_connectionStatus == BROADCAST){return _broadcastPASS;}
 	return "PASS NOT SET";
 }
 //set a new network password - does not automatically disconnect from current network if already connected
@@ -838,12 +859,23 @@ void ESPHelper::setMQTTQOS(int qos){
 
 //return the local IP address of the ESP as a string
 String ESPHelper::getIP(){
-	return WiFi.localIP().toString();
+	if(_connectionStatus != BROADCAST){
+		return WiFi.localIP().toString();	
+	}
+	else{
+		return _broadcastIP.toString();
+	}
+	
 }
 
 //return the local IP address of the ESP
 IPAddress ESPHelper::getIPAddress(){
-	return WiFi.localIP();
+	if(_connectionStatus != BROADCAST){
+		return WiFi.localIP();	
+	}
+	else{
+		return _broadcastIP;
+	}
 }
 
 //get the current connection status of ESPHelper
@@ -963,3 +995,8 @@ void ESPHelper::OTA_setHostnameWithVersion(const char* hostname){
 
 	ArduinoOTA.setHostname(_hostname);
 }
+
+char* ESPHelper::getHostname(){
+	return _hostname;
+}
+

@@ -47,6 +47,22 @@ ESPHelper myESP(&homeNet);
 
 bool MQTT_Connection;
 
+bool checkMqttConnection() {
+  // Check if the Connection status has changed.
+  // If Status changed to FULL_CONNECTION publish "online" status message on STATUS_TOPIC
+  // Toggle the INTERNAL_LED
+  if( MQTT_Connection != (myESP.getStatus() == FULL_CONNECTION) ){
+    MQTT_Connection = (myESP.getStatus() == FULL_CONNECTION);
+    if (MQTT_Connection) {
+      Serial.print("Full Connection established. publishing status on Topic ");
+      Serial.println(STATUS_TOPIC);
+      myESP.publish(STATUS_TOPIC, "online", true);      
+    }
+    digitalWrite(INTERNAL_LED, !MQTT_Connection);
+  }  
+}
+
+
 void setup() {
   Serial.begin(115200);
 
@@ -74,19 +90,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void loop() {
   myESP.loop();  //run the loop() method as often as possible - this keeps the network services running
 
-
-  // Check if the Connection status has changed.
-  // If Status changed to FULL_CONNECTION publish "online" status message on STATUS_TOPIC
-  // Toggle the INTERNAL_LED
-  if( MQTT_Connection != (myESP.getStatus() == FULL_CONNECTION) ){
-    MQTT_Connection = (myESP.getStatus() == FULL_CONNECTION);
-    if (MQTT_Connection) {
-      Serial.print("Full Connection established. publishing status on Topic ");
-      Serial.println(STATUS_TOPIC);
-      myESP.publish(STATUS_TOPIC, "online", true);      
-    }
-    digitalWrite(INTERNAL_LED, !MQTT_Connection);
-  }  
+  checkMqttConnection();
   
   yield();
 }

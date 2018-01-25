@@ -60,3 +60,10 @@ Useful Methods:
 * void OTA_setPassword(char* pass); //set a password for OTA updates
 
 * void OTA_setHostname(char* hostname); //give a hostname to the device for OTA identification
+
+ToDo:
+-----
+
+* Integrate Last Will into config files and config page
+* Implement callback for lost WiFi connection
+

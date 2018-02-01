@@ -254,7 +254,9 @@ bool ESPHelper::begin(){
 
 //end the instance of ESPHelper (shutdown wifi, ota, mqtt)
 void ESPHelper::end(){
+	ESPHelperFS::end();
 	OTA_disable();
+	client.disconnect();
 	WiFi.softAPdisconnect();
 	WiFi.disconnect();
 
@@ -263,6 +265,9 @@ void ESPHelper::end(){
 		delay(10);
 		timeout++;
 	}
+
+	_connectionStatus = NO_CONNECTION;
+
 }
 
 //attempts to load a config file from the filesystem - returns blank netInfo on failure

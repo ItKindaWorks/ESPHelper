@@ -585,15 +585,35 @@ void ESPHelper::reconnect() {
 
 					//connect to mqtt with user/pass
 					if (_mqttUserSet && _willMessageSet) {
+						debugPrintln(" - Using user & last will");
+						debugPrintln(String("\t Client Name: " + String(_clientName.c_str())));
+						debugPrintln(String("\t User Name: " + String(_currentNet.mqttUser)));
+						debugPrintln(String("\t Password: " + String(_currentNet.mqttPass)));
+						debugPrintln(String("\t Will Topic: " + String(_currentNet.willTopic)));
+						debugPrintln(String("\t Will QOS: " + String(_currentNet.willQoS)));
+						debugPrintln(String("\t Will Retain?: " + String(_currentNet.willRetain)));
+						debugPrintln(String("\t Will Message: " + String(_currentNet.willMessage)));
 						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
 					}
 
 					//connect to mqtt without credentials
 					else if (!_mqttUserSet && _willMessageSet) {
+						debugPrintln(" - Using last will");
+						debugPrintln(String("\t Client Name: " + String(_clientName.c_str())));
+						debugPrintln(String("\t Will Topic: " + String(_currentNet.willTopic)));
+						debugPrintln(String("\t Will QOS: " + String(_currentNet.willQoS)));
+						debugPrintln(String("\t Will Retain?: " + String(_currentNet.willRetain)));
+						debugPrintln(String("\t Will Message: " + String(_currentNet.willMessage)));
 						connected = client.connect((char*) _clientName.c_str(), _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
 					} else if (_mqttUserSet && !_willMessageSet) {
+						debugPrintln(" - Using user");
+						debugPrintln(String("\t Client Name: " + String(_clientName.c_str())));
+						debugPrintln(String("\t User Name: " + String(_currentNet.mqttUser)));
+						debugPrintln(String("\t Password: " + String(_currentNet.mqttPass)));
 						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass);
 					} else {
+						debugPrintln(" - Using default");
+						debugPrintln(String("\t Client Name: " + String(_clientName.c_str())));
 						connected = client.connect((char*) _clientName.c_str());
 					}
 

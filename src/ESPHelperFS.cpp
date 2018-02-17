@@ -103,7 +103,6 @@ bool ESPHelperFS::loadFile(const char* filename, std::unique_ptr<char[]> &buf){
   }
 
 
-
   //make sure the config isnt too large to store in the JSON container
   size_t size = configFile.size();
   FSdebugPrint("JSON File Size: ");
@@ -442,9 +441,11 @@ bool ESPHelperFS::createConfig( const char* filename,
 
   char portString[10];
   sprintf(portString, "%d", _mqttPort);
-  char qoSString[1];
+
+  char qoSString[10];
   sprintf(qoSString, "%d", _willQoS);
-  char retainString[1];
+
+  char retainString[10];
   sprintf(retainString, "%d", _willRetain);
 
   FSdebugPrintln("creating json");

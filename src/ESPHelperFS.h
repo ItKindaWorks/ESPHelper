@@ -106,8 +106,8 @@ private:
   char otaPass[32];
   char willTopic[64];
   char willMessage[64];
-  char willQoS[1];
-  char willRetain[1];
+  char willQoS[4];
+  char willRetain[4];
 
   netInfo _networkData;
 

@@ -45,13 +45,14 @@ public:
 
     netInfo getConfig();
 
-    
+    void setSpiffsReset(const char* uri);
     
     
 private:
     void handleGet();
     void handlePost();
     void handleNotFound();
+    void handleReset();
 
     ESP8266WebServer *_server;
     ESP8266WebServer _localServer;
@@ -65,10 +66,13 @@ private:
     char _newMqttPass[64];
     int _newMqttPort;
 
-    const char *_pageURI;
+    const char* _resetURI;
+    const char* _pageURI;
 
     netInfo* _fillData;
     bool _preFill = false;
+
+    bool _resetSet = false;
 
     netInfo _config;
     bool _configLoaded = false;

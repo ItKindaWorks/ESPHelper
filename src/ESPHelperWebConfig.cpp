@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "ESPHelperWebConfig.h"
+#include "FS.h"
 
 ESPHelperWebConfig::ESPHelperWebConfig(int port, const char* URI) : _localServer(port){
   _server = &_localServer;
@@ -73,19 +74,30 @@ netInfo ESPHelperWebConfig::getConfig(){
 
 //main config page that allows user to enter in configuration info
 void ESPHelperWebConfig::handleGet() {
+  String showReset;
+
+  if(_resetSet){
+    showReset = "</br></br></br></br></br><form action=\"/reset\" method=\"POST\">\
+    <input type=\"submit\" value=\"Click Here to Reset ESP Filesystem\"> (WARNING: Deletes all files on device!)</form>";
+  }
+  else{
+    showReset = "";
+  }
+
+
   if(_preFill){
     _server->send(200, "text/html", 
     String("<form action=\"" + String(_pageURI) + "\" method=\"POST\">\
-    <input type=\"text\" name=\"hostname\" size=\"64\" placeholder=\"Device Hostname  (Required)\" value=\"" + String(_fillData->hostname) + "\"></br>\
-    <input type=\"text\" name=\"ssid\" size=\"64\" placeholder=\"SSID  (Required)\" value=\"" + String(_fillData->ssid) + "\"></br>\
-    <input type=\"password\" name=\"netPass\" size=\"64\" placeholder=\"Network Password (Previous value used if blank)\"></br>\
-    <input type=\"password\" name=\"otaPassword\" size=\"64\" placeholder=\"OTA Password (Previous value used if blank)\"></br>\
-    <input type=\"text\" name=\"mqttHost\" size=\"64\" placeholder=\"MQTT Host\" value=\"" + String(_fillData->mqttHost) + "\"></br>\
-    <input type=\"text\" name=\"mqttUser\" size=\"64\" placeholder=\"MQTT Username\" value=\"" + String(_fillData->mqttUser) + "\"></br>\
-    <input type=\"text\" name=\"mqttPort\" size=\"64\" placeholder=\"MQTT Port\" value=\"" + String(_fillData->mqttPort) + "\"></br>\
-    <input type=\"password\" name=\"mqttPass\" size=\"64\" placeholder=\"MQTT Password (Previous value used if blank)\"></br>\
+    <input type=\"text\" name=\"hostname\" size=\"64\" maxlength=\"63\" placeholder=\"Device Hostname  (Required)\" value=\"" + String(_fillData->hostname) + "\"></br>\
+    <input type=\"text\" name=\"ssid\" size=\"64\" maxlength=\"63\" placeholder=\"SSID  (Required)\" value=\"" + String(_fillData->ssid) + "\"></br>\
+    <input type=\"password\" name=\"netPass\" size=\"64\" maxlength=\"63\" placeholder=\"Network Password (Previous value used if blank)\"></br>\
+    <input type=\"password\" name=\"otaPassword\" size=\"64\" maxlength=\"63\" placeholder=\"OTA Password (Previous value used if blank)\"></br>\
+    <input type=\"text\" name=\"mqttHost\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Host\" value=\"" + String(_fillData->mqttHost) + "\"></br>\
+    <input type=\"text\" name=\"mqttUser\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Username\" value=\"" + String(_fillData->mqttUser) + "\"></br>\
+    <input type=\"text\" name=\"mqttPort\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Port\" value=\"" + String(_fillData->mqttPort) + "\"></br>\
+    <input type=\"password\" name=\"mqttPass\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Password (Previous value used if blank)\"></br>\
     <input type=\"submit\" value=\"Submit\"></form>\
-    <p>Press Submit to update ESP8266 config file</p>"));
+    <p>Press Submit to update ESP8266 config file</p>" + showReset));
   }
 
 
@@ -93,16 +105,16 @@ void ESPHelperWebConfig::handleGet() {
   else{
     _server->send(200, "text/html", 
     String("<form action=\"" + String(_pageURI) + "\" method=\"POST\">\
-    <input type=\"text\" name=\"hostname\" size=\"64\" placeholder=\"Device Hostname  (Required)\"></br>\
-    <input type=\"text\" name=\"ssid\" size=\"64\" placeholder=\"SSID  (Required)\"></br>\
-    <input type=\"password\" name=\"netPass\" size=\"64\" placeholder=\"Network Password\"></br>\
-    <input type=\"password\" name=\"otaPassword\" size=\"64\" placeholder=\"OTA Password\"></br>\
-    <input type=\"text\" name=\"mqttHost\" size=\"64\" placeholder=\"MQTT Host\"></br>\
-    <input type=\"text\" name=\"mqttUser\" size=\"64\" placeholder=\"MQTT Username\"></br>\
-    <input type=\"text\" name=\"mqttPort\" size=\"64\" placeholder=\"MQTT Port\"></br>\
-    <input type=\"password\" name=\"mqttPass\" size=\"64\" placeholder=\"MQTT Password\"></br>\
+    <input type=\"text\" name=\"hostname\" size=\"64\" maxlength=\"63\" placeholder=\"Device Hostname  (Required)\"></br>\
+    <input type=\"text\" name=\"ssid\" size=\"64\" maxlength=\"63\" placeholder=\"SSID  (Required)\"></br>\
+    <input type=\"password\" name=\"netPass\" size=\"64\" maxlength=\"63\" placeholder=\"Network Password\"></br>\
+    <input type=\"password\" name=\"otaPassword\" size=\"64\" maxlength=\"63\" placeholder=\"OTA Password\"></br>\
+    <input type=\"text\" name=\"mqttHost\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Host\"></br>\
+    <input type=\"text\" name=\"mqttUser\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Username\"></br>\
+    <input type=\"text\" name=\"mqttPort\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Port\"></br>\
+    <input type=\"password\" name=\"mqttPass\" size=\"64\" maxlength=\"63\" placeholder=\"MQTT Password\"></br>\
     <input type=\"submit\" value=\"Submit\"></form>\
-    <p>Press Submit to update ESP8266 config file</p>"));
+    <p>Press Submit to update ESP8266 config file</p>" + showReset));
   }
   
 }
@@ -181,6 +193,20 @@ void ESPHelperWebConfig::handlePost() {
 
 
   _configLoaded = true;
+}
+
+void ESPHelperWebConfig::setSpiffsReset(const char* uri){
+  _resetURI = uri;
+  _server->on(_resetURI, HTTP_POST, [this](){handleReset();});
+  _resetSet = true;
+}
+
+void ESPHelperWebConfig::handleReset(){
+  //tell the user that the config is loaded in and the module is restarting
+  _server->send(200, "text/plain", String("Resetting SPIFFS and restarting with default values"));
+
+  SPIFFS.format();
+  ESP.restart();
 }
 
 void ESPHelperWebConfig::handleNotFound(){

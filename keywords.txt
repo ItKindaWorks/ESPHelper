@@ -46,7 +46,7 @@ getIPAddress 	KEYWORD2
 getNetInfo	KEYWORD2
 setNetInfo	KEYWORD2
 setHopping	KEYWORD2
-listSubscriptions
+listSubscriptions	KEYWORD2
 heartbeat 	KEYWORD2
 enableHeartbeat	KEYWORD2
 disableHeartbeat	KEYWORD2

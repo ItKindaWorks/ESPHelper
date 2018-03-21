@@ -197,7 +197,18 @@ bool ESPHelper::begin(){
 		//as long as an mqtt ip has been set create an instance of PubSub for client
 		if(_mqttSet){
 			//make mqtt client use either the secure or non-secure wifi client depending on the setting
-			if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+			if(_useSecureClient) {
+				client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);
+				if (_caFile) {
+					if(wifiClientSecure.loadCACert(_caFile)) {
+						debugPrintln("Loaded Cert into client");
+					} else {
+						debugPrintln("Unable to load Cert into client");
+					}
+				} else {
+					debugPrintln("No CA file");
+				}
+			}
 			else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
 
 			//set the mqtt message callback if needed
@@ -342,6 +353,18 @@ void ESPHelper::useSecureClient(const char* fingerprint){
 
 	//flag use of secure client
 	_useSecureClient = true;
+}
+
+void ESPHelper::useCustomCaCert(const char* cert){
+	SPIFFS.begin();
+	_caFile = SPIFFS.open(cert, "r");
+	if(!_caFile) {
+		debugPrintln("Couldn't load Cert");
+		return;
+	} else {
+		debugPrint("Loaded Cert");
+		debugPrintln(cert);
+	}
 }
 
 //enables and sets up broadcast mode rather than station mode. This allows users to create a network from the ESP

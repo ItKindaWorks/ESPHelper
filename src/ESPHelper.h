@@ -38,6 +38,7 @@
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+#include "FS.h"
 
 
 
@@ -285,6 +286,8 @@ public:
 
 	void useSecureClient(const char* fingerprint);
 
+	void useCustomCaCert(const char* cert);
+
 	void broadcastMode(const char* ssid, const char* password, const IPAddress ip);
 	void disableBroadcast();
 
@@ -374,6 +377,7 @@ private:
 	WiFiClientSecure wifiClientSecure;
 	const char* _fingerprint;
 	bool _useSecureClient = false;
+	File _caFile;
 
 
 	String _clientName;

@@ -61,6 +61,8 @@ Useful Methods:
 
 * void OTA_setHostname(char* hostname); //give a hostname to the device for OTA identification
 
+* void useCustomCaCert(const char* cert); //path to a DER certificate stored on the SPIFFS filesystem
+
 ToDo:
 -----
 

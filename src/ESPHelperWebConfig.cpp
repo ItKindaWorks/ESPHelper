@@ -134,8 +134,7 @@ void ESPHelperWebConfig::handlePost() {
   }
 
   //if there is an mqtt user/pass/port entered then there better also be a host!
-  if((_server->arg("mqttUser") != NULL || _server->arg("mqttPass") != NULL
-      || _server->arg("mqttPort") != NULL) && _server->arg("mqttHost") == NULL){
+  if((_server->arg("mqttUser") != NULL || _server->arg("mqttPass") != NULL) && _server->arg("mqttHost") == NULL){
 
     _server->send(400, "text/plain", "400: Invalid Request - MQTT info specified without host");  // The request is invalid, so send HTTP status 400
     return;

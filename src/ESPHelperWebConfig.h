@@ -1,6 +1,6 @@
-/*    
+/*
 ESPHelperWebConfig.h
-Copyright (c) 2017 ItKindaWorks All right reserved.
+Copyright (c) 2019 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
 This file is part of ESPHelper
@@ -18,23 +18,42 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
 
 
 #ifndef ESPHELPER_WEBCONFIG_H
 #define ESPHELPER_WEBCONFIG_H
 
-#include <ESP8266WebServer.h>
+
 #include "ESPHelper.h"
-#include <WiFiClient.h>
+
+#ifdef ESP8266
+#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#endif
+
+#ifdef ESP32
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <WiFi.h>
+#endif
+
+#include <WiFiClient.h>
+
+
+
 
 
 class ESPHelperWebConfig{
 
-public:	
+public:
 	ESPHelperWebConfig(int port, const char* URI);  //constructor
+#ifdef ESP8266
     ESPHelperWebConfig(ESP8266WebServer *server, const char* URI);
+#endif
+#ifdef ESP32
+    ESPHelperWebConfig(WebServer *server, const char* URI);
+#endif
 
     bool begin(const char* hostname);
     bool begin();
@@ -46,17 +65,22 @@ public:
     netInfo getConfig();
 
     void setSpiffsReset(const char* uri);
-    
-    
+
+
 private:
     void handleGet();
     void handlePost();
     void handleNotFound();
     void handleReset();
 
+#ifdef ESP8266
     ESP8266WebServer *_server;
     ESP8266WebServer _localServer;
-
+#endif
+#ifdef ESP32
+    WebServer *_server;
+    WebServer _localServer;
+#endif
     char _newSsid[64];
     char _newNetPass[64];
     char _newOTAPass[64];
@@ -78,9 +102,7 @@ private:
     bool _configLoaded = false;
     bool _runningLocal = false;
 
-	
+
 };
 
 #endif
-
-

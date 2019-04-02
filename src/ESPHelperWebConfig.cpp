@@ -1,6 +1,6 @@
-/*    
+/*
 ESPHelperWebConfig.cpp
-Copyright (c) 2017 ItKindaWorks All right reserved.
+Copyright (c) 2019 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
 This file is part of ESPHelper
@@ -21,17 +21,30 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 #include "ESPHelperWebConfig.h"
 #include "FS.h"
 
+#ifdef ESP32
+#include "SPIFFS.h"
+#endif
+
 ESPHelperWebConfig::ESPHelperWebConfig(int port, const char* URI) : _localServer(port){
   _server = &_localServer;
   _runningLocal = true;
   _pageURI = URI;
 }
 
+#ifdef ESP8266
 ESPHelperWebConfig::ESPHelperWebConfig(ESP8266WebServer *server, const char* URI){
   _server = server;
   _runningLocal = false;
   _pageURI = URI;
 }
+#endif
+#ifdef ESP32
+ESPHelperWebConfig::ESPHelperWebConfig(WebServer *server, const char* URI){
+  _server = server;
+  _runningLocal = false;
+  _pageURI = URI;
+}
+#endif
 
 bool ESPHelperWebConfig::begin(const char* _hostname){
   MDNS.begin(_hostname);
@@ -48,7 +61,7 @@ bool ESPHelperWebConfig::begin(){
 
   if(_runningLocal){
     _server->begin(); // Actually start the server
-  }  
+  }
 
 
 	return true;
@@ -86,7 +99,7 @@ void ESPHelperWebConfig::handleGet() {
 
 
   if(_preFill){
-    _server->send(200, "text/html", 
+    _server->send(200, "text/html",
     String("<form action=\"" + String(_pageURI) + "\" method=\"POST\">\
     <input type=\"text\" name=\"hostname\" size=\"64\" maxlength=\"63\" placeholder=\"Device Hostname  (Required)\" value=\"" + String(_fillData->hostname) + "\"></br>\
     <input type=\"text\" name=\"ssid\" size=\"64\" maxlength=\"63\" placeholder=\"SSID  (Required)\" value=\"" + String(_fillData->ssid) + "\"></br>\
@@ -103,7 +116,7 @@ void ESPHelperWebConfig::handleGet() {
 
 
   else{
-    _server->send(200, "text/html", 
+    _server->send(200, "text/html",
     String("<form action=\"" + String(_pageURI) + "\" method=\"POST\">\
     <input type=\"text\" name=\"hostname\" size=\"64\" maxlength=\"63\" placeholder=\"Device Hostname  (Required)\"></br>\
     <input type=\"text\" name=\"ssid\" size=\"64\" maxlength=\"63\" placeholder=\"SSID  (Required)\"></br>\
@@ -116,13 +129,13 @@ void ESPHelperWebConfig::handleGet() {
     <input type=\"submit\" value=\"Submit\"></form>\
     <p>Press Submit to update ESP8266 config file</p>" + showReset));
   }
-  
+
 }
 
 // If a POST request is made to URI /config
-void ESPHelperWebConfig::handlePost() {   
+void ESPHelperWebConfig::handlePost() {
 
-  //make sure that all the arguments exist and that at least an SSID and hostname have been entered                      
+  //make sure that all the arguments exist and that at least an SSID and hostname have been entered
   if( ! _server->hasArg("ssid") || ! _server->hasArg("netPass")
       || ! _server->hasArg("hostname") || ! _server->hasArg("mqttHost")
       || ! _server->hasArg("mqttUser") || ! _server->hasArg("mqttPass")
@@ -142,7 +155,7 @@ void ESPHelperWebConfig::handlePost() {
 
 
   //convert the Strings returned by _server->arg to char arrays that can be entered into netInfo
-  
+
 
   //network pass
   if(_preFill && _server->arg("netPass").length() == 0){
@@ -150,7 +163,7 @@ void ESPHelperWebConfig::handlePost() {
     _newNetPass[sizeof(_newNetPass) - 1] = '\0';
   }
   else{_server->arg("netPass").toCharArray(_newNetPass, sizeof(_newNetPass));}
-  
+
   //mqtt pass
   if(_preFill && _server->arg("mqttPass").length() == 0){
     strncpy(_newMqttPass,_fillData->mqttPass,64);
@@ -164,7 +177,7 @@ void ESPHelperWebConfig::handlePost() {
     _newOTAPass[sizeof(_newNetPass) - 1] = '\0';
   }
   else{_server->arg("otaPassword").toCharArray(_newOTAPass, sizeof(_newOTAPass));}
-    
+
   //other non protected vars
   _server->arg("ssid").toCharArray(_newSsid, sizeof(_newSsid));
   _server->arg("hostname").toCharArray(_newHostname, sizeof(_newHostname));
@@ -172,7 +185,7 @@ void ESPHelperWebConfig::handlePost() {
   _server->arg("mqttUser").toCharArray(_newMqttUser, sizeof(_newMqttUser));
 
   //the port is special because it doesnt get stored as a string so we take care of that
-  
+
   if(_server->arg("mqttPort") != NULL){_newMqttPort = _server->arg("mqttPort").toInt();}
   else{_newMqttPort = 1883;}
 
@@ -180,12 +193,12 @@ void ESPHelperWebConfig::handlePost() {
   //tell the user that the config is loaded in and the module is restarting
   _server->send(200, "text/plain", "Config Info Loaded");
 
-  //enter in the new data 
-  _config = {mqttHost : _newMqttHost,     
-             mqttUser : _newMqttUser,   
-             mqttPass : _newMqttPass,   
+  //enter in the new data
+  _config = {mqttHost : _newMqttHost,
+             mqttUser : _newMqttUser,
+             mqttPass : _newMqttPass,
              mqttPort : _newMqttPort,
-             ssid : _newSsid, 
+             ssid : _newSsid,
              pass : _newNetPass,
              otaPassword : _newOTAPass,
              hostname : _newHostname};

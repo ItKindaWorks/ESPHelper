@@ -1,6 +1,6 @@
 /*
     ESPHelper.h
-    Copyright (c) 2017 ItKindaWorks Inc All right reserved.
+    Copyright (c) 2019 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
 
     This file is part of ESPHelper
@@ -24,16 +24,24 @@
 #ifndef ESP_HELPER_H
 #define ESP_HELPER_H
 
+#ifdef ESP32
+#include <ESPmDNS.h>
+#include <WiFi.h>
+#endif
+
+
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-
 #include <WiFiUdp.h>
+#endif
+
+
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+
 #include "sharedData.h"
-
-
 #include "Metro.h"
 
 // #define VERSION "1-5-6"
@@ -178,12 +186,13 @@ private:
 	void (*_wifiCallback)();
 	bool _wifiCallbackSet = false;
 
-	#ifdef ESP8266
-		std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;
-	#endif
-	#ifdef ESP32
-		void(*_mqttCallback)(char*, uint8_t*, unsigned int) ;
-	#endif
+#ifdef ESP8266
+	std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;
+#endif
+#ifdef ESP32
+	void(*_mqttCallback)(char*, uint8_t*, unsigned int) ;
+#endif
+
 	bool _mqttCallbackSet = false;
 
 	int _connectionStatus = NO_CONNECTION;

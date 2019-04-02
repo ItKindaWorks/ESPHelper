@@ -1,6 +1,6 @@
 /*    
 ESPHelperFS.cpp
-Copyright (c) 2017 ItKindaWorks All right reserved.
+Copyright (c) 2019 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
 This file is part of ESPHelper
@@ -70,6 +70,7 @@ void ESPHelperFS::printFile(){
 
 
 void ESPHelperFS::printFSinfo(){
+#ifdef ESP8266
   FSInfo fs_info;
   SPIFFS.info(fs_info);
   FSdebugPrint("total bytes: ");
@@ -84,6 +85,13 @@ void ESPHelperFS::printFSinfo(){
   FSdebugPrintln(fs_info.maxOpenFiles);
   FSdebugPrint("max path length: ");
   FSdebugPrintln(fs_info.maxPathLength);
+#endif
+#ifdef ESP32
+  FSdebugPrint("total bytes: ");
+  FSdebugPrintln(SPIFFS.totalBytes);
+  FSdebugPrint("used bytes: ");
+  FSdebugPrintln(SPIFFS.usedBytes);
+#endif
 }
 
 

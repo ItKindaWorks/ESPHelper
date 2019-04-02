@@ -1,6 +1,6 @@
 /*
     sharedTypes.h
-    Copyright (c) 2018 ItKindaWorks Inc All right reserved.
+    Copyright (c) 2019 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
 
     This file is part of ESPHelper
@@ -24,7 +24,7 @@
 #ifndef SHARED_TYPES_H
 #define SHARED_TYPES_H
 
-#define VERSION "1-5-7"
+#define VERSION "1-7-0"
 
 
 //Maximum number of subscriptions that can be auto-subscribed

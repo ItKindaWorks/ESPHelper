@@ -1,6 +1,6 @@
 /*    
     ESPHelper.cpp
-    Copyright (c) 2017 ItKindaWorks Inc All right reserved.
+    Copyright (c) 2019 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
 
     This file is part of ESPHelper
@@ -219,6 +219,8 @@ bool ESPHelper::begin(){
 		//ota event handlers
 		ArduinoOTA.onStart([]() {/* ota start code */});
 		ArduinoOTA.onEnd([]() {
+			//give the arduino a bit of time to finish up any remaining network activity
+			delay(500);
 			//on ota end we disconnect from wifi cleanly before restarting.
 			WiFi.softAPdisconnect();
 			WiFi.disconnect();
@@ -269,6 +271,7 @@ void ESPHelper::end(){
 	_connectionStatus = NO_CONNECTION;
 
 }
+
 
 //attempts to load a config file from the filesystem - returns blank netInfo on failure
 //This will also create a new config with default values if none currently exists or is corrupted.
@@ -543,6 +546,7 @@ void ESPHelper::setWifiCallback(void (*callback)()){
 //attempts to connect to wifi & mqtt server if not connected
 void ESPHelper::reconnect() {
 	static int tryCount = 0;
+
 
 	if(reconnectMetro.check() && _connectionStatus != BROADCAST && setConnectionStatus() != FULL_CONNECTION){
 		debugPrintln("Attempting WiFi Connection...");

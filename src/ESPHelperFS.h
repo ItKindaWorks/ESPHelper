@@ -1,6 +1,6 @@
 /*    
 ESPHelperFS.h
-Copyright (c) 2017 ItKindaWorks All right reserved.
+Copyright (c) 2019 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
 
 This file is part of ESPHelper
@@ -27,6 +27,10 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 #include "ESPHelper.h"
 #include <ArduinoJson.h>
 #include "FS.h"
+
+#ifdef ESP32
+#include "SPIFFS.h"
+#endif
 
 // #define DEBUG
 

@@ -1,4 +1,4 @@
-/*    
+/*
 ESPHelperFS.h
 Copyright (c) 2019 ItKindaWorks All right reserved.
 github.com/ItKindaWorks
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 */
-    
+
 
 
 #ifndef ESPHelperFS_H
@@ -59,7 +59,7 @@ public:
 
   void printFile();
 
-  
+
 
   static int8_t validateConfig(const char* filename);
 
@@ -78,9 +78,9 @@ public:
   netInfo getNetInfo();
 
   static bool createConfig(  const char* filename,
-                      const char* _ssid, 
-                      const char* _networkPass, 
-                      const char* _deviceName, 
+                      const char* _ssid,
+                      const char* _networkPass,
+                      const char* _deviceName,
                       const char* _mqttIP,
                       const char* _mqttUser,
                       const char* _mqttPass,
@@ -93,10 +93,10 @@ public:
 
   void printFSinfo();
 
-  
-  static StaticJsonBuffer<JSON_SIZE> *_tmpBufPtr;
+
+  static StaticJsonDocument<JSON_SIZE> *_tmpBufPtr;
 private:
-  static bool loadFile(const char* filename, std::unique_ptr<char[]> &buf);
+  static bool loadFile(const char* filename, JsonDocument* buffer);
 
 
 
@@ -117,22 +117,20 @@ private:
 
   const char* _filename;
 
-  static bool saveConfig(JsonObject& json, const char* filename);
+  static bool saveConfig(JsonDocument json, const char* filename);
 
   const netInfo defaultConfig = { mqttHost : "0.0.0.0",     //can be blank if not using MQTT
                                 mqttUser : "user",   //can be blank
                                 mqttPass : "pass",   //can be blank
                                 mqttPort : 1883,         //default port for MQTT is 1883 - only change if needed.
-                                ssid : "networkSSID", 
+                                ssid : "networkSSID",
                                 pass : "networkPass",
                                 otaPassword : "otaPass",
                                 hostname : "NEW-ESP8266",
 				willTopic : "defaultWillTopic",
 				willMessage : "",
 				willQoS : 1,
-				willRetain : 1}; 
+				willRetain : 1};
 };
 
 #endif
-
-

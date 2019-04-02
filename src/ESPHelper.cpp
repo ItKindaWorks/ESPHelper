@@ -1,4 +1,4 @@
-/*    
+/*
     ESPHelper.cpp
     Copyright (c) 2019 ItKindaWorks Inc All right reserved.
     github.com/ItKindaWorks
@@ -365,11 +365,18 @@ void ESPHelper::broadcastMode(const char* ssid, const char* password, const IPAd
 	//set the ssid and password
 	WiFi.softAP(ssid, password);
 
+	//run the wifi lost callback if we were previously connected to a network
+	if(_wifiLostCallbackSet && _connectionStatus >= WIFI_ONLY){
+		_wifiLostCallback();
+	}
+
 	//update the connection status
 	_connectionStatus = BROADCAST;
 	_broadcastIP = ip;
 	strcpy(_broadcastSSID, ssid);
 	strcpy(_broadcastPASS, password);
+
+
 
 }
 
@@ -543,6 +550,12 @@ void ESPHelper::setWifiCallback(void (*callback)()){
 	_wifiCallbackSet = true;
 }
 
+//sets a custom function to run when connection to wifi is lost
+void ESPHelper::setWifiLostCallback(void (*callback)()){
+	_wifiLostCallback = callback;
+	_wifiLostCallbackSet = true;
+}
+
 //attempts to connect to wifi & mqtt server if not connected
 void ESPHelper::reconnect() {
 	static int tryCount = 0;
@@ -686,6 +699,12 @@ int ESPHelper::setConnectionStatus(){
 				returnVal = FULL_CONNECTION;
 			}
 		}
+
+		//assuming above fails, then wifi is not connected.
+		//if the wifi is not connected and the wifi lost callback has been set, then call it
+		else if(_connectionStatus >= WIFI_ONLY && _wifiLostCallbackSet){
+			_wifiLostCallback();
+		}
 	}
 
 
@@ -814,7 +833,7 @@ netInfo ESPHelper::getNetInfo(){
 }
 
 //return the current SSID
-const char* ESPHelper::getSSID(){			
+const char* ESPHelper::getSSID(){
 	if(_ssidSet && _connectionStatus != BROADCAST){return _currentNet.ssid;}
 	else if(_connectionStatus == BROADCAST){return _broadcastSSID;}
 	return "SSID NOT SET";
@@ -826,7 +845,7 @@ void ESPHelper::setSSID(const char* ssid){
 }
 
 //return the current network password
-const char* ESPHelper::getPASS(){			
+const char* ESPHelper::getPASS(){
 	if(_passSet && _connectionStatus != BROADCAST){return _currentNet.pass;}
 	else if(_connectionStatus == BROADCAST){return _broadcastPASS;}
 	return "PASS NOT SET";
@@ -889,18 +908,18 @@ void ESPHelper::setMQTTQOS(int qos){
 //return the local IP address of the ESP as a string
 String ESPHelper::getIP(){
 	if(_connectionStatus != BROADCAST){
-		return WiFi.localIP().toString();	
+		return WiFi.localIP().toString();
 	}
 	else{
 		return _broadcastIP.toString();
 	}
-	
+
 }
 
 //return the local IP address of the ESP
 IPAddress ESPHelper::getIPAddress(){
 	if(_connectionStatus != BROADCAST){
-		return WiFi.localIP();	
+		return WiFi.localIP();
 	}
 	else{
 		return _broadcastIP;
@@ -1028,4 +1047,3 @@ void ESPHelper::OTA_setHostnameWithVersion(const char* hostname){
 char* ESPHelper::getHostname(){
 	return _hostname;
 }
-

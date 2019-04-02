@@ -107,6 +107,7 @@ public:
 	void setMQTTCallback(MQTT_CALLBACK_SIGNATURE);
 
 	void setWifiCallback(void (*callback)());
+	void setWifiLostCallback(void (*callback)());
 
 	void reconnect();
 
@@ -185,6 +186,10 @@ private:
 
 	void (*_wifiCallback)();
 	bool _wifiCallbackSet = false;
+
+	void (*_wifiLostCallback)();
+	bool _wifiLostCallbackSet = false;
+
 
 #ifdef ESP8266
 	std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;

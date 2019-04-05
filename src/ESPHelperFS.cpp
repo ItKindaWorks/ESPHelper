@@ -21,18 +21,39 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ESPHelperFS.h"
 
-// StaticJsonBuffer<JSON_SIZE>* ESPHelperFS::_tmpBufPtr = NULL;
 
 
+/*
+empty constructor (will assume a file named "/netConfig.json")
+
+input: NA
+output:NA
+*/
 ESPHelperFS::ESPHelperFS() : _filename("/netConfig.json"){
   _networkData = defaultConfig;
 }
 
+
+/*
+constructor with a filename
+
+input: char ptr to a filename to use for loading ESPHelper config data
+output: NA
+*/
 ESPHelperFS::ESPHelperFS(const char* filename){
   _filename = filename;
   _networkData = defaultConfig;
 }
 
+
+/*
+starts the filesystem
+
+input: NA
+output:
+  true on sucessful loading of the FS
+  false on failure to load the FS (usually because of corruption or unformatted partition)
+*/
 bool ESPHelperFS::begin(){
   //load the config file
   if (SPIFFS.begin()) {
@@ -43,14 +64,25 @@ bool ESPHelperFS::begin(){
   return false;
 }
 
+
+/*
+shuts down the filesystem
+
+input: NA
+output: NA
+*/
 void ESPHelperFS::end(){
   FSdebugPrintln("Filesystem Unloaded");
   SPIFFS.end();
 }
 
 
+/*
+prints the contents of a file to the debugger
 
-
+input: NA
+output: NA (serial printing)
+*/
 void ESPHelperFS::printFile(){
   // this opens the file "f.txt" in read-mode
   File f = SPIFFS.open(_filename, "r");
@@ -68,7 +100,12 @@ void ESPHelperFS::printFile(){
 }
 
 
+/*
+debug utility to print out data about the FS
 
+input: NA
+output: NA (serial printing)
+*/
 void ESPHelperFS::printFSinfo(){
 #ifdef ESP8266
   FSInfo fs_info;
@@ -95,7 +132,16 @@ void ESPHelperFS::printFSinfo(){
 }
 
 
-//load the file from FS into var buf
+/*
+loads a JSON file from FS into buffer
+
+input:
+  char ptr to a filename that should be loaded
+  JsonDocument ptr to be used as a buffer for the loaded file
+output:
+  true on successful loading of file and parsing into JSON
+  false if any of the loading/parsing process fails (generally due to corrupt data or improper JSON)
+*/
 bool ESPHelperFS::loadFile(const char* filename, JsonDocument* buffer){
 
   FSdebugPrint("Opening File: ");
@@ -144,6 +190,13 @@ bool ESPHelperFS::loadFile(const char* filename, JsonDocument* buffer){
 
 }
 
+
+/*
+
+input:
+
+output:
+*/
 int8_t ESPHelperFS::validateConfig(const char* filename){
 
 
@@ -176,6 +229,13 @@ int8_t ESPHelperFS::validateConfig(const char* filename){
   return GOOD_CONFIG;
 }
 
+
+/*
+
+input:
+
+output:
+*/
 bool ESPHelperFS::loadNetworkConfig(){
 
   //validate that the config file is good and if not create a new one
@@ -260,6 +320,12 @@ bool ESPHelperFS::loadNetworkConfig(){
 }
 
 
+/*
+
+input:
+
+output:
+*/
 //add a key to a json file
 bool ESPHelperFS::addKey(const char* keyName, const char* value){
   if(_filename != ""){
@@ -268,6 +334,13 @@ bool ESPHelperFS::addKey(const char* keyName, const char* value){
   else{return false;}
 }
 
+
+/*
+
+input:
+
+output:
+*/
 //add a key to a json file
 bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* filename){
   if(!SPIFFS.exists(filename)){
@@ -311,6 +384,13 @@ bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* fil
   return false;
 }
 
+
+/*
+
+input:
+
+output:
+*/
 //read a key from a json file
 String ESPHelperFS::loadKey(const char* keyName){
   if(_filename != ""){
@@ -319,6 +399,13 @@ String ESPHelperFS::loadKey(const char* keyName){
   else {return String();}
 }
 
+
+/*
+
+input:
+
+output:
+*/
 //read a key from a json file
 String ESPHelperFS::loadKey(const char* keyName, const char* filename){
   static String returnString = "";
@@ -345,15 +432,23 @@ String ESPHelperFS::loadKey(const char* keyName, const char* filename){
 }
 
 
+/*
 
+input:
 
-
-
-
+output:
+*/
 netInfo ESPHelperFS::getNetInfo(){
   return _networkData;
 }
 
+
+/*
+
+input:
+
+output:
+*/
 bool ESPHelperFS::createConfig(const char* filename){
   return createConfig(_filename,
                       defaultConfig.ssid,
@@ -371,6 +466,12 @@ bool ESPHelperFS::createConfig(const char* filename){
 }
 
 
+/*
+
+input:
+
+output:
+*/
 bool ESPHelperFS::createConfig(const netInfo* config){
   return createConfig(_filename,
                       config->ssid,
@@ -387,6 +488,13 @@ bool ESPHelperFS::createConfig(const netInfo* config){
                       config->willRetain);
 }
 
+
+/*
+
+input:
+
+output:
+*/
 bool ESPHelperFS::createConfig(const netInfo* config, const char* filename){
   return createConfig(filename,
                       config->ssid,
@@ -403,6 +511,13 @@ bool ESPHelperFS::createConfig(const netInfo* config, const char* filename){
                       config->willRetain);
 }
 
+
+/*
+
+input:
+
+output:
+*/
 bool ESPHelperFS::createConfig( const char* filename,
                                 const char* _ssid,
                                 const char* _networkPass,
@@ -478,6 +593,13 @@ bool ESPHelperFS::createConfig( const char* filename,
   return saveConfig(jsonBuffer, filename);
 }
 
+
+/*
+
+input:
+
+output:
+*/
 bool ESPHelperFS::saveConfig(JsonDocument json, const char* filename) {
   FSdebugPrintln("Saving File...");
 

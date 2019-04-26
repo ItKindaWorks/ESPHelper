@@ -151,7 +151,7 @@ bool ESPHelperFS::loadFile(const char* filename, JsonDocument* buffer){
 
   //check to make sure opening was possible
   if (!configFile) {
-    FSdebugPrintln("Failed to open config file - returning false");
+    FSdebugPrintln("Failed to open config file. Did you forget to use the root '/'? - returning false");
     configFile.close();
     return false;
   }

@@ -17,7 +17,7 @@ Note:
 This library does requre the use of these libraries (so make sure they're installed as well!):
 * [Metro](https://www.pjrc.com/teensy/td_libs_Metro.html)
 * [pubsubclient](https://github.com/knolleary/pubsubclient)
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+* [ArduinoJson 6.x](https://github.com/bblanchon/ArduinoJson)
 
  In addition to those libraries, make sure that you have the ESP core files installed for your platform.
  * [ESP2866 Arduino Core](https://github.com/esp8266/Arduino)

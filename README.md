@@ -20,7 +20,7 @@ This library does requre the use of these libraries (so make sure they're instal
 * [ArduinoJson 6.x](https://github.com/bblanchon/ArduinoJson)
 
  In addition to those libraries, make sure that you have the ESP core files installed for your platform.
- * [ESP2866 Arduino Core](https://github.com/esp8266/Arduino)
+ * [ESP8266 Arduino Core](https://github.com/esp8266/Arduino)
  * [ESP32 Arduino Core](https://github.com/espressif/arduino-esp32)
 
 Useful Methods:

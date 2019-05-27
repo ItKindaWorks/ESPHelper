@@ -601,10 +601,10 @@ bool ESPHelperFS::createConfig( const char* filename,
 
 
   StaticJsonDocument<JSON_SIZE> jsonBuffer;
-  if(loadFile(filename, &jsonBuffer)){
-      FSdebugPrintln("File already exists - will not overwrite. No new file created. Exiting.");
-      return false;
-  }
+  // if(loadFile(filename, &jsonBuffer)){
+  //     FSdebugPrintln("File already exists - will not overwrite. No new file created. Exiting.");
+  //     return false;
+  // }
 
   jsonBuffer["ssid"] = _ssid;
   jsonBuffer["networkPass"] = _networkPass;

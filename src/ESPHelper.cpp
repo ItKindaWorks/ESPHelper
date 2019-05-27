@@ -808,6 +808,7 @@ void ESPHelper::publish(const char* topic, const char* payload){
 
 
 /*
+publish to a specified topic with a given retain level
 
 input:
 	char ptr to topic to publish to
@@ -815,7 +816,6 @@ input:
 	bool whether the MQTT broker should retain the message
 output: NA
 */
-//publish to a specified topic with a given retain level
 void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 	client.publish(topic, payload, retain);
 }

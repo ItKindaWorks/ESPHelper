@@ -149,9 +149,10 @@ bool ESPHelperFS::loadFile(const char* filename, JsonDocument* buffer){
   //open file as read only
   File configFile = SPIFFS.open(filename, "r");
 
+
   //check to make sure opening was possible
   if (!configFile) {
-    FSdebugPrintln("Failed to open config file. Did you forget to use the root '/'? - returning false");
+    FSdebugPrintln("Failed to open config file - returning false");
     configFile.close();
     return false;
   }
@@ -353,7 +354,7 @@ bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* fil
 
   //load the file
   StaticJsonDocument<JSON_SIZE> jsonBuffer;
-  // if(!loadFile(filename, &jsonBuffer)){return false;} //could not load file, return false
+  loadFile(filename, &jsonBuffer);
   JsonObject json = jsonBuffer.as<JsonObject>();
 
   if(!json.isNull()){
@@ -411,6 +412,8 @@ output:
 */
 String ESPHelperFS::loadKey(const char* keyName, const char* filename){
   static String returnString = "";
+  
+  returnString = "";
 
   StaticJsonDocument<JSON_SIZE> jsonBuffer;
   if(!loadFile(filename, &jsonBuffer)){return returnString;}

@@ -353,7 +353,7 @@ bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* fil
 
   //load the file
   StaticJsonDocument<JSON_SIZE> jsonBuffer;
-  if(!loadFile(filename, &jsonBuffer)){return false;} //could not load file, return false
+  // if(!loadFile(filename, &jsonBuffer)){return false;} //could not load file, return false
   JsonObject json = jsonBuffer.as<JsonObject>();
 
   if(!json.isNull()){

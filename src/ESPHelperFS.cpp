@@ -84,8 +84,19 @@ input: NA
 output: NA (serial printing)
 */
 void ESPHelperFS::printFile(){
+    printFile(_filename)
+}
+
+
+/*
+prints the contents of a file to the debugger
+
+input: NA
+output: NA (serial printing)
+*/
+void ESPHelperFS::printFile(const char* filename){
   // this opens the file "f.txt" in read-mode
-  File f = SPIFFS.open(_filename, "r");
+  File f = SPIFFS.open(filename, "r");
 
   if(f) {
     // we could open the file

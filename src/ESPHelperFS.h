@@ -58,6 +58,7 @@ public:
   static void end();
 
   void printFile();
+  static void printFile(const char* filename);
 
 
 

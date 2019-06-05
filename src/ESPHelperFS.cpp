@@ -84,7 +84,7 @@ input: NA
 output: NA (serial printing)
 */
 void ESPHelperFS::printFile(){
-    printFile(_filename)
+    printFile(_filename);
 }
 
 

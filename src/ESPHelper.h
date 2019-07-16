@@ -190,13 +190,13 @@ private:
 	void (*_wifiLostCallback)();
 	bool _wifiLostCallbackSet = false;
 
-
-#ifdef ESP8266
 	std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;
-#endif
-#ifdef ESP32
-	void(*_mqttCallback)(char*, uint8_t*, unsigned int) ;
-#endif
+// #ifdef ESP8266
+// 	std::function<void(char*, uint8_t*, unsigned int)> _mqttCallback;
+// #endif
+// #ifdef ESP32
+// 	void(*_mqttCallback)(char*, uint8_t*, unsigned int) ;
+// #endif
 
 	bool _mqttCallbackSet = false;
 

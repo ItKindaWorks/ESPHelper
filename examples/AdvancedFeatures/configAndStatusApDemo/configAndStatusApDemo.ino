@@ -24,6 +24,13 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 #include "ESPHelperWebConfig.h"
 #include "Metro.h"
 
+
+//enable this to allow the device to reset if it goes into broadcast mode
+//for more than a set amount of time (3 min by default). This is useful
+//in environments where the device has a weak network signal and experiences
+//occasional dropouts. 
+bool BROADCAST_TIMEOUT_EN = false;
+
 netInfo config;
 ESPHelper myESP;
 
@@ -45,12 +52,14 @@ netInfo homeNet = { .mqttHost = "YOUR MQTT-IP",     //can be blank if not using 
 
 //timeout before starting AP mode for configuration
 Metro connectTimeout = Metro(20000);
+Metro broadcastModeTimeout = Metro(180000);
 bool timeout = false;
 
 //AP moade setup info
 const char* broadcastSSID = "ESP-Hotspot";
 const char* broadcastPASS = "";
 IPAddress broadcastIP = {192, 168, 1, 1};
+
 
 
 
@@ -105,6 +114,12 @@ void loop(void){
 
 
 void manageESPHelper(int wifiStatus){
+  if (BROADCAST_TIMEOUT_EN && wifiStatus == BROADCAST && broadcastModeTimeout.check())
+  {
+     Serial.println("BROADCAST mode timeout and reset ESP");
+     ESP.reset();
+     delay(5000);
+  } 
   //if the unit is broadcasting or connected to wifi then reset the timeout vars
   if(wifiStatus == BROADCAST || wifiStatus >= WIFI_ONLY){
     connectTimeout.reset();
@@ -192,6 +207,7 @@ void checkForWifiTimeout(){
       myESP.OTA_setPassword(config.otaPassword);
       myESP.OTA_setHostnameWithVersion(config.hostname);
       myESP.OTA_enable();
+      broadcastModeTimeout.reset();
     }
 }
 

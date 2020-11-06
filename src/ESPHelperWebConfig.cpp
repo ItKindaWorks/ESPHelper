@@ -105,7 +105,7 @@ void ESPHelperWebConfig::handleGet() {
     _server->send(200, "text/html",
     String("<header>\
   	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/>\
-  	<title>Sistem configuration</title>\
+  	<title>System Configuration</title>\
   	<style body=\"text-align:center;\"font-family:verdana;\"></style>\
   	</header>\
   	<body style=\"background-color:#00dfff;\"><font style=\"font-family:verdana;\">\
@@ -117,7 +117,7 @@ void ESPHelperWebConfig::handleGet() {
     <input type=\"text\" name=\"hostname\" size=\"45\" maxlength=\"63\" placeholder=\"Device Hostname  (Required)\" value=\"" + String(_fillData->hostname) + "\"></br>\
     SSID:</br>\
     <input type=\"text\" name=\"ssid\" size=\"45\" maxlength=\"63\" placeholder=\"SSID  (Required)\" value=\"" + String(_fillData->ssid) + "\"></br>\
-    SSIS Password:</br>\
+    SSID Password:</br>\
     <input type=\"password\" name=\"netPass\" size=\"45\" maxlength=\"63\" placeholder=\"Network Password (Previous value used if blank)\"></br>\
     OTA Password:</br>\
     <input type=\"password\" name=\"otaPassword\" size=\"45\" maxlength=\"63\" placeholder=\"OTA Password (Previous value used if blank)\"></br>\
@@ -140,7 +140,7 @@ void ESPHelperWebConfig::handleGet() {
     _server->send(200, "text/html",
     String("<header>\
   	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/>\
-  	<title>Sistem configuration</title>\
+  	<title>System Configuration</title>\
   	<style body=\"text-align:center;\"font-family:verdana;\"></style>\
   	</header>\
   	<body style=\"background-color:#00dfff;\"><font style=\"font-family:verdana;\">\
@@ -152,7 +152,7 @@ void ESPHelperWebConfig::handleGet() {
     <input type=\"text\" name=\"hostname\" size=\"45\" maxlength=\"63\" placeholder=\"Device Hostname  (Required)\"></br>\
     SSID:</br>\
     <input type=\"text\" name=\"ssid\" size=\"45\" maxlength=\"63\" placeholder=\"SSID  (Required)\"></br>\
-    SSIS Password:</br>\
+    SSID Password:</br>\
     <input type=\"password\" name=\"netPass\" size=\"45\" maxlength=\"63\" placeholder=\"Network Password\"></br>\
     OTA Password:</br>\
     <input type=\"password\" name=\"otaPassword\" size=\"45\" maxlength=\"63\" placeholder=\"OTA Password\"></br>\

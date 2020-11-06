@@ -44,7 +44,6 @@
 #include "sharedData.h"
 #include "Metro.h"
 
-// #define VERSION "1-5-6"
 
 // #define DEBUG
 

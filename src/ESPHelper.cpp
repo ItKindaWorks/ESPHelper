@@ -480,6 +480,7 @@ input: char ptr for a filename
 output: netInfo struct loaded from FS
 */
 netInfo ESPHelper::loadConfigFile(const char* filename){
+	//initialize the loaded var to false until we load it from memory
 	bool configLoaded = false;
 	netInfo returnConfig;
 

@@ -337,7 +337,7 @@ output:
   false on failure to add key (either because the file does not exist/not set or because JSON file size/corruption issues)
 */
 bool ESPHelperFS::addKey(const char* keyName, const char* value){
-  if(_filename != ""){
+  if(_filename[0] != '\0'){
     return addKey(keyName, value, _filename);
   }
   else{return false;}
@@ -405,7 +405,7 @@ output:
   String holding the data stored in the key (blank string on failure to load)
 */
 String ESPHelperFS::loadKey(const char* keyName){
-  if(_filename != ""){
+  if(_filename[0] != '\0'){
     return loadKey(keyName, _filename);
   }
   else {return String();}

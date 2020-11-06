@@ -118,7 +118,7 @@ private:
 
   const char* _filename;
 
-  static bool saveConfig(JsonDocument json, const char* filename);
+  static bool saveConfig(JsonDocument& json, const char* filename);
 
   const netInfo defaultConfig = { mqttHost : "0.0.0.0",     //can be blank if not using MQTT
                                 mqttUser : "user",   //can be blank

@@ -649,7 +649,7 @@ output:
   true on sucessful save
   false on failure to save due to failure to open file for writing. Probably FS corruption
 */
-bool ESPHelperFS::saveConfig(JsonDocument json, const char* filename) {
+bool ESPHelperFS::saveConfig(JsonDocument& json, const char* filename) {
   FSdebugPrintln("Saving File...");
 
   if(SPIFFS.exists(filename)){

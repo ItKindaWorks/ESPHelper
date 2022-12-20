@@ -56,7 +56,7 @@ output:
 */
 bool ESPHelperFS::begin(){
   //load the config file
-  if (SPIFFS.begin()) {
+  if (LittleFS.begin()) {
     // printFSinfo();
     FSdebugPrintln("Loaded Filesystem");
     return true;
@@ -73,7 +73,7 @@ output: NA
 */
 void ESPHelperFS::end(){
   FSdebugPrintln("Filesystem Unloaded");
-  SPIFFS.end();
+  LittleFS.end();
 }
 
 
@@ -96,7 +96,7 @@ output: NA (serial printing)
 */
 void ESPHelperFS::printFile(const char* filename){
   // this opens the file "f.txt" in read-mode
-  File f = SPIFFS.open(filename, "r");
+  File f = LittleFS.open(filename, "r");
 
   if(f) {
     // we could open the file
@@ -120,7 +120,7 @@ output: NA (serial printing)
 void ESPHelperFS::printFSinfo(){
 #ifdef ESP8266
   FSInfo fs_info;
-  SPIFFS.info(fs_info);
+  LittleFS.info(fs_info);
   FSdebugPrint("total bytes: ");
   FSdebugPrintln(fs_info.totalBytes);
   FSdebugPrint("used bytes: ");
@@ -136,9 +136,9 @@ void ESPHelperFS::printFSinfo(){
 #endif
 #ifdef ESP32
   FSdebugPrint("total bytes: ");
-  FSdebugPrintln(SPIFFS.totalBytes);
+  FSdebugPrintln(LittleFS.totalBytes);
   FSdebugPrint("used bytes: ");
-  FSdebugPrintln(SPIFFS.usedBytes);
+  FSdebugPrintln(LittleFS.usedBytes);
 #endif
 }
 
@@ -158,7 +158,7 @@ bool ESPHelperFS::loadFile(const char* filename, JsonDocument* buffer){
   FSdebugPrint("Opening File: ");
   FSdebugPrintln(filename);
   //open file as read only
-  File configFile = SPIFFS.open(filename, "r");
+  File configFile = LittleFS.open(filename, "r");
 
 
   //check to make sure opening was possible
@@ -358,8 +358,8 @@ output:
 bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* filename){
 
   //if the file does not exist open the file for writing (create it) and then close it.
-  if(!SPIFFS.exists(filename)){
-    File configFile = SPIFFS.open(filename, "w");
+  if(!LittleFS.exists(filename)){
+    File configFile = LittleFS.open(filename, "w");
     configFile.close();
   }
 
@@ -652,14 +652,14 @@ output:
 bool ESPHelperFS::saveConfig(JsonDocument& json, const char* filename) {
   FSdebugPrintln("Saving File...");
 
-  if(SPIFFS.exists(filename)){
-    SPIFFS.remove(filename);
+  if(LittleFS.exists(filename)){
+    LittleFS.remove(filename);
   }
 
   FSdebugPrintln("Opening File as write only");
 
 
-  File configFile = SPIFFS.open(filename, "w");
+  File configFile = LittleFS.open(filename, "w");
   if (!configFile) {
     FSdebugPrintln("Failed to open config file for writing");
     return false;

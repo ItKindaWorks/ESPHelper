@@ -39,11 +39,15 @@
 
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
+
+
 #include <WiFiClientSecure.h>
 
 #include "sharedData.h"
 #include "Metro.h"
 
+
+#define PUB_SUB_VERSION 27
 
 // #define DEBUG
 
@@ -153,6 +157,8 @@ public:
 	void OTA_setHostname(const char* hostname);
 	void OTA_setHostnameWithVersion(const char* hostname);
 	char* getHostname();
+	PubSubClient* getMQTTClient();
+	bool setMQTTBuffer(int size);
 
 private:
 

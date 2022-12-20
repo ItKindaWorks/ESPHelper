@@ -26,11 +26,12 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ESPHelper.h"
 #include <ArduinoJson.h>
-#include "FS.h"
+// #include "FS.h"
+#include "LittleFS.h"
 
-#ifdef ESP32
-#include "SPIFFS.h"
-#endif
+// #ifdef ESP32
+// #include "SPIFFS.h"
+// #endif
 
 // #define DEBUG
 

@@ -967,6 +967,7 @@ void ESPHelper::reconnect() {
 					if (connected) {
 						debugPrintln(" -- Connected");
 
+						#if ESP_SDK_VERSION_MAJOR > 2
 						//if using https, verify the fingerprint of the server before setting full connection (return on fail)
 						if(_useSecureClient){
 							if (wifiClientSecure.verify(_fingerprint, _currentNet.mqttHost)) {
@@ -976,6 +977,9 @@ void ESPHelper::reconnect() {
 								return;
 							}
 						}
+						#else
+						if(_useSecureClient){debugPrintln("Certificate Not Supported on this SDK Version. Must use SDK 2.x.x");}
+						#endif
 
 						_connectionStatus = FULL_CONNECTION;
 						resubscribe();
@@ -1602,4 +1606,34 @@ output:
 */
 char* ESPHelper::getHostname(){
 	return _hostname;
+}
+
+
+/*
+returns internal pubsubclient ptr (use with caution)
+
+input: NA
+output: 
+	pubsubclient ptr
+*/
+PubSubClient* ESPHelper::getMQTTClient(){
+	// PubSubClient* tmp = &client;
+	return &client;
+}
+
+
+/*
+sets a new buffer size for mqtt messages in/out
+
+input: int bytes of how large the buffer should be
+output: 
+	true: success
+	false: failure
+*/
+bool ESPHelper::setMQTTBuffer(int size){
+	#if PUB_SUB_VERSION >= 28
+		return client.setBufferSize(size);
+	#else
+		return false;
+	#endif
 }

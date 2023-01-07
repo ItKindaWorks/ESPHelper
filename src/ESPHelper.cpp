@@ -926,6 +926,11 @@ void ESPHelper::reconnect() {
 				if (!client.connected() && timeout < 5) {
 					debugPrint("Attemping MQTT connection");
 
+					
+					client.disconnect();
+					if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+					else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
+
 
 					int connected = 0;
 

@@ -136,9 +136,9 @@ void ESPHelperFS::printFSinfo(){
 #endif
 #ifdef ESP32
   FSdebugPrint("total bytes: ");
-  FSdebugPrintln(LittleFS.totalBytes);
+  FSdebugPrintln(LittleFS.totalBytes());
   FSdebugPrint("used bytes: ");
-  FSdebugPrintln(LittleFS.usedBytes);
+  FSdebugPrintln(LittleFS.usedBytes());
 #endif
 }
 

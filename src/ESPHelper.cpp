@@ -530,11 +530,12 @@ output:
 	false on failure
 */
 bool ESPHelper::saveConfigFile(const netInfo config, const char* filename){
-
+	
 	//init ESPHelper FS and begin
 	ESPHelperFS configLoader(filename);
 	if(configLoader.begin()){
 		configLoader.createConfig(&config);
+		
 		configLoader.end();
 		return true;
 	}

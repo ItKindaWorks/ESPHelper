@@ -897,6 +897,10 @@ void ESPHelper::reconnect() {
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
 
+			#ifdef ESP32
+			reconnect();
+			#endif
+
 			//increment try count each time it cannot connect (this is used to determine when to hop to a new network)
 			tryCount++;
 			if(tryCount == 20){
@@ -1129,14 +1133,22 @@ void ESPHelper::updateNetwork(){
 	debugPrintln("\tDisconnecting from WiFi");
 	WiFi.disconnect();
 	debugPrintln("\tAttempting to begin on new network");
-
+	
 	//set the wifi mode
 	WiFi.mode(WIFI_STA);
+
+	#ifdef ESP32
+	WiFi.setSleep(false);
+	#endif
 
 	//connect to the network
 	if(_passSet && _ssidSet){WiFi.begin(_currentNet.ssid, _currentNet.pass);}
 	else if(_ssidSet){WiFi.begin(_currentNet.ssid);}
 	else{WiFi.begin("NO_SSID_SET");}
+
+	#ifdef ESP32
+	WiFi.setAutoReconnect(true);
+	#endif
 
 	debugPrintln("\tSetting new MQTT server");
 	//setup the mqtt broker info

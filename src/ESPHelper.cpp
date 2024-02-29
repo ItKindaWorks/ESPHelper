@@ -377,7 +377,11 @@ output:
 bool ESPHelper::begin(){
 	if(_ssidSet){
 		// Generate client name based on MAC address and last 8 bits of microsecond counter
+		#ifdef ESP8266
 		_clientName += "esp8266-";
+		#else
+		_clientName += "esp32-";
+		#endif
 		uint8_t mac[6];
 		WiFi.macAddress(mac);
 		_clientName += macToStr(mac);

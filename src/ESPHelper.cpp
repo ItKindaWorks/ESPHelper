@@ -386,6 +386,8 @@ bool ESPHelper::begin(){
 		WiFi.mode(WIFI_STA);
 		if(_passSet){WiFi.begin(_currentNet.ssid, _currentNet.pass);}
 		else{WiFi.begin(_currentNet.ssid);}
+		WiFi.setAutoReconnect(true);
+		WiFi.setSleep(false);
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
 		if(_mqttSet){
@@ -899,6 +901,8 @@ void ESPHelper::reconnect() {
 
 			#ifdef ESP32
 			reconnect();
+			#else
+			//WiFi.reconnect();
 			#endif
 
 			//increment try count each time it cannot connect (this is used to determine when to hop to a new network)
@@ -1137,18 +1141,15 @@ void ESPHelper::updateNetwork(){
 	//set the wifi mode
 	WiFi.mode(WIFI_STA);
 
-	#ifdef ESP32
-	WiFi.setSleep(false);
-	#endif
-
 	//connect to the network
 	if(_passSet && _ssidSet){WiFi.begin(_currentNet.ssid, _currentNet.pass);}
 	else if(_ssidSet){WiFi.begin(_currentNet.ssid);}
 	else{WiFi.begin("NO_SSID_SET");}
-
-	#ifdef ESP32
+	
+	WiFi.setSleep(false);
+	//#ifdef ESP32
 	WiFi.setAutoReconnect(true);
-	#endif
+	//#endif
 
 	debugPrintln("\tSetting new MQTT server");
 	//setup the mqtt broker info

@@ -162,6 +162,8 @@ public:
 
 	String macToStr(const uint8_t* mac);
 
+	void resubscribe();
+
 private:
 
 	void init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
@@ -169,11 +171,9 @@ private:
 
 	void changeNetwork();
 
-	
-
 	bool checkParams();
 
-	void resubscribe();
+	
 
 	int setConnectionStatus();
 

@@ -378,9 +378,9 @@ bool ESPHelper::begin(){
 	if(_ssidSet){
 		// Generate client name based on MAC address and last 8 bits of microsecond counter
 		#ifdef ESP8266
-		_clientName += "esp8266-";
+		_clientName = "esp8266-";
 		#else
-		_clientName += "esp32-";
+		_clientName = "esp32-";
 		#endif
 		uint8_t mac[6];
 		WiFi.macAddress(mac);
@@ -464,6 +464,7 @@ void ESPHelper::end(){
 	ESPHelperFS::end();
 	OTA_disable();
 	client.disconnect();
+	delay(20);
 	WiFi.softAPdisconnect();
 	WiFi.disconnect();
 
@@ -697,7 +698,7 @@ bool ESPHelper::subscribe(const char* topic, int qos){
 	if(_connectionStatus == FULL_CONNECTION){
 		//set the return value to the output of subscribe
 		bool returnVal = client.subscribe(topic, qos);
-
+		//Serial.printf("Subscribe to: %s - %s\n", topic, returnVal == true ? "Success" : "Failure");
 		//loop mqtt client
 		client.loop();
 		return returnVal;
@@ -984,7 +985,7 @@ void ESPHelper::reconnect() {
 					//if connected, subscribe to the topic(s) we want to be notified about
 					if (connected) {
 						debugPrintln(" -- Connected");
-
+						
 						#if ESP_SDK_VERSION_MAJOR > 2
 						//if using https, verify the fingerprint of the server before setting full connection (return on fail)
 						if(_useSecureClient){

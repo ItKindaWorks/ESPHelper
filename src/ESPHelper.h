@@ -39,6 +39,8 @@
 
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include <StreamUtils.h>
 
 
 #include <WiFiClientSecure.h>
@@ -105,6 +107,8 @@ public:
 
 	void publish(const char* topic, const char* payload);
 	void publish(const char* topic, const char* payload, bool retain);
+	boolean publishJson(const char* topic, JsonDocument& doc, bool retain);
+
 
 	bool setCallback(MQTT_CALLBACK_SIGNATURE);
 	void setMQTTCallback(MQTT_CALLBACK_SIGNATURE);

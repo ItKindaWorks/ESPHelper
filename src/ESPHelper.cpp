@@ -829,6 +829,15 @@ void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 	client.publish(topic, payload, retain);
 }
 
+boolean ESPHelper::publishJson(const char* topic, JsonDocument& doc, bool retain){
+	client.beginPublish(topic, measureJsonPretty(doc), retain);
+	BufferingPrint bufferedClient(client, 32);
+	serializeJsonPretty(doc, bufferedClient);
+	bufferedClient.flush();
+	client.endPublish();
+	return true;
+}
+
 
 /*
 set the callback function for MQTT

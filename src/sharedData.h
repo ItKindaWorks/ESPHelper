@@ -24,7 +24,7 @@
 #ifndef SHARED_TYPES_H
 #define SHARED_TYPES_H
 
-#define VERSION "1-7-12"
+#define VERSION "1-7-13"
 
 
 //Maximum number of subscriptions that can be auto-subscribed

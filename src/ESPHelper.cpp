@@ -173,6 +173,9 @@ ESPHelper::ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex){
 	//disable ota by default
 	_useOTA = false;
 
+	
+	client = new PubSubClient();
+
 	netInfo* tmp = netList[constrain(_currentIndex, 0, _netCount)];
 	init(tmp->ssid, tmp->pass, tmp->mqttHost, tmp->mqttUser, tmp->mqttPass, tmp->mqttPort, tmp->willTopic, tmp->willMessage, tmp->willQoS, tmp->willRetain);
 }
@@ -395,22 +398,24 @@ bool ESPHelper::begin(){
 
 		//as long as an mqtt ip has been set create an instance of PubSub for client
 		if(_mqttSet){
+			delete client;
 			//make mqtt client use either the secure or non-secure wifi client depending on the setting
-			if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
-			else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
+			if(_useSecureClient){client = new PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+			else{client = new PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
 
 			//set the mqtt message callback if needed
 			if(_mqttCallbackSet){
-				client.setCallback(_mqttCallback);
+				client->setCallback(_mqttCallback);
 			}
 		}
 
 		//define a dummy instance of mqtt so that it is instantiated if no mqtt ip is set
 		else{
+			delete client;
 			//make mqtt client use either the secure or non-secure wifi client depending on the setting
 			//(this shouldnt be needed if making a dummy connection since the idea would be that there wont be mqtt in this case)
-			if(_useSecureClient){client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClientSecure);}
-			else{client = PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
+			if(_useSecureClient){client = new PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClientSecure);}
+			else{client = new PubSubClient("192.0.2.0", _currentNet.mqttPort, wifiClient);}
 
 		}
 
@@ -435,7 +440,7 @@ bool ESPHelper::begin(){
 
 		//initially attempt to connect to wifi when we begin (but only block for 2 seconds before timing out)
 		int timeout = 0;	//counter for begin connection attempts
-		while (((!client.connected() && _mqttSet) || WiFi.status() != WL_CONNECTED) && timeout < 200 ) {	//max 2 sec before timeout
+		while (((!client->connected() && _mqttSet) || WiFi.status() != WL_CONNECTED) && timeout < 200 ) {	//max 2 sec before timeout
 			reconnect();
 			delay(10);
 			timeout++;
@@ -463,8 +468,9 @@ output: NA
 void ESPHelper::end(){
 	ESPHelperFS::end();
 	OTA_disable();
-	client.disconnect();
+	client->disconnect();
 	delay(20);
+	delete client;
 	WiFi.softAPdisconnect();
 	WiFi.disconnect();
 
@@ -569,7 +575,11 @@ void ESPHelper::useSecureClient(const char* fingerprint){
 	}
 
 	//if use of secure connection is set retroactivly (after begin), then re-instantiate client
-	if(_hasBegun){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+	if(_hasBegun){
+		delete client;
+		client = new PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);
+	}
+
 
 	//flag use of secure client
 	_useSecureClient = true;
@@ -652,7 +662,7 @@ int ESPHelper::loop(){
 	if(_ssidSet){
 
 		//check for good connections and attempt a reconnect if needed
-		if (((_mqttSet && !client.connected()) || setConnectionStatus() < WIFI_ONLY) && _connectionStatus != BROADCAST) {
+		if (((_mqttSet && !client->connected()) || setConnectionStatus() < WIFI_ONLY) && _connectionStatus != BROADCAST) {
 			reconnect();
 		}
 
@@ -660,7 +670,7 @@ int ESPHelper::loop(){
 		if(_connectionStatus >= BROADCAST){
 
 			//run the MQTT loop if we have a full connection
-			if(_connectionStatus == FULL_CONNECTION){client.loop();}
+			if(_connectionStatus == FULL_CONNECTION){client->loop();}
 
 			//run the heartbeat
 			heartbeat();
@@ -697,10 +707,10 @@ output:
 bool ESPHelper::subscribe(const char* topic, int qos){
 	if(_connectionStatus == FULL_CONNECTION){
 		//set the return value to the output of subscribe
-		bool returnVal = client.subscribe(topic, qos);
+		bool returnVal = client->subscribe(topic, qos);
 		//Serial.printf("Subscribe to: %s - %s\n", topic, returnVal == true ? "Success" : "Failure");
 		//loop mqtt client
-		client.loop();
+		client->loop();
 		return returnVal;
 	}
 
@@ -777,7 +787,7 @@ bool ESPHelper::removeSubscription(const char* topic){
 				_subscriptions[i].isUsed = false;
 
 				//unsubscribe
-				client.unsubscribe(_subscriptions[i].topic);
+				client->unsubscribe(_subscriptions[i].topic);
 				returnVal = true;
 				break;
 			}
@@ -799,7 +809,7 @@ output
 
 */
 bool ESPHelper::unsubscribe(const char* topic){
-	return client.unsubscribe(topic);
+	return client->unsubscribe(topic);
 }
 
 
@@ -826,15 +836,16 @@ input:
 output: NA
 */
 void ESPHelper::publish(const char* topic, const char* payload, bool retain){
-	client.publish(topic, payload, retain);
+	client->publish(topic, payload, retain);
 }
 
 boolean ESPHelper::publishJson(const char* topic, JsonDocument& doc, bool retain){
-	client.beginPublish(topic, measureJsonPretty(doc), retain);
-	BufferingPrint bufferedClient(client, 32);
+	client->beginPublish(topic, measureJsonPretty(doc), retain);
+	BufferingPrint bufferedClient(*client, 32);
 	serializeJsonPretty(doc, bufferedClient);
 	bufferedClient.flush();
-	client.endPublish();
+	// &bufferedClient->flush();
+	client->endPublish();
 	return true;
 }
 
@@ -851,7 +862,7 @@ void ESPHelper::setMQTTCallback(MQTT_CALLBACK_SIGNATURE){
 
 	//only set the callback if using mqtt AND the system has already been started. Otherwise just save it for later
 	if(_hasBegun && _mqttSet) {
-		client.setCallback(_mqttCallback);
+		client->setCallback(_mqttCallback);
 	}
 	_mqttCallbackSet = true;
 }
@@ -946,13 +957,15 @@ void ESPHelper::reconnect() {
 			if(_mqttSet){
 
 				static int timeout = 0;	//allow a max of 5 mqtt connection attempts before timing out
-				if (!client.connected() && timeout < 5) {
+				if (!client->connected() && timeout < 5) {
 					debugPrint("Attemping MQTT connection");
 
 					
-					client.disconnect();
-					if(_useSecureClient){client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
-					else{client = PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
+					client->disconnect();
+					delete client;
+					
+					if(_useSecureClient){client = new PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClientSecure);}
+					else{client = new PubSubClient(_currentNet.mqttHost, _currentNet.mqttPort, wifiClient);}
 
 
 					int connected = 0;
@@ -967,7 +980,7 @@ void ESPHelper::reconnect() {
 						debugPrintln(String("\t Will QOS: " + String(_currentNet.willQoS)));
 						debugPrintln(String("\t Will Retain?: " + String(_currentNet.willRetain)));
 						debugPrintln(String("\t Will Message: " + String(_currentNet.willMessage)));
-						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
+						connected = client->connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass, _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
 					}
 
 					//connect to mqtt without credentials
@@ -978,17 +991,17 @@ void ESPHelper::reconnect() {
 						debugPrintln(String("\t Will QOS: " + String(_currentNet.willQoS)));
 						debugPrintln(String("\t Will Retain?: " + String(_currentNet.willRetain)));
 						debugPrintln(String("\t Will Message: " + String(_currentNet.willMessage)));
-						connected = client.connect((char*) _clientName.c_str(), _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
+						connected = client->connect((char*) _clientName.c_str(), _currentNet.willTopic, (int) _currentNet.willQoS, _currentNet.willRetain, (char*) _currentNet.willMessage);
 					} else if (_mqttUserSet && !_willMessageSet) {
 						debugPrintln(" - Using user");
 						debugPrintln(String("\t Client Name: " + String(_clientName.c_str())));
 						debugPrintln(String("\t User Name: " + String(_currentNet.mqttUser)));
 						debugPrintln(String("\t Password: " + String(_currentNet.mqttPass)));
-						connected = client.connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass);
+						connected = client->connect((char*) _clientName.c_str(), _currentNet.mqttUser, _currentNet.mqttPass);
 					} else {
 						debugPrintln(" - Using default");
 						debugPrintln(String("\t Client Name: " + String(_clientName.c_str())));
-						connected = client.connect((char*) _clientName.c_str());
+						connected = client->connect((char*) _clientName.c_str());
 					}
 
 					//if connected, subscribe to the topic(s) we want to be notified about
@@ -1021,7 +1034,7 @@ void ESPHelper::reconnect() {
 				}
 
 				//if we still cant connect to mqtt after 10 attempts increment the try count
-				if(timeout >= 5 && !client.connected()){
+				if(timeout >= 5 && !client->connected()){
 					timeout = 0;
 					tryCount++;
 					if(tryCount == 20){
@@ -1063,7 +1076,7 @@ int ESPHelper::setConnectionStatus(){
 			returnVal = WIFI_ONLY;
 
 			//if mqtt is connected as well then set the status to full connection
-			if(client.connected()){
+			if(client->connected()){
 				returnVal = FULL_CONNECTION;
 			}
 		}
@@ -1167,8 +1180,8 @@ void ESPHelper::updateNetwork(){
 
 	debugPrintln("\tSetting new MQTT server");
 	//setup the mqtt broker info
-	if(_mqttSet){client.setServer(_currentNet.mqttHost, _currentNet.mqttPort);}
-	else{client.setServer("192.0.2.0", 1883);}
+	if(_mqttSet){client->setServer(_currentNet.mqttHost, _currentNet.mqttPort);}
+	else{client->setServer("192.0.2.0", 1883);}
 
 	debugPrintln("\tDone - Ready for next reconnect attempt");
 }
@@ -1651,7 +1664,7 @@ output:
 */
 PubSubClient* ESPHelper::getMQTTClient(){
 	// PubSubClient* tmp = &client;
-	return &client;
+	return client;
 }
 
 
@@ -1665,7 +1678,7 @@ output:
 */
 bool ESPHelper::setMQTTBuffer(int size){
 	#if PUB_SUB_VERSION >= 28
-		return client.setBufferSize(size);
+		return client->setBufferSize(size);
 	#else
 		return false;
 	#endif

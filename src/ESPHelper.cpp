@@ -1007,7 +1007,7 @@ void ESPHelper::reconnect() {
 					//if connected, subscribe to the topic(s) we want to be notified about
 					if (connected) {
 						debugPrintln(" -- Connected");
-						
+
 						#if ESP_SDK_VERSION_MAJOR > 2
 						//if using https, verify the fingerprint of the server before setting full connection (return on fail)
 						if(_useSecureClient){
@@ -1021,6 +1021,11 @@ void ESPHelper::reconnect() {
 						#else
 						if(_useSecureClient){debugPrintln("Certificate Not Supported on this SDK Version. Must use SDK 2.x.x");}
 						#endif
+
+						if(_mqttCallbackSet){
+							debugPrintln("Setting MQTT callback");
+							client->setCallback(_mqttCallback);
+						}
 
 						_connectionStatus = FULL_CONNECTION;
 						resubscribe();
@@ -1663,7 +1668,6 @@ output:
 	pubsubclient ptr
 */
 PubSubClient* ESPHelper::getMQTTClient(){
-	// PubSubClient* tmp = &client;
 	return client;
 }
 

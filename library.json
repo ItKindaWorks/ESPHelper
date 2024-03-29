@@ -14,7 +14,7 @@
     "license": "GPL-3.0-or-later",
     "keywords": "mqtt, iot, esp8266, esp32, ota",
     "description": "A library to make using WiFi & MQTT on the ESP8266 & ESP32 easy.",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "examples": "examples/*/*.ino",
     "frameworks": "arduino",
     "platforms": [

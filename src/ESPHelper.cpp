@@ -378,19 +378,23 @@ output:
 	false on: ssid not set
 */
 bool ESPHelper::begin(){
-	if(_ssidSet){
-		// Generate client name based on MAC address and last 8 bits of microsecond counter
-		#ifdef ESP8266
-		_clientName = "esp8266-";
-		#else
-		_clientName = "esp32-";
-		#endif
-		uint8_t mac[6];
-		WiFi.macAddress(mac);
-		_clientName += macToStr(mac);
 
-		//set the wifi mode to station and begin the wifi (connect using either ssid or ssid/pass)
-		WiFi.mode(WIFI_STA);
+	// Generate client name based on MAC address and last 8 bits of microsecond counter
+	#ifdef ESP8266
+	_clientName = "esp8266-";
+	#else
+	_clientName = "esp32-";
+	#endif
+	uint8_t mac[6];
+	WiFi.macAddress(mac);
+	_clientName += macToStr(mac);
+
+	//set the wifi mode to station
+	WiFi.mode(WIFI_STA);
+
+	//as long as the SSID has been set, then try to connect to the network
+	if(_ssidSet){
+
 		if(_passSet){WiFi.begin(_currentNet.ssid, _currentNet.pass);}
 		else{WiFi.begin(_currentNet.ssid);}
 		WiFi.setAutoReconnect(true);

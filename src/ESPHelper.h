@@ -183,7 +183,7 @@ private:
 
 	netInfo _currentNet;
 
-	PubSubClient* client;
+	PubSubClient client;
 
 	Metro reconnectMetro = Metro(500);
 

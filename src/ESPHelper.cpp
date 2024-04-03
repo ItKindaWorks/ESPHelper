@@ -682,6 +682,8 @@ int ESPHelper::loop(){
 
 			return _connectionStatus;
 		}
+
+		yield();
 	}
 
 	//return -1 for no connection because of bad network info

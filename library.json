@@ -14,7 +14,7 @@
     "license": "GPL-3.0-or-later",
     "keywords": "mqtt, iot, esp8266, esp32, ota",
     "description": "A library to make using WiFi & MQTT on the ESP8266 & ESP32 easy.",
-    "version": "1.8.6",
+    "version": "1.8.7",
     "examples": "examples/*/*.ino",
     "frameworks": "arduino",
     "platforms": [
@@ -24,7 +24,7 @@
     "dependencies": {
         "bblanchon/ArduinoJson": "6.18.0",
         "bblanchon/StreamUtils": "@^1.8.0",
-        "itkindaworks/Metro": "@^1.0.0",
+        "itkindaworks/Metro": "@^1.0.1",
         "knolleary/PubSubClient": "@2.8"
     }
     

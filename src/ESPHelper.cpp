@@ -838,15 +838,35 @@ void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 	client.publish(topic, payload, retain);
 }
 
+
+
 boolean ESPHelper::publishJson(const char* topic, JsonDocument& doc, bool retain){
-	client.beginPublish(topic, measureJsonPretty(doc), retain);
-	BufferingPrint bufferedClient(client, 32);
-	serializeJsonPretty(doc, bufferedClient);
-	bufferedClient.flush();
-	// &bufferedclient.flush();
-	client.endPublish();
-	return true;
+
+	//figure out the correct size
+	size_t dataSize = measureJsonPretty(doc);
+
+	if(dataSize < 1023){
+		//create & fill
+		uint8_t* buf = (uint8_t*)malloc(dataSize);
+		serializeJsonPretty(doc, buf, dataSize);
+
+		//publish the full packet
+		client.beginPublish(topic, dataSize, retain);
+		client.write(buf, dataSize);
+		client.endPublish();
+
+		//cleanup
+		free(buf);
+		buf = NULL;
+
+		
+		return true;
+	}
+	
+	return false;
+	
 }
+
 
 
 /*

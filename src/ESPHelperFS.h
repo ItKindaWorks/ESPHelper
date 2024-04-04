@@ -71,8 +71,8 @@ public:
   bool addKey(const char* keyName, const char* value);
   static bool addKey(const char* keyName, const char* value, const char* filename);
 
-  String loadKey(const char* keyName);
-  static String loadKey(const char* keyName, const char* filename);
+  bool loadKey(const char* keyName, char* buf, size_t bufSize);
+  static bool loadKey(const char* keyName, const char* filename, char* buf, size_t bufSize);
 
   netInfo getNetInfo();
 

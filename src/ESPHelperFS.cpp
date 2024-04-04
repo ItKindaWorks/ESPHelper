@@ -404,11 +404,11 @@ input:
 output:
   String holding the data stored in the key (blank string on failure to load)
 */
-String ESPHelperFS::loadKey(const char* keyName){
+bool ESPHelperFS::loadKey(const char* keyName, char* buf, size_t bufSize){
   if(_filename[0] != '\0'){
-    return loadKey(keyName, _filename);
+    return loadKey(keyName, _filename, buf, bufSize);
   }
-  else {return String();}
+  else {return false;}
 }
 
 
@@ -421,30 +421,39 @@ input:
 output:
   String holding the data stored in the key (blank string on failure to load)
 */
-String ESPHelperFS::loadKey(const char* keyName, const char* filename){
-  static String returnString = "";
+bool ESPHelperFS::loadKey(const char* keyName, const char* filename, char* buf, size_t bufSize){
+  // static String returnString = "";
   
-  returnString = "";
+  // returnString = "";
 
   StaticJsonDocument<JSON_SIZE> jsonBuffer;
-  if(!loadFile(filename, &jsonBuffer)){return returnString;}
+  if(!loadFile(filename, &jsonBuffer)){
+    return false;
+  }
   JsonObject json = jsonBuffer.as<JsonObject>();
   if(!json.isNull()){
 
     //if the key does not exist then return an empty string
     if(!json.containsKey(keyName)){
       FSdebugPrintln("Key not found");
-
-      return returnString;
+      return false;
     }
 
-    //set the return value to that of the key
-    returnString = (const char*)json[keyName];
+    //get store the key data in the buffer
+    uint16_t charWritten = snprintf(buf, bufSize, "%s", (const char*)json[keyName]);
+    if(charWritten < 0 || charWritten >= bufSize){
+      FSdebugPrintln("Error writing data to buffer");
+      return false;
+    }
+    else{
+      return true;
+    }
+
   }
 
 
   //return the key (blank if file could not be opened)
-  return returnString;
+  return true;
 }
 
 

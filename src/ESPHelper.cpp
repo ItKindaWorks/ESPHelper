@@ -774,13 +774,14 @@ output:
 */
 bool ESPHelper::removeSubscription(const char* topic){
 	bool returnVal = false;
-	String topicStr = topic;
+	createSafeString(topicStr, MAX_TOPIC_LENGTH);
 
 	//loop through all subscriptions
 	for(int i = 0; i < MAX_SUBSCRIPTIONS; i++){
 		//if an element is used, check for it being the one we want to remove
 		if(_subscriptions[i].isUsed){
-			String subStr = _subscriptions[i].topic;
+			createSafeString(subStr, MAX_TOPIC_LENGTH);
+			subStr = _subscriptions[i].topic;
 			if(subStr.equals(topicStr)){
 				//reset the used flag to false
 				_subscriptions[i].isUsed = false;

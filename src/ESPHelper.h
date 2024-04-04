@@ -41,7 +41,7 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <StreamUtils.h>
-
+#include <SafeString.h>
 
 #include <WiFiClientSecure.h>
 

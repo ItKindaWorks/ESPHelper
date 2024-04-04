@@ -24,7 +24,7 @@
 #ifndef SHARED_TYPES_H
 #define SHARED_TYPES_H
 
-#define VERSION "1-8-8"
+#define VERSION "1-9-0"
 
 
 //Maximum number of subscriptions that can be auto-subscribed
@@ -32,6 +32,8 @@
 #define MAX_SUBSCRIPTIONS 25
 
 #define DEFAULT_QOS 1;	//at least once - devices are guarantee to get a message.
+
+#define MAX_TOPIC_LENGTH 128
 
 
 enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};

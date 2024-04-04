@@ -19,11 +19,7 @@ You should have received a copy of the GNU General Public License
 along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "ESPHelperWebConfig.h"
-#include "FS.h"
 
-#ifdef ESP32
-#include "SPIFFS.h"
-#endif
 
 ESPHelperWebConfig::ESPHelperWebConfig(int port, const char* URI) : _localServer(port){
   _server = &_localServer;
@@ -222,7 +218,7 @@ void ESPHelperWebConfig::handleReset(){
   //tell the user that the config is loaded in and the module is restarting
   _server->send(200, "text/plain", String("Resetting SPIFFS and restarting with default values"));
 
-  SPIFFS.format();
+  LittleFS.format();
   ESP.restart();
 }
 

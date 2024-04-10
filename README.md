@@ -16,8 +16,9 @@ Note:
 -----
 This library does requre the use of these libraries (so make sure they're installed as well!):
 * [Metro](https://www.pjrc.com/teensy/td_libs_Metro.html)
-* [PubSubClient](https://github.com/knolleary/pubsubclient) (Current Supported Version - 6.17.0)
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (Current Supported Version - 2.8)
+* [PubSubClient](https://github.com/knolleary/pubsubclient) (Current Supported Version - 2.8)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (Current Supported Version - 7.0.4)
+* [SafeString](https://github.com/PowerBroker2/SafeString) (Current Supported Version - 4.1.30)
 
  In addition to those libraries, make sure that you have the ESP core files installed for your platform.
  * [ESP8266 Arduino Core](https://github.com/esp8266/Arduino)

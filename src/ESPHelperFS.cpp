@@ -173,7 +173,7 @@ bool ESPHelperFS::loadFile(const char* filename, JsonDocument* buffer){
   size_t size = configFile.size();
   FSdebugPrint("JSON File Size: ");
   FSdebugPrintln(size);
-  if (size > JSON_SIZE) {
+  if (size > MAX_JSON_SIZE) {
     FSdebugPrintln("JSON File too large - returning false");
     return false;
   }
@@ -205,7 +205,7 @@ int8_t ESPHelperFS::validateConfig(const char* filename){
 
 
 
-  StaticJsonDocument<JSON_SIZE> jsonBuffer;
+  JsonDocument jsonBuffer;
   if(!loadFile(filename, &jsonBuffer)){return CANNOT_PARSE;}
   JsonObject json = jsonBuffer.as<JsonObject>();
 
@@ -253,7 +253,7 @@ bool ESPHelperFS::loadNetworkConfig(){
 
   else{
 
-      StaticJsonDocument<JSON_SIZE> jsonBuffer;
+      JsonDocument jsonBuffer;
       if(!loadFile(_filename, &jsonBuffer)){return false;}
       JsonObject json = jsonBuffer.as<JsonObject>();
 
@@ -364,7 +364,7 @@ bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* fil
   }
 
   //load the file
-  StaticJsonDocument<JSON_SIZE> jsonBuffer;
+  JsonDocument jsonBuffer;
   loadFile(filename, &jsonBuffer);
   JsonObject json = jsonBuffer.as<JsonObject>();
 
@@ -382,7 +382,7 @@ bool ESPHelperFS::addKey(const char* keyName, const char* value, const char* fil
   }
 
 
-  StaticJsonDocument<JSON_SIZE> blankBuffer;
+  JsonDocument blankBuffer;
   //add the key to the json object
   blankBuffer[keyName] = value;
   FSdebugPrint("Added Key ");
@@ -426,7 +426,7 @@ bool ESPHelperFS::loadKey(const char* keyName, const char* filename, char* buf, 
   
   // returnString = "";
 
-  StaticJsonDocument<JSON_SIZE> jsonBuffer;
+  JsonDocument jsonBuffer;
   if(!loadFile(filename, &jsonBuffer)){
     return false;
   }
@@ -623,7 +623,7 @@ bool ESPHelperFS::createConfig( const char* filename,
 
 
 
-  StaticJsonDocument<JSON_SIZE> jsonBuffer;
+  JsonDocument jsonBuffer;
   // if(loadFile(filename, &jsonBuffer)){
   //     FSdebugPrintln("File already exists - will not overwrite. No new file created. Exiting.");
   //     return false;

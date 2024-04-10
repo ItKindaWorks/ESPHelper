@@ -42,7 +42,7 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
   #define DEBUG_PRINT_SPEED 1
 #endif
 
-const uint16_t JSON_SIZE = 512;
+const uint16_t MAX_JSON_SIZE = 512;
 
 enum validateStates {NO_CONFIG, CONFIG_TOO_BIG, CANNOT_PARSE, INCOMPLETE, GOOD_CONFIG};
 
@@ -93,7 +93,6 @@ public:
   void printFSinfo();
 
 
-  static StaticJsonDocument<JSON_SIZE> *_tmpBufPtr;
 private:
   static bool loadFile(const char* filename, JsonDocument* buffer);
 

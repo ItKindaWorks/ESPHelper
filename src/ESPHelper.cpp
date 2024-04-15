@@ -848,16 +848,17 @@ boolean ESPHelper::publishJson(const char* topic, JsonDocument& doc, bool retain
 
 	if(dataSize < 1023){
 		//create & fill
-		uint8_t* buf = (uint8_t*)malloc(dataSize);
+		uint8_t* buf = new uint8_t[dataSize];
 		serializeJsonPretty(doc, buf, dataSize);
 
 		//publish the full packet
 		client.beginPublish(topic, dataSize, retain);
 		client.write(buf, dataSize);
 		client.endPublish();
+		// client.loop();
 
 		//cleanup
-		free(buf);
+		delete[] buf;
 		buf = NULL;
 
 		

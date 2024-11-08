@@ -841,32 +841,51 @@ void ESPHelper::publish(const char* topic, const char* payload, bool retain){
 
 
 
-boolean ESPHelper::publishJson(const char* topic, JsonDocument& doc, bool retain){
+bool ESPHelper::publishJson(const char* topic, JsonDocument& doc, bool retain){
 
+	const size_t MAX_CHUNK_SIZE = 128; // Define a suitable chunk size
+	
 	//figure out the correct size
 	size_t dataSize = measureJsonPretty(doc);
 
 	if(dataSize < 1023){
 		//create & fill
-		uint8_t* buf = new uint8_t[dataSize];
-		serializeJsonPretty(doc, buf, dataSize);
+		uint8_t* buf = new uint8_t[dataSize+1];
+		if (!buf) {
+			return false; // Handle memory allocation failure
+		}
+		size_t payloadLength = serializeJsonPretty(doc, buf, dataSize+1);
+		if (payloadLength == 0) {
+			delete[] buf;
+			return false; // Handle serialization failure
+		}
+		size_t bytesSent = 0;
 
-		//publish the full packet
-		client.beginPublish(topic, dataSize, retain);
-		client.write(buf, dataSize);
-		client.endPublish();
-		// client.loop();
+		// Start publishing
+		if (!client.beginPublish(topic, dataSize, retain)) {
+			delete[] buf;
+			return false;
+		}
+
+		while (bytesSent < payloadLength) {
+			size_t chunkSize = min(payloadLength - bytesSent, MAX_CHUNK_SIZE);
+			size_t result = client.write((const uint8_t*)(buf + bytesSent), chunkSize);
+			if (result != chunkSize) {
+				delete[] buf;
+				client.endPublish(); // Ensure to end publish on error
+				return false; // Handle error
+			}
+			bytesSent += result;
+		}
 
 		//cleanup
 		delete[] buf;
 		buf = NULL;
 
-		
-		return true;
+		return client.endPublish();
 	}
 	
 	return false;
-	
 }
 
 

@@ -63,36 +63,18 @@
 #endif
 
 
+void printNetInfo(const NetInfo *net, const char* header, bool printMQTT = true, bool printWill = true);
 
 
 class ESPHelper{
 
 public:
 	ESPHelper();
-	ESPHelper(const netInfo *startingNet);
-	ESPHelper(netInfo *netList[], uint8_t netCount, uint8_t startIndex = 0);	//remember netInfo *netList[] is really netinfo**
-	ESPHelper(const char *ssid, const char *pass, const char *mqttIP);
-	ESPHelper(const char *ssid, const char *pass);
-	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
-	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage);
-	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
-	ESPHelper(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
+	ESPHelper(const NetInfo *startingNet, bool storeLocal = true);
 
-	ESPHelper(const char* configFile);
-
-
-	bool begin(const char* filename);
-	bool begin(const netInfo *startingNet);
-	bool begin(const char *ssid, const char *pass, const char *mqttIP);
-	bool begin(const char *ssid, const char *pass);
-	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort);
-	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage);
-	bool begin(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
 	bool begin();
+	bool begin(const NetInfo *startingNet, bool storeLocal = true);
 	void end();
-
-	netInfo loadConfigFile(const char* filename);
-	bool saveConfigFile(const netInfo config, const char* filename);
 
 	void useSecureClient(const char* fingerprint);
 
@@ -135,25 +117,18 @@ public:
 	void setMQTTQOS(int qos);
 
 	void setWill(const char *willTopic, const char *willMessage);
-	void setWill(const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
+	void setWill(const char *willTopic, const char *willMessage, const int willQoS, const bool willRetain);
 
 	String getIP();
 	IPAddress getIPAddress();
 
 	int getStatus();
 
-	void setNetInfo(netInfo newNetwork);
-	void setNetInfo(netInfo *newNetwork);
-	// netInfo* getNetInfo();
-	netInfo getNetInfo();
 
-	void setHopping(bool canHop);
+	NetInfo* getNetInfo();
+	// NetInfo getNetInfo();
 
 	void listSubscriptions();
-
-	void enableHeartbeat(int16_t pin);
-	void disableHeartbeat();
-	void heartbeat();
 
 	void OTA_enable();
 	void OTA_disable();
@@ -171,10 +146,8 @@ public:
 
 private:
 
-	void init(const char *ssid, const char *pass, const char *mqttIP, const char *mqttUser, const char *mqttPass, const int mqttPort, const char *willTopic, const char *willMessage, const int willQoS, const int willRetain);
+	void init();
 	void validateConfig();
-
-	void changeNetwork();
 
 	bool checkParams();
 
@@ -182,7 +155,7 @@ private:
 
 	int setConnectionStatus();
 
-	netInfo _currentNet;
+	NetInfo _currentNet;
 
 	PubSubClient client;
 
@@ -219,7 +192,7 @@ private:
 	char _broadcastSSID[64];
 	char _broadcastPASS[64];
 
-	//netInfo array vars (total + current index)
+	//NetInfo array vars (total + current index)
 	uint8_t _netCount = 0;
 	uint8_t _currentIndex = 0;
 
@@ -234,14 +207,11 @@ private:
 	bool _useOTA = false;
 	bool _OTArunning = false;
 
-	bool _hoppingAllowed = false;
 
 	bool _hasBegun = false;
 
-	netInfo **_netList;
+	NetInfo **_netList;
 
-	int16_t _ledPin = 2;
-	bool _heartbeatEnabled = false;
 
 	subscription _subscriptions[MAX_SUBSCRIPTIONS];
 

@@ -26,7 +26,7 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include "ESPHelper.h"
-#include "LittleFS.h"
+// #include "LittleFS.h"
 
 #ifdef ESP8266
 #include <ESP8266WebServer.h>
@@ -87,13 +87,15 @@ public:
     bool begin(const char* hostname);
     bool begin();
 
-    void fillConfig(netInfo* fillInfo);
+    void useConfig(NetInfo& config);
+
+    void fillConfig(bool preFill = true);
 
     bool handle();
 
-    netInfo getConfig();
+    NetInfo& getConfig();
 
-    void setSpiffsReset(const char* uri);
+    void setFlashReset(const char* uri);
 
 
 private:
@@ -110,26 +112,18 @@ private:
     WebServer *_server;
     WebServer _localServer;
 #endif
-    char _newSsid[64];
-    char _newNetPass[64];
-    char _newOTAPass[64];
-    char _newHostname[64];
-    char _newMqttHost[64];
-    char _newMqttUser[64];
-    char _newMqttPass[64];
-    int _newMqttPort;
+
 
     const char* _resetURI;
     const char* _pageURI;
 
-    netInfo* _fillData;
     bool _preFill = false;
 
     bool _resetSet = false;
 
-    netInfo _config;
-    bool _configLoaded = false;
+    NetInfo _config;
     bool _runningLocal = false;
+    bool _configChanged = false;
 
 
 };

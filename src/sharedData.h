@@ -24,7 +24,11 @@
 #ifndef SHARED_TYPES_H
 #define SHARED_TYPES_H
 
-#define VERSION "1-9-6"
+#include <SafeString.h>
+
+
+#define VERSION "2-0-0b1"
+
 
 
 //Maximum number of subscriptions that can be auto-subscribed
@@ -36,185 +40,182 @@
 #define MAX_TOPIC_LENGTH 128
 
 
-enum connStatus {NO_CONNECTION, BROADCAST, WIFI_ONLY, FULL_CONNECTION};
+enum connStatus {NO_CONNECTION, BROADCAST, ROAMING, WIFI_ONLY, FULL_CONNECTION};
 
-struct netInfo {
-	const char* name;
-	const char* mqttHost;
-	const char* mqttUser;
-	const char* mqttPass;
+struct ESPHelperConf {
+	char mqttHost[32];
+	char mqttUser[16];
+	char mqttPass[16];
 	int mqttPort;
-	const char* ssid;
-	const char* pass;
-	const char* otaPassword;
-	const char* hostname;
-	const char* willTopic;
-	const char* willMessage;
+	char ssid[32];
+	char pass[32];
+	char otaPassword[16];
+	char hostname[32];
+	char willTopic[64];
+	char willMessage[32];
 	int willQoS;
-	int willRetain;
-
-	netInfo() : mqttPort(1883) {}
-
-	//name | mqtt host | ssid | network pass
-	netInfo(const char* _name,
-			const char* _mqttHost,
-			const char* _ssid,
-			const char* _pass) :
-			name(_name),
-			mqttHost(_mqttHost),
-			mqttUser("defaultMqttUser"),
-			mqttPass("defaultMqttPass"),
-			mqttPort(1883),
-			ssid(_ssid),
-			pass(_pass),
-			otaPassword("defaultOTA_PASS"),
-			hostname("defaultHostname"),
-			willTopic("defaultWillTopic"),
-			willMessage(""),
-			willQoS(1),
-			willRetain(1) {}
-
-  //mqtt host | ssid | network pass | willTopic | willMessage
-  netInfo(const char* _mqttHost,
-    const char* _ssid,
-    const char* _pass,
-    const char* _willTopic,
-    const char* _willMessage) :
-    mqttHost(_mqttHost),
-	mqttUser("defaultMqttUser"),
-    mqttPass("defaultMqttPass"),
-	mqttPort(1883),
-    ssid(_ssid),
-    pass(_pass),
-    otaPassword("defaultOTA_PASS"),
-    hostname("defaultHostname"),
-    willTopic(_willTopic),
-    willMessage(_willMessage),
-    willQoS(1),
-    willRetain(1) {}
-
-	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass
-	netInfo(const char* _mqttHost,
-			const char* _mqttUser,
-			const char* _mqttPass,
-			int _mqttPort,
-			const char* _ssid,
-			const char* _pass) :
-			mqttHost(_mqttHost),
-			mqttUser(_mqttUser),
-			mqttPass(_mqttPass),
-			mqttPort(_mqttPort),
-			ssid(_ssid),
-			pass(_pass),
-			otaPassword("defaultOtaPASS"),
-			hostname("defaultHostname"),
-			willTopic("defaultWillTopic"),
-			willMessage(""),
-			willQoS(1),
-			willRetain(1)  {}
-
-
-	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname
-	netInfo(const char* _mqttHost,
-			const char* _mqttUser,
-			const char* _mqttPass,
-			int _mqttPort,
-			const char* _ssid,
-			const char* _pass,
-			const char* _otaPassword,
-			const char* _hostname) :
-			mqttHost(_mqttHost),
-			mqttUser(_mqttUser),
-			mqttPass(_mqttPass),
-			mqttPort(_mqttPort),
-			ssid(_ssid),
-			pass(_pass),
-			otaPassword(_otaPassword),
-			hostname(_hostname),
-			willTopic("defaultWillTopic"),
-			willMessage(""),
-			willQoS(1),
-			willRetain(1) {}
-
-
-	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname | willTopic | willMessage
-	netInfo(const char* _mqttHost,
-			const char* _mqttUser,
-			const char* _mqttPass,
-			int _mqttPort,
-			const char* _ssid,
-			const char* _pass,
-			const char* _otaPassword,
-			const char* _hostname,
-			const char* _willTopic,
-			const char* _willMessage) :
-			mqttHost(_mqttHost),
-			mqttUser(_mqttUser),
-			mqttPass(_mqttPass),
-			mqttPort(_mqttPort),
-			ssid(_ssid),
-			pass(_pass),
-			otaPassword("defaultOtaPASS"),
-			hostname("defaultHostname"),
-			willTopic(_willTopic),
-			willMessage(_willMessage),
-			willQoS(1),
-			willRetain(1) {}
-
-
-	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | willTopic | willMessage | willRetain | willQoS
-	netInfo(const char* _mqttHost,
-			const char* _mqttUser,
-			const char* _mqttPass,
-			int _mqttPort,
-			const char* _ssid,
-			const char* _pass,
-			const char* _willTopic,
-			const char* _willMessage,
-			int _willQoS,
-			int _willRetain) :
-			mqttHost(_mqttHost),
-			mqttUser(_mqttUser),
-			mqttPass(_mqttPass),
-			mqttPort(_mqttPort),
-			ssid(_ssid),
-			pass(_pass),
-			otaPassword("defaultOtaPASS"),
-			hostname("defaultHostname"),
-			willTopic(_willTopic),
-			willMessage(_willMessage),
-			willQoS(1),
-			willRetain(1) {}
-
-
-	//mqtt host | mqtt user| mqtt pass| mqtt port| ssid | network pass | ota pass | hostname | willTopic | willMessage | willRetain | willQoS
-	netInfo(const char* _mqttHost,
-			const char* _mqttUser,
-			const char* _mqttPass,
-			int _mqttPort,
-			const char* _ssid,
-			const char* _pass,
-			const char* _otaPassword,
-			const char* _hostname,
-			const char* _willTopic,
-			const char* _willMessage,
-			int _willQoS,
-			int _willRetain) :
-			mqttHost(_mqttHost),
-			mqttUser(_mqttUser),
-			mqttPass(_mqttPass),
-			mqttPort(_mqttPort),
-			ssid(_ssid),
-			pass(_pass),
-			otaPassword(_otaPassword),
-			hostname(_hostname),
-			willTopic(_willTopic),
-			willMessage(_willMessage),
-			willQoS(_willQoS),
-			willRetain(_willRetain)  {}
-
+	bool willRetain;
 };
-// typedef struct netInfo netInfo;
+
+class NetInfo {
+public:
+
+	/**
+	 * @brief Construct a new NetInfo object with local storage
+	 * 
+	 */
+	explicit NetInfo() {
+		_conf = new ESPHelperConf();
+		_storeLocal = true;
+		clear();
+	}
+
+	/**
+	 * @brief Construct a new NetInfo object with external storage
+	 * 
+	 * @param externalConf Pointer to an existing ESPHelperConf object
+	 */
+	explicit NetInfo(ESPHelperConf& externalConf) {
+		_conf = &externalConf;
+		_storeLocal = false;
+	}
+
+	// Deleted copy operations for memory safety
+	NetInfo(const NetInfo& other) = delete;
+	NetInfo& operator=(const NetInfo& other) = delete;
+
+	/**
+	 * @brief Destroy the Net Info object
+	 * 
+	 */
+	~NetInfo() {
+		if (_storeLocal && _conf != nullptr) {
+			delete _conf;
+		}
+	}
+
+
+	
+
+	// ESPHelperConf* getRawConfPtr() const {
+	// 	return _conf;
+	// }
+
+	/* * @brief Use an external ESPHelperConf object for storage
+	 * 
+	 * This method allows the NetInfo instance to use an existing ESPHelperConf object
+	 * instead of managing its own memory. It is useful for sharing configurations.
+	 * 
+	 * @param externalConf Pointer to an existing ESPHelperConf object
+	 */
+	void setExternalMemory(ESPHelperConf* externalConf) {
+		if (_storeLocal && _conf != externalConf) {
+			delete _conf;
+		}
+		_conf = externalConf;
+		_storeLocal = false;
+	}
+
+	/**
+	 * @brief Clone the current configuration to another NetInfo object
+	 * 
+	 * @param target The target NetInfo object to clone to
+	 * @param storeLocal If true, the target will store a local copy of the configuration
+	 */
+	void cloneTo(NetInfo& target, bool storeLocal) const {
+		if (storeLocal) {
+			target.setToLocalCopy(*_conf);
+		} else {
+			target.setExternalMemory(_conf);
+		}
+	}
+
+	// const ESPHelperConf* getConfPointer() const { return _conf; }
+
+	void setMqttHost(const char* val) { safeCopy(_conf->mqttHost, val, sizeof(_conf->mqttHost)); }
+	void setMqttUser(const char* val) { safeCopy(_conf->mqttUser, val, sizeof(_conf->mqttUser)); }
+	void setMqttPass(const char* val) { safeCopy(_conf->mqttPass, val, sizeof(_conf->mqttPass)); }
+	void setSsid(const char* val) { safeCopy(_conf->ssid, val, sizeof(_conf->ssid)); }
+	void setPass(const char* val) { safeCopy(_conf->pass, val, sizeof(_conf->pass)); }
+	void setOtaPassword(const char* val) { safeCopy(_conf->otaPassword, val, sizeof(_conf->otaPassword)); }
+	void setHostname(const char* val) { safeCopy(_conf->hostname, val, sizeof(_conf->hostname)); }
+	void setMqttWillTopic(const char* val) { safeCopy(_conf->willTopic, val, sizeof(_conf->willTopic)); }
+	void setMqttWillMessage(const char* val) { safeCopy(_conf->willMessage, val, sizeof(_conf->willMessage)); }
+	void setMqttPort(int val) { _conf->mqttPort = val; }
+	void setMqttWillRetain(bool val) { _conf->willRetain = val; }
+	void setMqttWillQoS(int val) { _conf->willQoS = val; }
+
+	const char* getMqttHost() const { return _conf->mqttHost; }
+	const char* getMqttUser() const { return _conf->mqttUser; }
+	const char* getMqttPass() const { return _conf->mqttPass; }
+	const char* getSsid() const { return _conf->ssid; }
+	const char* getPass() const { return _conf->pass; }
+	const char* getOtaPassword() const { return _conf->otaPassword; }
+	const char* getHostname() const { return _conf->hostname; }
+	const char* getMqttWillTopic() const { return _conf->willTopic; }
+	const char* getMqttWillMessage() const { return _conf->willMessage; }
+	int getMqttPort() const { return _conf->mqttPort; }
+	int getMqttWillQoS() const { return _conf->willQoS; }
+	bool getMqttWillRetain() const { return _conf->willRetain; }
+
+private:
+
+	//denotes whether the ESPHelperConf is stored in external memory or locally within this instance
+	bool _storeLocal = true;
+	ESPHelperConf* _conf = nullptr;
+
+	/* * @brief Safely copy a string to a destination buffer
+	 * 
+	 * This method copies a string from source to destination, ensuring that the destination
+	 * does not overflow. It also ensures that the destination is null-terminated.
+	 * 
+	 * @param dest Pointer to the destination buffer
+	 * @param src Pointer to the source string
+	 * @param maxLen Maximum length of the destination buffer
+	 */
+	void safeCopy(char* dest, const char* src, size_t maxLen) {
+		if (src) {
+			strncpy(dest, src, maxLen - 1);
+			dest[maxLen - 1] = '\0';
+		} else if (dest && maxLen > 0) {
+			dest[0] = '\0';
+		}
+	}
+
+	/* * @brief Clear the configuration data
+	 * 
+	 * This method resets all fields in the ESPHelperConf structure to their default values.
+	 * It is useful for initializing or resetting the configuration.
+	 */
+	void clear() {
+		memset(_conf, 0, sizeof(ESPHelperConf));
+		_conf->mqttPort = 1883;
+		_conf->willQoS = 1;
+		_conf->willRetain = true;
+	}
+
+
+	
+
+	/* * @brief Set the NetInfo to a local copy of the provided ESPHelperConf
+	 * 
+	 * This method creates a local copy of the provided ESPHelperConf object.
+	 * It is useful when you want to ensure that the NetInfo instance has its own copy
+	 * of the configuration data.
+	 * 
+	 * @param conf The ESPHelperConf object to copy from
+	 */
+	void setToLocalCopy(const ESPHelperConf& conf) {
+		if (!_storeLocal) {
+			_conf = new ESPHelperConf();
+			_storeLocal = true;
+		}
+		memcpy(_conf, &conf, sizeof(ESPHelperConf));
+	}
+
+	
+};
+// typedef struct NetInfo NetInfo;
 
 
 struct subscription{

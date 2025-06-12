@@ -63,19 +63,22 @@ bool ESPHelperWebConfig::begin(){
 	return true;
 }
 
-void ESPHelperWebConfig::fillConfig(netInfo* fillInfo){
-  _fillData = fillInfo;
-  _preFill = true;
+void ESPHelperWebConfig::useConfig(NetInfo& config){
+  config.cloneTo(_config, false);
+}
+
+void ESPHelperWebConfig::fillConfig(bool preFill){
+  _preFill = preFill;
 }
 
 bool ESPHelperWebConfig::handle(){
 	_server->handleClient();
-	return _configLoaded;
+	return _configChanged;
 }
 
-netInfo ESPHelperWebConfig::getConfig(){
-	_configLoaded = false;
-	return _config;
+NetInfo& ESPHelperWebConfig::getConfig(){
+  _configChanged = false;
+  return _config;
 }
 
 
@@ -88,11 +91,11 @@ void ESPHelperWebConfig::handleGet() {
 
   if(_preFill){
     htmlData.replace("%HELPER_PAGE_URI%", _pageURI);
-    htmlData.replace("%HELPER_HOSTNAME%", _fillData->hostname);
-    htmlData.replace("%HELPER_SSID%", _fillData->ssid);
-    htmlData.replace("%HELPER_MQTT_HOST%", _fillData->mqttHost);
-    htmlData.replace("%HELPER_MQTT_USER%", _fillData->mqttUser);
-    htmlData.replace("%HELPER_MQTT_PORT%", String(_fillData->mqttPort));
+    htmlData.replace("%HELPER_HOSTNAME%", _config.getHostname());
+    htmlData.replace("%HELPER_SSID%", _config.getSsid());
+    htmlData.replace("%HELPER_MQTT_HOST%", _config.getMqttHost());
+    htmlData.replace("%HELPER_MQTT_USER%", _config.getMqttUser());
+    htmlData.replace("%HELPER_MQTT_PORT%", String(_config.getMqttPort()));
     if(_resetSet){
       htmlData += \
       "<center>"\
@@ -123,6 +126,7 @@ void ESPHelperWebConfig::handleGet() {
 
 // If a POST request is made to URI /config
 void ESPHelperWebConfig::handlePost() {
+  // printNetInfo(&_config, "[pre handlePost config:]", true, true);
 
   //make sure that all the arguments exist and that at least an SSID and hostname have been entered
   if( ! _server->hasArg("ssid") || ! _server->hasArg("netPass")
@@ -149,40 +153,26 @@ void ESPHelperWebConfig::handlePost() {
   }
 
 
-  //convert the Strings returned by _server->arg to char arrays that can be entered into netInfo
+  //convert the Strings returned by _server->arg to char arrays that can be entered into NetInfo
 
-
-  //network pass
-  if(_preFill && _server->arg("netPass").length() == 0){
-    strncpy(_newNetPass,_fillData->pass,64);
-    _newNetPass[sizeof(_newNetPass) - 1] = '\0';
+  if(_server->arg("netPass").length() != 0 or _preFill == false){
+    _config.setPass(_server->arg("netPass").c_str());
   }
-  else{_server->arg("netPass").toCharArray(_newNetPass, sizeof(_newNetPass));}
-
-  //mqtt pass
-  if(_preFill && _server->arg("mqttPass").length() == 0){
-    strncpy(_newMqttPass,_fillData->mqttPass,64);
-    _newMqttPass[sizeof(_newNetPass) - 1] = '\0';
+  if(_server->arg("mqttPass").length() != 0 or _preFill == false){
+    _config.setMqttPass(_server->arg("mqttPass").c_str());
   }
-  else{_server->arg("mqttPass").toCharArray(_newMqttPass, sizeof(_newMqttPass));}
-
-  //ota pass
-  if(_preFill && _server->arg("otaPassword").length() == 0){
-    strncpy(_newOTAPass,_fillData->otaPassword,64);
-    _newOTAPass[sizeof(_newNetPass) - 1] = '\0';
+  if(_server->arg("otaPassword").length() != 0 or _preFill == false){
+    _config.setOtaPassword(_server->arg("otaPassword").c_str());
   }
-  else{_server->arg("otaPassword").toCharArray(_newOTAPass, sizeof(_newOTAPass));}
 
-  //other non protected vars
-  _server->arg("ssid").toCharArray(_newSsid, sizeof(_newSsid));
-  _server->arg("hostname").toCharArray(_newHostname, sizeof(_newHostname));
-  _server->arg("mqttHost").toCharArray(_newMqttHost, sizeof(_newMqttHost));
-  _server->arg("mqttUser").toCharArray(_newMqttUser, sizeof(_newMqttUser));
+  _config.setSsid(_server->arg("ssid").c_str());
+  _config.setHostname(_server->arg("hostname").c_str());
+  _config.setMqttHost(_server->arg("mqttHost").c_str());
+  _config.setMqttUser(_server->arg("mqttUser").c_str());
 
   //the port is special because it doesnt get stored as a string so we take care of that
-
-  if(_server->arg("mqttPort") != NULL){_newMqttPort = _server->arg("mqttPort").toInt();}
-  else{_newMqttPort = 1883;}
+  if(_server->arg("mqttPort") != NULL){_config.setMqttPort(_server->arg("mqttPort").toInt());}
+  else{_config.setMqttPort(1883);}
 
 
   //tell the user that the config is loaded in and the module is restarting
@@ -194,21 +184,12 @@ void ESPHelperWebConfig::handlePost() {
     <p><a href=" + String("config") + ">Open configuration page</a></p>\
     <p>Wait for the ESP8266 to restart with the new settings</p>"));
 
-  //enter in the new data
-  _config = {mqttHost : _newMqttHost,
-             mqttUser : _newMqttUser,
-             mqttPass : _newMqttPass,
-             mqttPort : _newMqttPort,
-             ssid : _newSsid,
-             pass : _newNetPass,
-             otaPassword : _newOTAPass,
-             hostname : _newHostname};
+  // printNetInfo(&_config, "[post handlePost config:]", true, true);
 
-
-  _configLoaded = true;
+  _configChanged = true;
 }
 
-void ESPHelperWebConfig::setSpiffsReset(const char* uri){
+void ESPHelperWebConfig::setFlashReset(const char* uri){
   _resetURI = uri;
   _server->on(_resetURI, HTTP_POST, [this](){handleReset();});
   _resetSet = true;
@@ -216,10 +197,11 @@ void ESPHelperWebConfig::setSpiffsReset(const char* uri){
 
 void ESPHelperWebConfig::handleReset(){
   //tell the user that the config is loaded in and the module is restarting
-  _server->send(200, "text/plain", String("Resetting SPIFFS and restarting with default values"));
+  #warning "TODO: Implement flash reset from web config"
+  // _server->send(200, "text/plain", String("Resetting SPIFFS and restarting with default values"));
 
-  LittleFS.format();
-  ESP.restart();
+  // LittleFS.format();
+  // ESP.restart();
 }
 
 void ESPHelperWebConfig::handleNotFound(){

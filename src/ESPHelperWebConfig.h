@@ -68,6 +68,19 @@ MQTT Port:</br>\
 <input type=\"text\" name=\"mqttPort\" size=\"45\" maxlength=\"63\" placeholder=\"MQTT Port\" value=\"%HELPER_MQTT_PORT%\"></br>\
 MQTT Password:</br>\
 <input type=\"password\" name=\"mqttPass\" size=\"45\" maxlength=\"63\" placeholder=\"MQTT Password (Previous value used if blank)\"></br>\
+<hr />\
+<h4 style=\"text-align:center;\"><span style=\"color:#0a4f75;\">MQTT Will Settings</span></h4>\
+Will Topic:</br>\
+<input type=\"text\" name=\"mqttWillTopic\" size=\"45\" maxlength=\"128\" placeholder=\"MQTT Will Topic\" value=\"%HELPER_MQTT_WILL_TOPIC%\"></br>\
+Will Message:</br>\
+<input type=\"text\" name=\"mqttWillMessage\" size=\"45\" maxlength=\"128\" placeholder=\"MQTT Will Message\" value=\"%HELPER_MQTT_WILL_MESSAGE%\"></br>\
+Will QoS:</br>\
+<input type=\"number\" name=\"mqttWillQos\" min=\"0\" max=\"2\" value=\"%HELPER_MQTT_WILL_QOS%\"></br>\
+Will Retain:</br>\
+<select name=\"mqttWillRetain\">\
+<option value=\"0\" %HELPER_MQTT_WILL_RETAIN_0%>False</option>\
+<option value=\"1\" %HELPER_MQTT_WILL_RETAIN_1%>True</option>\
+</select></br>\
 <p>Press Submit to update ESP8266 config file</br>\
 <input type=\"submit\" value=\"Submit\"></form>\
 <p font-size=\"font-size:1.2;\"><a href=/>Go to Device Status Page</a></p>";

@@ -96,6 +96,12 @@ void ESPHelperWebConfig::handleGet() {
     htmlData.replace("%HELPER_MQTT_HOST%", _config.getMqttHost());
     htmlData.replace("%HELPER_MQTT_USER%", _config.getMqttUser());
     htmlData.replace("%HELPER_MQTT_PORT%", String(_config.getMqttPort()));
+    // Add Will fields
+    htmlData.replace("%HELPER_MQTT_WILL_TOPIC%", _config.getMqttWillTopic());
+    htmlData.replace("%HELPER_MQTT_WILL_MESSAGE%", _config.getMqttWillMessage());
+    htmlData.replace("%HELPER_MQTT_WILL_QOS%", String(_config.getMqttWillQoS()));
+    htmlData.replace("%HELPER_MQTT_WILL_RETAIN_0%", _config.getMqttWillRetain() ? "" : "selected");
+    htmlData.replace("%HELPER_MQTT_WILL_RETAIN_1%", _config.getMqttWillRetain() ? "selected" : "");
     if(_resetSet){
       htmlData += \
       "<center>"\
@@ -112,6 +118,12 @@ void ESPHelperWebConfig::handleGet() {
     htmlData.replace("%HELPER_MQTT_HOST%", "");
     htmlData.replace("%HELPER_MQTT_USER%", "");
     htmlData.replace("%HELPER_MQTT_PORT%", "");
+    // Add Will fields (empty)
+    htmlData.replace("%HELPER_MQTT_WILL_TOPIC%", "");
+    htmlData.replace("%HELPER_MQTT_WILL_MESSAGE%", "");
+    htmlData.replace("%HELPER_MQTT_WILL_QOS%", "0");
+    htmlData.replace("%HELPER_MQTT_WILL_RETAIN_0%", "selected");
+    htmlData.replace("%HELPER_MQTT_WILL_RETAIN_1%", "");
     if(_resetSet){
       htmlData += \
       "<center>"\
@@ -152,7 +164,6 @@ void ESPHelperWebConfig::handlePost() {
     return;
   }
 
-
   //convert the Strings returned by _server->arg to char arrays that can be entered into NetInfo
 
   if(_server->arg("netPass").length() != 0 or _preFill == false){
@@ -174,6 +185,19 @@ void ESPHelperWebConfig::handlePost() {
   if(_server->arg("mqttPort") != NULL){_config.setMqttPort(_server->arg("mqttPort").toInt());}
   else{_config.setMqttPort(1883);}
 
+  // MQTT Will fields
+  if (_server->hasArg("mqttWillTopic")) {
+    _config.setMqttWillTopic(_server->arg("mqttWillTopic").c_str());
+  }
+  if (_server->hasArg("mqttWillMessage")) {
+    _config.setMqttWillMessage(_server->arg("mqttWillMessage").c_str());
+  }
+  if (_server->hasArg("mqttWillQos")) {
+    _config.setMqttWillQoS(_server->arg("mqttWillQos").toInt());
+  }
+  if (_server->hasArg("mqttWillRetain")) {
+    _config.setMqttWillRetain(_server->arg("mqttWillRetain").toInt() == 1);
+  }
 
   //tell the user that the config is loaded in and the module is restarting
   _server->send(200, "text/html",

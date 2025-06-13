@@ -51,7 +51,7 @@ struct ESPHelperConf {
 	char pass[32];
 	char otaPassword[16];
 	char hostname[32];
-	char willTopic[64];
+	char willTopic[128];
 	char willMessage[32];
 	int willQoS;
 	bool willRetain;

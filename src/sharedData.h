@@ -27,7 +27,7 @@
 #include <SafeString.h>
 
 
-#define VERSION "2-0-1"
+#define VERSION "2-0-2"
 
 
 

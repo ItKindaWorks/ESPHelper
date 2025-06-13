@@ -70,6 +70,5 @@ Useful Methods:
 
 ### ToDo
 
-* Integrate Last Will into config files and config page
 * Implement callback for lost WiFi connection
 

@@ -208,7 +208,7 @@ void ESPHelperWebConfig::handlePost() {
     <p><a href=" + String("config") + ">Open configuration page</a></p>\
     <p>Wait for the ESP8266 to restart with the new settings</p>"));
 
-  // printNetInfo(&_config, "[post handlePost config:]", true, true);
+  // printNetInfo(&_config, "[ESPHelperWeb Post]", true, true);
 
   _configChanged = true;
 }

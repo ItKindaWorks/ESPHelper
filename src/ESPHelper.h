@@ -126,7 +126,6 @@ public:
 
 
 	NetInfo* getNetInfo();
-	// NetInfo getNetInfo();
 
 	void listSubscriptions();
 
@@ -148,8 +147,6 @@ private:
 
 	void init();
 	void validateConfig();
-
-	bool checkParams();
 
 	
 
@@ -192,10 +189,6 @@ private:
 	char _broadcastSSID[64];
 	char _broadcastPASS[64];
 
-	//NetInfo array vars (total + current index)
-	uint8_t _netCount = 0;
-	uint8_t _currentIndex = 0;
-
 	bool _ssidSet = false;
 	bool _passSet = false;
 	bool _mqttSet = false;
@@ -209,8 +202,6 @@ private:
 
 
 	bool _hasBegun = false;
-
-	NetInfo **_netList;
 
 
 	subscription _subscriptions[MAX_SUBSCRIPTIONS];

@@ -957,17 +957,10 @@ output:
 */
 String ESPHelper::macToStr(const uint8_t* mac){
 
-  String result;
-
-  for (int i = 0; i < 6; ++i) {
-    result += String(mac[i], 16);
-
-    if (i < 5){
-      result += ':';
-    }
-  }
-
-  return result;
+  char buf[18];
+  snprintf(buf, sizeof(buf), "%02X:%02X:%02X:%02X:%02X:%02X",
+		   mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  return String(buf);
 }
 
 

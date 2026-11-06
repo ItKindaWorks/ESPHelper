@@ -731,12 +731,7 @@ void ESPHelper::reconnect() {
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
 
-			#ifdef ESP32
-			reconnect();
-			#else
-			//WiFi.reconnect();
-			#endif
-
+			WiFi.reconnect();
 		}
 
 		// make sure we are connected to WIFI before attemping to reconnect to MQTT

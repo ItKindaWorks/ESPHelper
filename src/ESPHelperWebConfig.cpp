@@ -67,7 +67,7 @@ bool ESPHelperWebConfig::begin(){
 
   _server->on(pageURI.c_str(), HTTP_GET, [this](AsyncWebServerRequest *request){ 
     //send back the config page using the handleGet function as the template processor
-    request->send_P(200, "text/html", static_config_html, sizeof(static_config_html), [this](const String& var){
+    request->send(200, "text/html", static_config_html, sizeof(static_config_html), [this](const String& var){
       return handleGet(var);
     });
   });    

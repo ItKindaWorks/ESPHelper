@@ -730,8 +730,7 @@ void ESPHelper::reconnect() {
 		//attempt to connect to the wifi if connection is lost
 		if(WiFi.status() != WL_CONNECTED){
 			_connectionStatus = NO_CONNECTION;
-
-			WiFi.reconnect();
+			// WiFi.reconnect();
 		}
 
 		// make sure we are connected to WIFI before attemping to reconnect to MQTT
